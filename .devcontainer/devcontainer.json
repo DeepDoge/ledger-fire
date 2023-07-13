@@ -6,7 +6,11 @@
 	"image": "mcr.microsoft.com/devcontainers/typescript-node:0-20",
 	"customizations": {
 		"vscode": {
-			"extensions": ["esbenp.prettier-vscode", "dbaeumer.vscode-eslint"]
+			"extensions": [
+				"esbenp.prettier-vscode",
+				"dbaeumer.vscode-eslint",
+				"denoland.vscode-deno"
+			]
 		}
 	},
 
@@ -17,7 +21,12 @@
 	// "forwardPorts": [],
 
 	// Use 'postCreateCommand' to run commands after the container is created.
-	"postCreateCommand": "npm install"
+	"postCreateCommand": "npm install",
+	"features": {
+		"ghcr.io/devcontainers-contrib/features/deno:1": {
+			"version": "1.27.1"
+		}
+	}
 
 	// Configure tool-specific properties.
 	// "customizations": {},
