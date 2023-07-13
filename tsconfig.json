@@ -1,0 +1,30 @@
+{
+	"compilerOptions": {
+		"target": "ESNext",
+		"module": "ESNext",
+		"lib": ["ESNext", "DOM"],
+		"noEmit": true,
+
+		"strict": true,
+		"strictBindCallApply": true,
+		"strictFunctionTypes": true,
+		"strictNullChecks": true,
+		"strictPropertyInitialization": true,
+
+		"noImplicitReturns": true,
+		"noImplicitAny": true,
+		"noImplicitOverride": true,
+		"noImplicitThis": true,
+
+		"noUnusedLocals": true,
+		"noUnusedParameters": true,
+
+		"useUnknownInCatchVariables": true,
+		"noUncheckedIndexedAccess": true,
+
+		"preserveConstEnums": true,
+		"forceConsistentCasingInFileNames": true,
+		"useDefineForClassFields": true
+	},
+	"include": ["src"]
+}
