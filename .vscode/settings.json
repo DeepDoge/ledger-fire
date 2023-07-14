@@ -5,7 +5,7 @@
 		"source.fixAll.eslint": true
 	},
 	"editor.defaultFormatter": "esbenp.prettier-vscode",
-	"deno.enablePaths": ["./src/server"],
-	"deno.enable": true,
-	"deno.lint": false
+	"[prisma]": {
+		"editor.defaultFormatter": "Prisma.prisma"
+	}
 }

@@ -4,6 +4,7 @@
 		"module": "ESNext",
 		"lib": ["ESNext", "DOM"],
 		"noEmit": true,
+		"moduleResolution": "NodeNext",
 
 		"strict": true,
 		"strictBindCallApply": true,

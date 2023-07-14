@@ -6,11 +6,7 @@
 	"image": "mcr.microsoft.com/devcontainers/typescript-node:0-20",
 	"customizations": {
 		"vscode": {
-			"extensions": [
-				"esbenp.prettier-vscode",
-				"dbaeumer.vscode-eslint",
-				"denoland.vscode-deno"
-			]
+			"extensions": ["esbenp.prettier-vscode", "dbaeumer.vscode-eslint", "Prisma.prisma"]
 		}
 	},
 
