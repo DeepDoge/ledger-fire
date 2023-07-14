@@ -3,9 +3,9 @@
 	"name": "ledger-fire",
 	"scripts": {
 		"format": "prettier -w ./",
-		"dev": "vite",
+		"dev": "vite --host",
 		"build": "vite build",
-		"preview": "vite preview"
+		"preview": "vite preview --host"
 	},
 	"devDependencies": {
 		"@prisma/client": "^4.15.0",
