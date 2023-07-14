@@ -22,8 +22,16 @@ model Transaction {
   timestamp DateTime @default(now())
 
   StockMove StockMove[]
+  Indexing  Indexing[]
 
   @@index([from])
+}
+
+model Indexing {
+  id BigInt @id @default(0)
+
+  lastIndexedTx   Transaction @relation(fields: [lastIndexedTxId], references: [id])
+  lastIndexedTxId BigInt
 }
 
 model Warehouse {
