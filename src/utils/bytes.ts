@@ -1,4 +1,6 @@
 export function hexToBytes(hex: string): Uint8Array {
+	if (hex.startsWith("0x")) hex.slice(2)
+
 	if (hex.length % 2 !== 0) hex = `0${hex}`
 	const bytes = new Uint8Array(hex.length / 2)
 	for (let i = 0; i < hex.length; i += 2) {
@@ -8,7 +10,9 @@ export function hexToBytes(hex: string): Uint8Array {
 }
 
 export function bytesToHex(bytes: Uint8Array): string {
-	return [...bytes].map((b) => b.toString(16).padStart(2, "0")).join("")
+	return `0x${Array.from(bytes)
+		.map((byte) => byte.toString(16).padStart(2, "0"))
+		.join("")}`
 }
 
 export function toBytes(data: unknown): Uint8Array {
@@ -30,7 +34,7 @@ export function toBytes(data: unknown): Uint8Array {
 						.map((item) => {
 							const bytes = toBytes(item)
 							const result = new Uint8Array(bytes.length + 4)
-							new DataView(result.buffer).setUint32(0, bytes.length, true)
+							new DataView(result.buffer).setUint32(0, bytes.length, false)
 							result.set(bytes, 4)
 							return [...result]
 						})
@@ -48,7 +52,7 @@ export function toBytes(data: unknown): Uint8Array {
 
 export function fromBytes(bytes: Uint8Array): unknown {
 	const type = bytes[0]
-	const data = bytes.slice(1)
+	const data = new Uint8Array([...bytes.subarray(1)])
 
 	switch (type) {
 		case 0:
@@ -65,7 +69,7 @@ export function fromBytes(bytes: Uint8Array): unknown {
 			const result: unknown[] = []
 			let offset = 0
 			while (offset < data.length) {
-				const length = new DataView(data.buffer).getUint32(offset, true)
+				const length = new DataView(data.buffer).getUint32(offset, false)
 				offset += 4
 
 				const item = fromBytes(data.slice(offset, offset + length))

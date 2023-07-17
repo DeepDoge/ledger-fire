@@ -5,10 +5,6 @@ generator client {
   provider = "prisma-client-js"
 }
 
-generator typegraphql {
-  provider = "typegraphql-prisma"
-}
-
 datasource db {
   provider = "sqlite"
   url      = "file:./dev.db"
@@ -30,8 +26,8 @@ model Transaction {
 model Indexing {
   id BigInt @id @default(0)
 
-  lastIndexedTx   Transaction @relation(fields: [lastIndexedTxId], references: [id])
-  lastIndexedTxId BigInt
+  lastIndexedTx   Transaction? @relation(fields: [lastIndexedTxId], references: [id])
+  lastIndexedTxId BigInt?
 }
 
 model Warehouse {
