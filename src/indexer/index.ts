@@ -26,7 +26,9 @@ export async function indexNextTx() {
 	const data = fromBytes(tx.data)
 	if (!Array.isArray(data)) throw new Error("Invalid data")
 
-	await method(tx, ...data)
+	await prisma.$transaction(async (prisma) => {
+		await method(tx, prisma, ...data)
+	})
 
 	lastTxId++
 	return true

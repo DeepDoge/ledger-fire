@@ -1,10 +1,10 @@
-import { prisma } from "../prisma/client.js"
+import type { Prisma } from "@prisma/client"
 import type { Transaction } from "./transaction.js"
 
-type Method = (tx: Transaction, ...args: any[]) => Promise<any>
+type Method = (tx: Transaction, prisma: Prisma.TransactionClient, ...args: any[]) => Promise<any>
 
 export const methods: Record<string, Method> = {
-	async createWarehouse(_, name: string, address: string) {
+	async createWarehouse(_, prisma, name: string, address: string) {
 		await prisma.warehouse.create({
 			data: {
 				name,
@@ -13,7 +13,7 @@ export const methods: Record<string, Method> = {
 		})
 	},
 
-	async createBrand(_, name: string) {
+	async createBrand(_, prisma, name: string) {
 		await prisma.brand.create({
 			data: {
 				name,
@@ -21,7 +21,7 @@ export const methods: Record<string, Method> = {
 		})
 	},
 
-	async createProduct(_, name: string, brandId: number) {
+	async createProduct(_, prisma, name: string, brandId: number) {
 		await prisma.product.create({
 			data: {
 				name,
@@ -30,7 +30,7 @@ export const methods: Record<string, Method> = {
 		})
 	},
 
-	async createProduct2(_, name: string, brandName: string) {
+	async createProduct2(_, prisma, name: string, brandName: string) {
 		await prisma.product.create({
 			data: {
 				name,
@@ -43,7 +43,7 @@ export const methods: Record<string, Method> = {
 		})
 	},
 
-	async stockMovement(tx: Transaction, productId: number, warehouseId: number, quantity: number) {
+	async stockMovement(tx: Transaction, prisma, productId: number, warehouseId: number, quantity: number) {
 		await prisma.stockMove.create({
 			data: {
 				txId: tx.id,

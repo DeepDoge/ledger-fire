@@ -1,10 +1,10 @@
 import { fromBytes, toBytes } from "@/utils/bytes"
 import type { PrismaClient } from "@prisma/client"
-import { accessCheck, type AllowedOperation, type PathToken } from "./proxy"
+import { accessCheck, type AllowedMethod, type PathToken } from "./proxy"
 
 export type PrismaClientReadonlyProxy = {
 	[K in Exclude<keyof PrismaClient, `$${string}` | symbol>]: {
-		[K2 in AllowedOperation]: PrismaClient[K][K2]
+		[K2 in AllowedMethod]: PrismaClient[K][K2]
 	}
 }
 export namespace PrismaClientReadonlyProxy {
