@@ -1,4 +1,5 @@
 import express from "express"
+import { indexNextTx } from "./indexer"
 import { Transaction } from "./indexer/transaction"
 import { handleServerRequest } from "./prisma/proxyServer"
 import { fromBytes } from "./utils/bytes"
@@ -60,4 +61,11 @@ api.post("/tx", async (req, res) => {
 
 api.listen(PORT, () => {
 	console.log(`Server is running on http://localhost:${PORT}`)
+})
+
+new Promise(async () => {
+	while (true) {
+		await new Promise((resolve) => setTimeout(resolve, 0))
+		await indexNextTx()
+	}
 })

@@ -12,10 +12,10 @@ let lastTxId =
 				id: true,
 			},
 		})
-	)?.id ?? 0
+	)?.id ?? -1n
 
 export async function indexNextTx() {
-	const txId = lastTxId
+	const txId = lastTxId + 1n
 
 	const tx = await prisma.transaction.findUnique({ where: { id: txId } })
 	if (!tx) return false
@@ -28,8 +28,12 @@ export async function indexNextTx() {
 
 	await prisma.$transaction(async (prisma) => {
 		await method(tx, prisma, ...data)
+		await prisma.indexing.update({
+			where: { id: 0 },
+			data: { lastIndexedTxId: txId },
+		})
+		lastTxId = txId
 	})
 
-	lastTxId++
 	return true
 }
