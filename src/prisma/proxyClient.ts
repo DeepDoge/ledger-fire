@@ -1,3 +1,4 @@
+import { API_URL } from "@/config"
 import { fromBytes, toBytes } from "@/utils/bytes"
 import type { PrismaClient } from "@prisma/client"
 import { accessCheck, type AllowedMethod, type PathToken } from "./proxy"
@@ -26,7 +27,7 @@ function createProxy(path: PathToken[] = []): unknown {
 }
 
 async function callRemote(path: PathToken[]) {
-	const response = await fetch("https://deepdoge-redesigned-doodle-59gj7r54627p7j-23450.preview.app.github.dev/prisma-proxy", {
+	const response = await fetch(`${API_URL}/prisma-proxy`, {
 		method: "POST",
 		body: toBytes(path),
 		headers: {

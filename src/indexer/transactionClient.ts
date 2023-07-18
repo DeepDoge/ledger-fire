@@ -1,3 +1,4 @@
+import { API_URL } from "@/config"
 import { toBytes } from "@/utils/bytes"
 import type { Call, Tuples } from "hotscript"
 import type { methods } from "./methods"
@@ -7,7 +8,7 @@ export const transaction = new Proxy(() => {}, {
 	get<K extends keyof typeof methods>(_: never, methodKey: K) {
 		return async (...args: unknown[]) => {
 			const requestData: TransactionRequestData = [methodKey, args, new Uint8Array(0)]
-			await fetch("https://deepdoge-redesigned-doodle-59gj7r54627p7j-23450.preview.app.github.dev/tx", {
+			await fetch(`${API_URL}/tx`, {
 				method: "POST",
 				body: toBytes(requestData),
 				headers: {

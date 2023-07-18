@@ -1,4 +1,5 @@
 import express from "express"
+import { API_PORT } from "./config"
 import { indexNextTx } from "./indexer"
 import { handleTransactionServerRequest } from "./indexer/transactionServer"
 import { handlePrismaProxyServerRequest } from "./prisma/proxyServer"
@@ -6,8 +7,6 @@ import { handlePrismaProxyServerRequest } from "./prisma/proxyServer"
 const api = express()
 
 api.use(express.raw({ type: "application/octet-stream" }))
-
-const PORT = 23450 as const
 
 api.options("/prisma-proxy", (_, res) => {
 	res.header("Access-Control-Allow-Origin", "*")
@@ -51,8 +50,8 @@ api.post("/tx", async (req, res) => {
 	}
 })
 
-api.listen(PORT, async () => {
-	console.log(`Server is running on http://localhost:${PORT}`)
+api.listen(API_PORT, async () => {
+	console.log(`Server is running on http://localhost:${API_PORT}`)
 
 	console.log("Starting indexer...")
 	let indexingCache = true
