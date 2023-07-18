@@ -19,7 +19,7 @@ export async function handleTransactionServerRequest(request: Uint8Array): Promi
 		await prisma.transaction.create({
 			select: { id: true },
 			data: {
-				id: nextId++,
+				id: nextId,
 				method,
 				data: Buffer.from(toBytes(args)),
 				from: Buffer.from(from),
@@ -27,6 +27,8 @@ export async function handleTransactionServerRequest(request: Uint8Array): Promi
 			},
 		})
 	).id
+
+	nextId = id + 1n
 
 	return toBytes(id)
 }
