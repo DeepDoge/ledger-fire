@@ -54,9 +54,14 @@ api.post("/tx", async (req, res) => {
 api.listen(PORT, async () => {
 	console.log(`Server is running on http://localhost:${PORT}`)
 
-	console.log("Indexing transactions...")
+	console.log("Starting indexer...")
+	let indexingCache = true
 	while (true) {
 		await new Promise((resolve) => setTimeout(resolve, 100))
-		await indexNextTx()
+		const indexing = await indexNextTx()
+		if (indexingCache === indexing) continue
+		indexingCache = indexing
+		if (!indexing) console.log("Waiting for new transactions...")
 	}
+	console.log("Indexer stopped")
 })
