@@ -25,6 +25,8 @@ export function toBytes(data: unknown): Uint8Array {
 			return new Uint8Array([2, ...hexToBytes(data.toString(16))])
 		case "boolean":
 			return new Uint8Array([3, data ? 1 : 0])
+		case "undefined":
+			return new Uint8Array([9])
 		case "object":
 			if (data === null) return new Uint8Array([4])
 			if (Array.isArray(data)) {
@@ -85,6 +87,8 @@ export function fromBytes(bytes: Uint8Array): unknown {
 			return data
 		case 8:
 			return new Date(parseInt(bytesToHex(data), 16))
+		case 9:
+			return undefined
 		default:
 			throw new Error(`Unsupported type ${type}`)
 	}
