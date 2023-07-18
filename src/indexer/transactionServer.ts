@@ -1,12 +1,12 @@
 import { fromBytes, toBytes } from "@/utils/bytes.js"
-import { prismaRW } from "../prisma/client.js"
+import { prisma } from "../prisma/client.js"
 import type { methods } from "./methods.js"
 
 export type TransactionRequestData = [methodKey: keyof typeof methods, args: unknown[], from: Uint8Array]
 
 let nextId =
 	(
-		await prismaRW.transaction.findFirst({
+		await prisma.transaction.findFirst({
 			orderBy: { id: "desc" },
 			select: { id: true },
 		})
@@ -16,7 +16,7 @@ export async function handleTransactionServerRequest(request: Uint8Array): Promi
 	const [method, args, from] = fromBytes(request) as TransactionRequestData
 
 	const id = (
-		await prismaRW.transaction.create({
+		await prisma.transaction.create({
 			select: { id: true },
 			data: {
 				id: nextId++,

@@ -1,14 +1,14 @@
 import { fromBytes } from "@/utils/bytes.js"
-import { prismaRW } from "../prisma/client.js"
+import { prisma } from "../prisma/client.js"
 import type { TransactionMethod } from "./methods.js"
 import { methods } from "./methods.js"
 
-let nextTxId = (await prismaRW.indexing.findUnique({ where: { id: 0 } }))?.nextTxId ?? (await prismaRW.indexing.create({})).nextTxId
+let nextTxId = (await prisma.indexing.findUnique({ where: { id: 0 } }))?.nextTxId ?? (await prisma.indexing.create({})).nextTxId
 
 export async function indexNextTx() {
 	const txId = nextTxId
 
-	const tx = await prismaRW.transaction.findUnique({ where: { id: txId } })
+	const tx = await prisma.transaction.findUnique({ where: { id: txId } })
 	if (!tx) return false
 
 	console.log(`Indexing tx ${txId}`)
@@ -19,7 +19,7 @@ export async function indexNextTx() {
 	const data = fromBytes(tx.data)
 	if (!Array.isArray(data)) throw new Error("Invalid data")
 
-	await prismaRW.$transaction(async (prisma) => {
+	await prisma.$transaction(async (prisma) => {
 		await method(tx, prisma, ...data)
 		nextTxId = (
 			await prisma.indexing.update({

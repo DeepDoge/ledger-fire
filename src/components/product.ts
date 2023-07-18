@@ -1,4 +1,4 @@
-import { prismaRO } from "@/prisma/proxyClient"
+import { prismaProxy } from "@/prisma/proxyClient"
 import type { Product } from "@prisma/client"
 import { $ } from "master-ts/library/$"
 import { defineComponent } from "master-ts/library/component"
@@ -10,7 +10,7 @@ export function ProductComponent(product: Product) {
 
 	component.$html = html`
 		<div class="name">${product.name}</div>
-		<div class="brandName">${$.await(prismaRO.brand.findUniqueOrThrow({ where: { id: product.brandId } })).then((brand) => brand.name)}</div>
+		<div class="brandName">${$.await(prismaProxy.brand.findUniqueOrThrow({ where: { id: product.brandId } })).then((brand) => brand.name)}</div>
 	`
 
 	return component
