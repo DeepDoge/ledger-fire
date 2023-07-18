@@ -1,38 +1,37 @@
 import { fromBytes } from "@/utils/bytes.js"
-import { prisma } from "../prisma/client.js"
+import { prismaRW } from "../prisma/client.js"
+import type { TransactionMethod } from "./methods.js"
 import { methods } from "./methods.js"
 
-let lastTxId =
-	(
-		await prisma.transaction.findFirst({
-			orderBy: {
-				id: "desc",
-			},
-			select: {
-				id: true,
-			},
-		})
-	)?.id ?? -1n
+let nextTxId = (await prismaRW.indexing.findUnique({ where: { id: 0 } }))?.nextTxId ?? (await prismaRW.indexing.create({})).nextTxId
 
 export async function indexNextTx() {
-	const txId = lastTxId + 1n
+	const txId = nextTxId
 
-	const tx = await prisma.transaction.findUnique({ where: { id: txId } })
+	const tx = await prismaRW.transaction.findUnique({ where: { id: txId } })
 	if (!tx) return false
 
-	const method = methods[tx.method]
+	console.log(`Indexing tx ${txId}`)
+
+	const method: TransactionMethod = methods[tx.method as keyof typeof methods]
 	if (!method) throw new Error(`Unknown method ${tx.method}`)
 
 	const data = fromBytes(tx.data)
 	if (!Array.isArray(data)) throw new Error("Invalid data")
 
-	await prisma.$transaction(async (prisma) => {
+	await prismaRW.$transaction(async (prisma) => {
 		await method(tx, prisma, ...data)
-		await prisma.indexing.update({
-			where: { id: 0 },
-			data: { lastIndexedTxId: txId },
-		})
-		lastTxId = txId
+		nextTxId = (
+			await prisma.indexing.update({
+				select: { nextTxId: true },
+				where: { id: 0 },
+				data: {
+					nextTxId: {
+						increment: 1n,
+					},
+				},
+			})
+		).nextTxId
 	})
 
 	return true

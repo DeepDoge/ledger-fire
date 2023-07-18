@@ -1,3 +1,5 @@
+import type { PrismaClient } from "@prisma/client"
+
 export type PathToken =
 	| {
 			type: "property"
@@ -8,7 +10,12 @@ export type PathToken =
 			args: unknown[]
 	  }
 
-const allowedMethods = ["findUnique", "findFirst", "findMany"] as const
+const allowedMethods = ["findUnique", "findUniqueOrThrow", "findFirst", "findFirstOrThrow", "findMany"] as const satisfies readonly Exclude<
+	{
+		[K in Exclude<keyof PrismaClient, `$${string}` | symbol>]: keyof PrismaClient[K]
+	}[Exclude<keyof PrismaClient, `$${string}` | symbol>],
+	symbol
+>[]
 export type AllowedMethod = (typeof allowedMethods)[number]
 const allowedMethodsSet = new Set(allowedMethods)
 export { allowedMethodsSet as allowedMethods }

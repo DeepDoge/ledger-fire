@@ -39,4 +39,4 @@ async function callRemote(path: PathToken[]) {
 	return fromBytes(bytes)
 }
 
-export const prismaProxy = PrismaClientReadonlyProxy.createClient()
+export const prismaRO = PrismaClientReadonlyProxy.createClient()

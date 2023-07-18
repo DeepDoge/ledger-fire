@@ -11,27 +11,24 @@ datasource db {
 }
 
 model Transaction {
-  id        BigInt   @id @default(autoincrement())
+  id        BigInt @id
   from      Bytes
   method    String
   data      Bytes
-  timestamp DateTime @default(now())
+  timestamp BigInt
 
   StockMove StockMove[]
-  Indexing  Indexing[]
 
   @@index([from])
 }
 
 model Indexing {
-  id BigInt @id @default(0)
-
-  lastIndexedTx   Transaction? @relation(fields: [lastIndexedTxId], references: [id])
-  lastIndexedTxId BigInt?
+  id       BigInt @id @default(0)
+  nextTxId BigInt @default(0)
 }
 
 model Warehouse {
-  id BigInt @id @default(autoincrement())
+  id BigInt @id
 
   name       String
   address    String
@@ -40,14 +37,14 @@ model Warehouse {
 }
 
 model Brand {
-  id BigInt @id @default(autoincrement())
+  id BigInt @id
 
   name     String
   products Product[]
 }
 
 model Product {
-  id BigInt @id @default(autoincrement())
+  id BigInt @id
 
   name  String
   brand Brand  @relation(fields: [brandId], references: [id])
@@ -72,7 +69,7 @@ model Stock {
 }
 
 model StockMove {
-  id   BigInt      @id @default(autoincrement())
+  id   BigInt      @id
   tx   Transaction @relation(fields: [txId], references: [id])
   txId BigInt
 

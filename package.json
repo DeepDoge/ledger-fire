@@ -3,7 +3,7 @@
 	"name": "ledger-fire",
 	"scripts": {
 		"format": "prettier -w ./",
-		"dev": "tsx ./src/server.ts | vite --host",
+		"dev": "tsx watch ./src/server.ts | vite --host",
 		"build": "vite build",
 		"preview": "vite preview --host"
 	},
