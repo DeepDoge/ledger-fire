@@ -5,12 +5,12 @@ import type { methods } from "./methods.js"
 export type TransactionRequestData = [methodKey: keyof typeof methods, args: unknown[], from: Uint8Array]
 
 let nextId =
-	(
+	((
 		await prisma.transaction.findFirst({
 			orderBy: { id: "desc" },
 			select: { id: true },
 		})
-	)?.id ?? 0n
+	)?.id ?? -1n) + 1n
 
 export async function handleTransactionServerRequest(request: Uint8Array): Promise<Uint8Array> {
 	const [method, args, from] = fromBytes(request) as TransactionRequestData
