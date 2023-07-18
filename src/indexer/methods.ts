@@ -1,46 +1,47 @@
+import { randomBigInt } from "@/utils/random"
 import type { Prisma } from "@prisma/client"
 import type { Transaction } from "./transaction"
 
 export type TransactionMethod = (tx: Transaction, prisma: Prisma.TransactionClient, ...args: any[]) => Promise<any>
 
 export const methods = {
-	async createWarehouse(tx, prisma, name: string, address: string) {
+	async createWarehouse(_, prisma, name: string, address: string) {
 		await prisma.warehouse.create({
 			data: {
-				id: tx.id,
+				id: randomBigInt(),
 				name,
 				address,
 			},
 		})
 	},
 
-	async createBrand(tx, prisma, name: string) {
+	async createBrand(_, prisma, name: string) {
 		await prisma.brand.create({
 			data: {
-				id: tx.id,
+				id: randomBigInt(),
 				name,
 			},
 		})
 	},
 
-	async createProduct(tx, prisma, name: string, brandId: number) {
+	async createProduct(_, prisma, name: string, brandId: number) {
 		await prisma.product.create({
 			data: {
-				id: tx.id,
+				id: randomBigInt(),
 				name,
 				brandId,
 			},
 		})
 	},
 
-	async createProduct2(tx, prisma, name: string, brandName: string) {
+	async createProduct2(_, prisma, name: string, brandName: string) {
 		await prisma.product.create({
 			data: {
-				id: tx.id,
+				id: randomBigInt(),
 				name,
 				brand: {
 					create: {
-						id: tx.id,
+						id: randomBigInt(),
 						name: brandName,
 					},
 				},
@@ -51,7 +52,7 @@ export const methods = {
 	async stockMovement(tx: Transaction, prisma, productId: number, warehouseId: number, quantity: number) {
 		await prisma.stockMove.create({
 			data: {
-				id: tx.id,
+				id: randomBigInt(),
 				txId: tx.id,
 				productId,
 				warehouseId,
