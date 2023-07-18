@@ -1,7 +1,6 @@
 import { API_URL } from "@/config"
 import { toBytes } from "@/utils/bytes"
-import type { Call, Tuples } from "hotscript"
-import type { methods } from "./methods"
+import type { MethodParameters, methods } from "./methods"
 import type { TransactionRequestData } from "./transactionServer"
 
 export const transaction = new Proxy(() => {}, {
@@ -18,5 +17,5 @@ export const transaction = new Proxy(() => {}, {
 		}
 	},
 }) as unknown as {
-	[K in keyof typeof methods]: (...args: Call<Tuples.Drop<2>, Parameters<(typeof methods)[K]>>) => ReturnType<(typeof methods)[K]>
+	[K in keyof typeof methods]: (...args: MethodParameters<(typeof methods)[K]>) => ReturnType<(typeof methods)[K]>
 }

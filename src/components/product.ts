@@ -1,16 +1,14 @@
-import { prismaProxy } from "@/prisma/proxyClient"
-import type { Product } from "@prisma/client"
-import { $ } from "master-ts/library/$"
+import type { Prisma } from "@prisma/client"
 import { defineComponent } from "master-ts/library/component"
 import { css, html } from "master-ts/library/template"
 
 const XProduct = defineComponent("x-product")
-export function ProductComponent(product: Product) {
+export function ProductComponent(product: Prisma.ProductGetPayload<{ include: { brand: true } }>) {
 	const component = new XProduct()
 
 	component.$html = html`
 		<div class="name">${product.name}</div>
-		<div class="brandName">${$.await(prismaProxy.brand.findUniqueOrThrow({ where: { id: product.brandId } })).then((brand) => brand.name)}</div>
+		<div class="brandName">${product.brand.name}</div>
 	`
 
 	return component

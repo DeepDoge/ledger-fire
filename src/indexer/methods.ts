@@ -1,11 +1,16 @@
 import { randomBigInt } from "@/utils/random"
-import type { Prisma } from "@prisma/client"
-import type { Transaction } from "./transaction"
+import type { Prisma, Transaction } from "@prisma/client"
+import type { Call, Tuples } from "hotscript"
 
 export type TransactionMethod = (tx: Transaction, prisma: Prisma.TransactionClient, ...args: any[]) => Promise<any>
+function method<T extends TransactionMethod>(fn: T) {
+	return fn
+}
 
-export const methods = {
-	async createWarehouse(_, prisma, name: string, address: string) {
+export type MethodParameters<T extends TransactionMethod> = Call<Tuples.Drop<2>, Parameters<T>>
+
+export namespace methods {
+	export const createWarehouse = method(async (_, prisma, name: string, address: string) => {
 		await prisma.warehouse.create({
 			data: {
 				id: randomBigInt(),
@@ -13,18 +18,18 @@ export const methods = {
 				address,
 			},
 		})
-	},
+	})
 
-	async createBrand(_, prisma, name: string) {
+	export const createBrand = method(async (_, prisma, name: string) => {
 		await prisma.brand.create({
 			data: {
 				id: randomBigInt(),
 				name,
 			},
 		})
-	},
+	})
 
-	async createProduct(_, prisma, name: string, brandId: number) {
+	export const createProduct = method(async (_, prisma, name: string, brandId: number) => {
 		await prisma.product.create({
 			data: {
 				id: randomBigInt(),
@@ -32,9 +37,9 @@ export const methods = {
 				brandId,
 			},
 		})
-	},
+	})
 
-	async createProduct2(_, prisma, name: string, brandName: string) {
+	export const createProduct2 = method(async (_, prisma, name: string, brandName: string) => {
 		await prisma.product.create({
 			data: {
 				id: randomBigInt(),
@@ -47,9 +52,9 @@ export const methods = {
 				},
 			},
 		})
-	},
+	})
 
-	async stockMovement(tx: Transaction, prisma, productId: number, warehouseId: number, quantity: number) {
+	export const stockMovement = method(async (tx, prisma, productId: number, warehouseId: number, quantity: number) => {
 		await prisma.stockMove.create({
 			data: {
 				id: randomBigInt(),
@@ -59,5 +64,5 @@ export const methods = {
 				quantity,
 			},
 		})
-	},
-} as const satisfies Record<string, TransactionMethod>
+	})
+}

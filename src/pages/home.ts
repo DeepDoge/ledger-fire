@@ -10,7 +10,7 @@ export const homeLayout = createPage(() => {
 	const PageComponent = defineComponent("x-home-page")
 	const page = new PageComponent()
 
-	const test = prismaProxy.product.findMany()
+	const test = prismaProxy.product.findMany({ include: { brand: true } })
 
 	page.$html = html`
 		<x ${ProductFormComponent()}></x>
