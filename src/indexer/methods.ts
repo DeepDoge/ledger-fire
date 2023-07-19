@@ -1,16 +1,25 @@
 import { randomBigInt } from "@/utils/random"
 import type { Prisma, Transaction } from "@prisma/client"
-import type { Call, Tuples } from "hotscript"
+import type { Type, TypeObject } from "type-spirit/library"
+import { $bigint, $object, $string, type $infer } from "type-spirit/library"
 
-export type TransactionMethod = (tx: Transaction, prisma: Prisma.TransactionClient, ...args: any[]) => Promise<any>
-function method<T extends TransactionMethod>(fn: T) {
-	return fn
+export type Method = {
+	call: (tx: Transaction, prisma: Prisma.TransactionClient, params: any) => unknown
+	$params: TypeObject<Record<PropertyKey, Type<unknown>>>
 }
 
-export type MethodParameters<T extends TransactionMethod> = Call<Tuples.Drop<2>, Parameters<T>>
+function method<TParams extends Record<PropertyKey, Type<any>>, TReturns>(
+	$params: TParams,
+	fn: (tx: Transaction, prisma: Prisma.TransactionClient, params: $infer<TypeObject<TParams>>) => TReturns
+) {
+	return {
+		call: fn,
+		$params: $object($params),
+	} satisfies Method
+}
 
 export namespace methods {
-	export const createWarehouse = method(async (_, prisma, name: string, address: string) => {
+	export const createWarehouse = method({ name: $string(), address: $string() }, async (_, prisma, { name, address }) => {
 		await prisma.warehouse.create({
 			data: {
 				id: randomBigInt(),
@@ -20,7 +29,7 @@ export namespace methods {
 		})
 	})
 
-	export const createBrand = method(async (_, prisma, name: string) => {
+	export const createBrand = method({ name: $string() }, async (_, prisma, { name }) => {
 		await prisma.brand.create({
 			data: {
 				id: randomBigInt(),
@@ -29,7 +38,7 @@ export namespace methods {
 		})
 	})
 
-	export const createProduct = method(async (_, prisma, name: string, brandId: number) => {
+	export const createProduct = method({ name: $string(), brandId: $bigint() }, async (_, prisma, { name, brandId }) => {
 		await prisma.product.create({
 			data: {
 				id: randomBigInt(),
@@ -39,7 +48,7 @@ export namespace methods {
 		})
 	})
 
-	export const createProduct2 = method(async (_, prisma, name: string, brandName: string) => {
+	export const createProduct2 = method({ name: $string(), brandName: $string() }, async (_, prisma, { name, brandName }) => {
 		await prisma.product.create({
 			data: {
 				id: randomBigInt(),
@@ -54,15 +63,18 @@ export namespace methods {
 		})
 	})
 
-	export const stockMovement = method(async (tx, prisma, productId: number, warehouseId: number, quantity: number) => {
-		await prisma.stockMove.create({
-			data: {
-				id: randomBigInt(),
-				txId: tx.id,
-				productId,
-				warehouseId,
-				quantity,
-			},
-		})
-	})
+	export const stockMovement = method(
+		{ productId: $bigint(), warehouseId: $bigint(), quantity: $bigint() },
+		async (tx, prisma, { productId, warehouseId, quantity }) => {
+			await prisma.stockMove.create({
+				data: {
+					id: randomBigInt(),
+					txId: tx.id,
+					productId,
+					warehouseId,
+					quantity,
+				},
+			})
+		}
+	)
 }

@@ -1,8 +1,16 @@
+import { $bytes } from "@/utils/$types.js"
 import { fromBytes, toBytes } from "@/utils/bytes.js"
+import type { $infer } from "type-spirit/library/index.js"
+import { $literal, $tuple, $union, $unknown } from "type-spirit/library/index.js"
 import { prisma } from "../prisma/client.js"
-import type { methods } from "./methods.js"
+import { methods } from "./methods.js"
 
-export type TransactionRequestData = [methodKey: keyof typeof methods, args: unknown[], from: Uint8Array]
+export const $transactionRequestData = $tuple(
+	$union(...(Object.keys(methods) as (keyof typeof methods)[]).map((key) => $literal(key))),
+	$unknown(),
+	$bytes()
+)
+export type TransactionRequestData = $infer<typeof $transactionRequestData>
 
 let nextId =
 	((
@@ -13,7 +21,7 @@ let nextId =
 	)?.id ?? -1n) + 1n
 
 export async function handleTransactionServerRequest(request: Uint8Array): Promise<Uint8Array> {
-	const [method, args, from] = fromBytes(request) as TransactionRequestData
+	const [method, params, from] = $transactionRequestData.parseOrThrow(fromBytes(request))
 
 	const id = (
 		await prisma.transaction.create({
@@ -21,7 +29,7 @@ export async function handleTransactionServerRequest(request: Uint8Array): Promi
 			data: {
 				id: nextId,
 				method,
-				data: Buffer.from(toBytes(args)),
+				data: Buffer.from(toBytes(params)),
 				from: Buffer.from(from),
 				timestamp: BigInt(Date.now()),
 			},

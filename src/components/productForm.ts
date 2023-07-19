@@ -11,7 +11,10 @@ export function ProductFormComponent() {
 	const brandName = $.writable("")
 
 	async function onSubmit() {
-		await transaction.createProduct2(name.ref, brandName.ref)
+		await transaction.createProduct2({
+			name: name.ref,
+			brandName: brandName.ref,
+		})
 	}
 
 	component.$html = html`

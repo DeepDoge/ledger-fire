@@ -17,13 +17,15 @@
 		"express": "^4.18.2",
 		"hotscript": "^1.0.13",
 		"master-ts": "github:DeepDoge/master-ts#0.0.34",
+		"master-ts-types": "github:DeepDoge/type-spirit#0.0.2",
 		"master-ts-vite-plugin": "github:DeepDoge/master-ts-vite-plugin#0.0.13",
 		"prettier": "^2.8.8",
 		"prettier-plugin-organize-imports": "^3.2.2",
 		"prisma": "^4.15.0",
+		"tsx": "^3.12.7",
+		"type-spirit": "github:DeepDoge/type-spirit#0.0.3",
 		"typescript": "^5.1.6",
 		"vite": "^4.4.4",
-		"vite-plugin-singlefile": "^0.13.5",
-		"tsx": "^3.12.7"
+		"vite-plugin-singlefile": "^0.13.5"
 	}
 }

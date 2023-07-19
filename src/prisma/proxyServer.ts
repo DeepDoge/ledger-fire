@@ -1,9 +1,11 @@
 import { fromBytes, toBytes } from "@/utils/bytes"
+import { $array } from "type-spirit/library"
 import { prisma } from "./client"
-import { accessCheck, type PathToken } from "./proxy"
+import { $pathToken, accessCheck, type PathToken } from "./proxy"
 
 export async function handlePrismaProxyServerRequest(data: Uint8Array): Promise<Uint8Array> {
-	const path = fromBytes(data) as PathToken[]
+	const path = $array($pathToken).parseOrThrow(fromBytes(data))
+
 	let current = prisma
 	for (const token of path) {
 		if (token.type === "property") accessCheck(path, token.prop)
