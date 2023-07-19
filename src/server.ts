@@ -1,6 +1,7 @@
+import colors from "colors"
 import express from "express"
 import { API_PORT } from "./config"
-import { indexNextTx } from "./indexer"
+import { runIndexer } from "./indexer"
 import { handleTransactionServerRequest } from "./indexer/transactionServer"
 import { handlePrismaProxyServerRequest } from "./prisma/proxyServer"
 
@@ -51,16 +52,10 @@ api.post("/tx", async (req, res) => {
 })
 
 api.listen(API_PORT, async () => {
-	console.log(`Server is running on http://localhost:${API_PORT}`)
-
-	console.log("Starting indexer...")
-	let indexingCache = true
-	while (true) {
-		await new Promise((resolve) => setTimeout(resolve, 100))
-		const indexing = await indexNextTx()
-		if (indexingCache === indexing) continue
-		indexingCache = indexing
-		if (!indexing) console.log("Waiting for new transactions...")
-	}
-	console.log("Indexer stopped")
+	console.log()
+	console.log(colors.bgGreen(" API Server "), colors.dim(`Listening on port`), colors.white(`${API_PORT}`))
+	console.log()
+	console.log(colors.green("➜ "), colors.white("Local:"), colors.cyan(`http://localhost:${API_PORT}`))
+	console.log()
+	runIndexer()
 })
