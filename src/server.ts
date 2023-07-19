@@ -55,7 +55,7 @@ api.listen(API_PORT, async () => {
 	console.log()
 	console.log(colors.bgGreen(" API Server "), colors.dim(`Listening on port`), colors.white(`${API_PORT}`))
 	console.log()
-	console.log(colors.green("➜ "), colors.white("Local:"), colors.cyan(`http://localhost:${API_PORT}`))
+	console.log(colors.green(" ➜ "), colors.white("Local:"), colors.cyan(`http://localhost:${API_PORT}`))
 	console.log()
 	runIndexer()
 })

@@ -20,7 +20,7 @@ export async function runIndexer() {
 		indexingCache = indexing
 		if (!indexing) {
 			console.log(logPrefix, `Waiting for next transaction...`)
-			console.log(logPrefixEmpty, colors.dim(` txId = ${nextTxId}`))
+			console.log(logPrefixEmpty, colors.gray("➜ "), colors.dim(`txId = ${nextTxId}`))
 		}
 	}
 	console.log(logPrefix, "Indexer stopped")
@@ -33,9 +33,9 @@ async function indexNextTx() {
 
 	try {
 		console.log(logPrefix, `Indexing transaction`)
-		console.log(logPrefixEmpty, colors.dim(` txId = ${txId}`))
-		console.log(logPrefixEmpty, colors.dim(` method = ${tx.method}`))
-		console.log(logPrefixEmpty, colors.dim(` from = ${tx.from}`))
+		console.log(logPrefixEmpty, colors.gray("➜ "), colors.dim(`txId = ${txId}`))
+		console.log(logPrefixEmpty, colors.gray("➜ "), colors.dim(`method = ${tx.method}`))
+		console.log(logPrefixEmpty, colors.gray("➜ "), colors.dim(`from = ${tx.from}`))
 
 		const method = (methods as Record<PropertyKey, Method>)[tx.method]
 		if (!method) throw new Error(`Unknown method ${tx.method}`)
@@ -44,12 +44,10 @@ async function indexNextTx() {
 		await method.call(tx, prisma, params)
 	} catch (error) {
 		console.log(logPrefix, colors.red(`Error while indexing transaction`))
-		console.log(logPrefixEmpty, colors.dim(` txId = ${txId}`))
-		console.log(logPrefixEmpty, colors.dim(` method = ${tx.method}`))
-		console.log(logPrefixEmpty, colors.dim(` from = ${tx.from}`))
-
-		if (error instanceof Error) console.log(logPrefixEmpty, colors.red(error.toString()))
-		else console.log(logPrefixEmpty, colors.red(`${error}`))
+		console.log(logPrefixEmpty, colors.gray("➜ "), colors.dim(`txId = ${txId}`))
+		console.log(logPrefixEmpty, colors.gray("➜ "), colors.dim(`method = ${tx.method}`))
+		console.log(logPrefixEmpty, colors.gray("➜ "), colors.dim(`from = ${tx.from}`))
+		console.log(logPrefixEmpty, colors.red(`${error}`))
 	}
 
 	nextTxId = (
