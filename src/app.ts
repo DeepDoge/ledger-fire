@@ -1,26 +1,53 @@
 import "@/import-styles"
 
-import { routerLayout } from "@/routes"
+import { $ } from "master-ts/library/$"
 import { defineComponent } from "master-ts/library/component"
 import { css, html } from "master-ts/library/template"
+import { NavigationComponent } from "./navigation"
+import { route } from "./router"
 
-const AppComponent = defineComponent("x-app")
-function App() {
-	const component = new AppComponent()
+const ComponentConstructor = defineComponent("x-app")
+function AppComponent() {
+	const component = new ComponentConstructor()
 
-	component.$html = html` <main>${() => routerLayout.ref.component}</main> `
+	component.$html = html`
+		<header style:grid-area=${"header"}>
+			<x ${NavigationComponent()}></x>
+		</header>
+		<main style:grid-area=${"main"}>
+			${() => {
+				if (route.pathArr.ref[0] === "#warehouses") {
+					return $.await(import("./components/warehouses")).then((m) => m.WarehousesComponent())
+				}
+
+				return null
+			}}
+		</main>
+	`
 
 	return component
 }
 
-AppComponent.$css = css`
+ComponentConstructor.$css = css`
 	:host {
 		display: grid;
+		grid-template-areas: "header main";
+		grid-template-columns: minmax(0, 10em) 1fr;
+	}
+
+	header {
+		display: grid;
+
+		position: sticky;
+		top: 0;
+		height: 100vh;
 	}
 
 	main {
 		display: grid;
+
+		padding: calc(var(--span) * 2);
 	}
 `
 
-document.querySelector("#app")?.replaceWith(App())
+document.querySelector("#app")?.replaceWith(AppComponent())

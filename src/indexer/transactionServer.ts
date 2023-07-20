@@ -1,8 +1,8 @@
+import { prisma } from "@/prisma/client"
 import { $bytes } from "@/utils/$types"
 import { fromBytes, toBytes } from "@/utils/bytes"
 import type { $infer } from "type-spirit/library"
 import { $literal, $tuple, $union, $unknown } from "type-spirit/library"
-import { prisma } from "../prisma/client"
 import { methods } from "./methods"
 
 export const $transactionRequestData = $tuple(

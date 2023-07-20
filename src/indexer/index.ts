@@ -1,6 +1,6 @@
+import { prisma } from "@/prisma/client"
 import { fromBytes } from "@/utils/bytes"
 import colors from "colors"
-import { prisma } from "../prisma/client"
 import type { Method } from "./methods"
 import { methods } from "./methods"
 

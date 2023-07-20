@@ -3,9 +3,9 @@ import { $ } from "master-ts/library/$"
 import { defineComponent } from "master-ts/library/component"
 import { html } from "master-ts/library/template"
 
-const XProductForm = defineComponent("x-product-form")
+const ComponentConstructor = defineComponent("x-product-form")
 export function ProductFormComponent() {
-	const component = new XProductForm()
+	const component = new ComponentConstructor()
 
 	const name = $.writable("")
 	const brandName = $.writable("")
