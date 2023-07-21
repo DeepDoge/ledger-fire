@@ -1,6 +1,6 @@
 import { $ } from "master-ts/library/$"
 import { defineComponent } from "master-ts/library/component"
-import type { SignalWritable } from "master-ts/library/signal"
+import type { SignalReadable } from "master-ts/library/signal"
 import { css, html } from "master-ts/library/template"
 
 const ComponentConstructor = defineComponent("x-dialog")
@@ -26,9 +26,38 @@ export type DialogConfirm = DialogBase & {
 
 export type Dialog = DialogAlert | DialogConfirm
 
-export function DialogComponent(dialogs: SignalWritable<Dialog[]>) {
+export type DialogManager = {
+	create<T extends Dialog>(init: Omit<T, "resolver" | "id">): Promise<ReturnType<T["resolver"]>>
+	dialogs: SignalReadable<Dialog[]>
+}
+
+export function createDialogManager(): DialogManager {
+	const dialogs = $.writable<Dialog[]>([])
+
+	return {
+		create(init) {
+			return new Promise((resolve) => {
+				const dialog = {
+					id: Symbol(),
+					...init,
+					resolver(...args: Parameters<typeof resolve>) {
+						dialogs.ref = dialogs.ref.filter((dialog) => dialog.id !== dialog.id)
+						resolve(...args)
+					},
+				} as unknown as Dialog
+
+				dialogs.ref.push(dialog)
+				dialogs.signal()
+			})
+		},
+		dialogs: dialogs as SignalReadable<Dialog[]>,
+	}
+}
+
+export function DialogComponent(dialogManager: DialogManager) {
 	const component = new ComponentConstructor()
 
+	const { dialogs } = dialogManager
 	const lastDialog = $.derive(() => (dialogs.ref.length > 0 ? dialogs.ref[dialogs.ref.length - 1]! : null))
 
 	component.$html = html`
@@ -94,7 +123,7 @@ ComponentConstructor.$css = css`
 		display: grid;
 		align-content: end;
 		justify-content: center;
-		grid-template-columns: minmax(0, 23em);
+		grid-template-columns: minmax(0, 25em);
 	}
 
 	.dialog {
