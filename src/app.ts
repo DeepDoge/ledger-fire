@@ -3,7 +3,7 @@ import "@/import-styles"
 import { $ } from "master-ts/library/$"
 import { defineComponent } from "master-ts/library/component"
 import { css, html } from "master-ts/library/template"
-import { DialogComponent, createDialogManager } from "./components/dialog"
+import { createDialogManager } from "./components/dialog"
 import { NavigationComponent } from "./navigation"
 import { route } from "./router"
 
@@ -26,7 +26,7 @@ function AppComponent() {
 				return null
 			}}
 		</main>
-		<x ${DialogComponent(dialogManager)}></x>
+		<x ${dialogManager.component}></x>
 	`
 
 	return component

@@ -28,13 +28,13 @@ export type Dialog = DialogAlert | DialogConfirm
 
 export type DialogManager = {
 	create<T extends Dialog>(init: Omit<T, "resolver" | "id">): Promise<ReturnType<T["resolver"]>>
-	dialogs: SignalReadable<Dialog[]>
+	component: ReturnType<typeof DialogComponent>
 }
 
 export function createDialogManager(): DialogManager {
 	const dialogs = $.writable<Dialog[]>([])
 
-	return {
+	const self: DialogManager = {
 		create(init) {
 			return new Promise((resolve) => {
 				const dialog = {
@@ -50,14 +50,15 @@ export function createDialogManager(): DialogManager {
 				dialogs.signal()
 			})
 		},
-		dialogs: dialogs as SignalReadable<Dialog[]>,
+		component: DialogComponent(dialogs),
 	}
+
+	return self
 }
 
-export function DialogComponent(dialogManager: DialogManager) {
+function DialogComponent(dialogs: SignalReadable<Dialog[]>) {
 	const component = new ComponentConstructor()
 
-	const { dialogs } = dialogManager
 	const lastDialog = $.derive(() => (dialogs.ref.length > 0 ? dialogs.ref[dialogs.ref.length - 1]! : null))
 
 	component.$html = html`
