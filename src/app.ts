@@ -3,8 +3,32 @@ import "@/import-styles"
 import { $ } from "master-ts/library/$"
 import { defineComponent } from "master-ts/library/component"
 import { css, html } from "master-ts/library/template"
+import { DialogComponent, type Dialog } from "./components/dialog"
 import { NavigationComponent } from "./navigation"
 import { route } from "./router"
+
+const dialogs = $.writable<Dialog[]>([])
+export async function createDialog(init: Omit<Dialog, "resolver" | "id">) {
+	return new Promise((resolve) => {
+		const dialog = {
+			id: Symbol(),
+			...init,
+			resolver(...args: Parameters<typeof resolve>) {
+				dialogs.ref = dialogs.ref.filter((dialog) => dialog.id !== dialog.id)
+				resolve(...args)
+			},
+		}
+
+		dialogs.ref.push(dialog as Dialog)
+		dialogs.signal()
+	})
+}
+
+createDialog({
+	type: "alert",
+	title: "Hello",
+	message: "World",
+})
 
 const ComponentConstructor = defineComponent("x-app")
 function AppComponent() {
@@ -23,6 +47,7 @@ function AppComponent() {
 				return null
 			}}
 		</main>
+		<x ${DialogComponent(dialogs)}></x>
 	`
 
 	return component
