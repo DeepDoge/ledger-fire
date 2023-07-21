@@ -27,7 +27,8 @@ export async function createDialog(init: Omit<Dialog, "resolver" | "id">) {
 createDialog({
 	type: "alert",
 	title: "Hello",
-	message: "World",
+	message: "World ".repeat(10000),
+	confirm: "Hello World",
 })
 
 const ComponentConstructor = defineComponent("x-app")

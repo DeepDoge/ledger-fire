@@ -77,9 +77,10 @@ ComponentConstructor.$css = css`
 	}
 
 	.overlay {
+		isolation: isolate;
 		position: fixed;
 		inset: 0;
-		isolation: isolate;
+		padding-inline: calc(var(--span) * 0.5);
 	}
 
 	.backdrop {
@@ -93,7 +94,7 @@ ComponentConstructor.$css = css`
 		display: grid;
 		align-content: end;
 		justify-content: center;
-		grid-auto-columns: minmax(0, 20em);
+		grid-template-columns: minmax(0, 23em);
 	}
 
 	.dialog {
@@ -102,5 +103,15 @@ ComponentConstructor.$css = css`
 		border-radius: var(--radius);
 		box-shadow: 0 0 0.5em hsl(var(--base--hsl), 50%);
 		padding: calc(var(--span) * 1);
+	}
+
+	.dialog {
+		max-height: 90vh;
+		display: grid;
+		gap: calc(var(--span) * 0.5);
+	}
+
+	.message {
+		overflow: auto;
 	}
 `
