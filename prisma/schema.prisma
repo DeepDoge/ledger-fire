@@ -11,7 +11,7 @@ datasource db {
 }
 
 model Transaction {
-  id        BigInt @id
+  id        BigInt @id @default(autoincrement())
   from      Bytes
   method    String
   data      Bytes
@@ -28,7 +28,7 @@ model Indexing {
 }
 
 model Warehouse {
-  id BigInt @id
+  id BigInt @id @default(autoincrement())
 
   name       String
   address    String
@@ -44,7 +44,7 @@ model Brand {
 }
 
 model Product {
-  id BigInt @id
+  id BigInt @id @default(autoincrement())
 
   name  String
   brand Brand  @relation(fields: [brandId], references: [id])
@@ -53,6 +53,8 @@ model Product {
 
   stocks     Stock[]
   stockMoves StockMove[]
+
+  SupplierProduct SupplierProduct[]
 }
 
 model Stock {
@@ -69,7 +71,7 @@ model Stock {
 }
 
 model StockMove {
-  id   BigInt      @id
+  id   BigInt      @id @default(autoincrement())
   tx   Transaction @relation(fields: [txId], references: [id])
   txId BigInt
 
@@ -80,4 +82,40 @@ model StockMove {
 
   warehouseId BigInt
   productId   BigInt
+}
+
+model Account {
+  id BigInt @id @default(autoincrement())
+
+  governmentId String? @unique
+  fullName     String
+  nickname     String?
+  address      String?
+  email        String?
+  phone        String?
+
+  Supplier Supplier?
+}
+
+model Supplier {
+  account   Account @relation(fields: [accountId], references: [id])
+  accountId BigInt  @id
+
+  SupplierProduct SupplierProduct[]
+}
+
+model SupplierProduct {
+  id         BigInt   @id @default(autoincrement())
+  supplier   Supplier @relation(fields: [supplierId], references: [accountId])
+  supplierId BigInt
+
+  name    String
+  code    String
+  barcode String
+
+  product   Product? @relation(fields: [productId], references: [id])
+  productId BigInt?
+
+  @@unique([supplierId, code])
+  @@unique([supplierId, barcode])
 }
