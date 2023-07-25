@@ -3,8 +3,6 @@ import { defineComponent } from "master-ts/library/component"
 import type { SignalReadable } from "master-ts/library/signal"
 import { css, html } from "master-ts/library/template"
 
-const ComponentConstructor = defineComponent("x-dialog")
-
 export type DialogBase = {
 	id: unknown
 	title: string
@@ -55,6 +53,8 @@ export function createDialogManager(): DialogManager {
 
 	return self
 }
+
+const ComponentConstructor = defineComponent("x-dialog")
 
 function DialogComponent(dialogs: SignalReadable<Dialog[]>) {
 	const component = new ComponentConstructor()

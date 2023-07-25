@@ -1,14 +1,13 @@
 import { prisma } from "@/prisma/client"
-import { $bytes } from "@/utils/$types"
 import { fromBytes, toBytes } from "@/utils/bytes"
 import type { $infer } from "type-spirit/library"
-import { $literal, $tuple, $union, $unknown } from "type-spirit/library"
+import { $instanceOf, $literal, $tuple, $union, $unknown } from "type-spirit/library"
 import { methods } from "./methods"
 
 export const $transactionRequestData = $tuple(
 	$union(...(Object.keys(methods) as (keyof typeof methods)[]).map((key) => $literal(key))),
 	$unknown(),
-	$bytes()
+	$instanceOf(Uint8Array)
 )
 export type TransactionRequestData = $infer<typeof $transactionRequestData>
 
