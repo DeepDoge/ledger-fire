@@ -11,10 +11,8 @@ datasource db {
 }
 
 model Transaction {
-  id        BigInt @id @default(autoincrement())
+  id        BigInt @id
   from      Bytes
-  method    String
-  data      Bytes
   timestamp BigInt
 
   SupplierBill SupplierBill[]

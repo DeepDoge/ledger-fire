@@ -103,47 +103,47 @@ export namespace methods {
 		}
 	)
 
-	export type SupplierBillCreate = $infer<typeof $supplierBillCreate>
-	export const $supplierBillCreate = $object({
-		id: $string(),
-		supplierId: $bigint(),
-		items: $array(
-			$object({
-				name: $string(),
-				code: $string(),
-				quantity: $bigint(),
-				price: $bigint(),
-			})
-		),
-		timestamp: $bigint(),
-	})
-
-	export const enterSupplierBill = method($supplierBillCreate, async (tx, prisma, { id, supplierId, items, timestamp }) => {
-		await prisma.supplierBill.create({
-			data: {
-				id,
-				txId: tx.id,
-				timestamp,
-				supplierId,
-				SupplierBillItem: {
-					create: items.map(({ name, code, price, quantity }) => ({
-						price,
-						quantity,
-						supplierProduct: {
-							connectOrCreate: {
-								where: { supplierId_code: { supplierId, code } },
-								create: {
-									supplierId,
-									code,
-									name,
+	export const enterSupplierBill = method(
+		$object({
+			id: $string(),
+			supplierId: $bigint(),
+			items: $array(
+				$object({
+					name: $string(),
+					code: $string(),
+					quantity: $bigint(),
+					price: $bigint(),
+				})
+			),
+			timestamp: $bigint(),
+		}),
+		async (tx, prisma, { id, supplierId, items, timestamp }) => {
+			await prisma.supplierBill.create({
+				data: {
+					id,
+					txId: tx.id,
+					timestamp,
+					supplierId,
+					SupplierBillItem: {
+						create: items.map(({ name, code, price, quantity }) => ({
+							price,
+							quantity,
+							supplierProduct: {
+								connectOrCreate: {
+									where: { supplierId_code: { supplierId, code } },
+									create: {
+										supplierId,
+										code,
+										name,
+									},
 								},
 							},
-						},
-					})),
+						})),
+					},
 				},
-			},
-		})
-	})
+			})
+		}
+	)
 
 	export const matchSupplierProduct = method(
 		$object({

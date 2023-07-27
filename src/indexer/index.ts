@@ -1,8 +1,11 @@
 import { prisma } from "@/prisma/client"
 import { fromBytes } from "@/utils/bytes"
 import colors from "colors"
+import fs from "fs/promises"
+import path from "path"
 import type { Method } from "./methods"
 import { methods } from "./methods"
+import { $transactionRequestData } from "./transactionServer"
 
 let nextTxId = (await prisma.indexing.findUnique({ where: { id: 0 } }))?.nextTxId ?? (await prisma.indexing.create({})).nextTxId
 
@@ -28,25 +31,35 @@ export async function runIndexer() {
 
 async function indexNextTx() {
 	const txId = nextTxId
-	const tx = await prisma.transaction.findUnique({ where: { id: txId } })
-	if (!tx) return false
+	const txRequest = await fs.readFile(path.join("./transactions", ...txId.toString(36), "tx")).catch(() => null)
+	if (!txRequest) return false
 
 	try {
-		console.log(logPrefix, `Indexing transaction`)
-		console.log(logPrefixEmpty, colors.gray("➜ "), colors.dim(`txId = ${txId}`))
-		console.log(logPrefixEmpty, colors.gray("➜ "), colors.dim(`method = ${tx.method}`))
-		console.log(logPrefixEmpty, colors.gray("➜ "), colors.dim(`from = ${tx.from}`))
+		await prisma.$transaction(async (prisma) => {
+			const txRequestData = fromBytes(txRequest)
+			const [methodName, params, from] = $transactionRequestData.parseOrThrow(txRequestData)
 
-		const method = (methods as Record<PropertyKey, Method>)[tx.method]
-		if (!method) throw new Error(`Unknown method ${tx.method}`)
-		const params = method.$params.parseOrThrow(fromBytes(tx.data))
+			const tx = await prisma.transaction.create({
+				data: {
+					id: txId,
+					from: Buffer.from(from),
+					timestamp: Date.now(),
+				},
+			})
 
-		await method.call(tx, prisma, params)
+			console.log(logPrefix, `Indexing transaction`)
+			console.log(logPrefixEmpty, colors.gray("➜ "), colors.dim(`txId = ${txId}`))
+			console.log(logPrefixEmpty, colors.gray("➜ "), colors.dim(`method = ${methodName}`))
+			console.log(logPrefixEmpty, colors.gray("➜ "), colors.dim(`from = ${from}`))
+
+			const method = methods[methodName] as Method | undefined
+			if (!method) throw new Error(`Unknown method ${methodName}`)
+
+			await method.call(tx, prisma, params)
+		})
 	} catch (error) {
 		console.log(logPrefix, colors.red(`Error while indexing transaction`))
 		console.log(logPrefixEmpty, colors.gray("➜ "), colors.dim(`txId = ${txId}`))
-		console.log(logPrefixEmpty, colors.gray("➜ "), colors.dim(`method = ${tx.method}`))
-		console.log(logPrefixEmpty, colors.gray("➜ "), colors.dim(`from = ${tx.from}`))
 		console.log(logPrefixEmpty, colors.red(`${error}`))
 	}
 
