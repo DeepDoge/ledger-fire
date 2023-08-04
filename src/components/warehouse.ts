@@ -14,7 +14,6 @@ export function WarehouseComponent(warehouse: Warehouse) {
 	const destroying = $.await(destroyPromise)
 		.until(() => true)
 		.then(() => false)
-
 	async function destroy() {
 		await destroyPromise.ref
 		const confirm = await dialogManager.create({
