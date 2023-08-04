@@ -1,16 +1,20 @@
 import { fromBytes, toBytes } from "@/utils/bytes"
 import fs from "fs/promises"
 import path from "path"
-import type { $infer } from "type-spirit/library"
-import { $instanceOf, $literal, $tuple, $union, $unknown } from "type-spirit/library"
+import { z } from "zod"
 import { methods } from "./methods"
 
-export const $transactionRequestData = $tuple(
-	$union(...(Object.keys(methods) as (keyof typeof methods)[]).map((key) => $literal(key))),
-	$unknown(),
-	$instanceOf(Uint8Array)
-)
-export type TransactionRequestData = $infer<typeof $transactionRequestData>
+type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) extends (k: infer I) => void ? I : never
+type LastOf<T> = UnionToIntersection<T extends any ? () => T : never> extends () => infer R ? R : never
+type Push<T extends any[], V> = [...T, V]
+type TuplifyUnion<T, L = LastOf<T>, N = [T] extends [never] ? true : false> = true extends N ? [] : Push<TuplifyUnion<Exclude<T, L>>, L>
+
+export const transactionRequestDataZod = z.tuple([
+	z.enum(Object.keys(methods) as TuplifyUnion<keyof typeof methods>),
+	z.unknown(),
+	z.instanceof(Uint8Array),
+])
+export type TransactionRequestData = z.infer<typeof transactionRequestDataZod>
 
 // We get the id from ./transactions/id file, if the path doesn't exist, id = 0n
 // Every time we handle a request, we increment the id and write it to the file
@@ -23,7 +27,7 @@ try {
 
 export async function handleTransactionServerRequest(request: Uint8Array): Promise<Uint8Array> {
 	const data = fromBytes(request)
-	$transactionRequestData.parseOrThrow(data)
+	transactionRequestDataZod.parse(data)
 
 	// convert id to base64 and save the request bytes inside file, the path start from transactions/ folder and every letter is a folder except last letter if a file
 	const pathToTx = path.join("./transactions", ...id.toString(36))

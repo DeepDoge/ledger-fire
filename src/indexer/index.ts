@@ -5,7 +5,7 @@ import fs from "fs/promises"
 import path from "path"
 import type { Method } from "./methods"
 import { methods } from "./methods"
-import { $transactionRequestData } from "./transactionServer"
+import { transactionRequestDataZod } from "./transactionServer"
 
 let nextTxId = (await prisma.indexing.findUnique({ where: { id: 0 } }))?.nextTxId ?? (await prisma.indexing.create({})).nextTxId
 
@@ -37,7 +37,7 @@ async function indexNextTx() {
 	try {
 		await prisma.$transaction(async (prisma) => {
 			const txRequestData = fromBytes(txRequest)
-			const [methodName, params, from] = $transactionRequestData.parseOrThrow(txRequestData)
+			const [methodName, params, from] = transactionRequestDataZod.parse(txRequestData)
 
 			const tx = await prisma.transaction.create({
 				data: {

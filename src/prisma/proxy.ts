@@ -1,13 +1,18 @@
 import type { PrismaClient } from "@prisma/client"
-import type { $infer } from "type-spirit/library"
-import { $array, $literal, $object, $string, $union, $unknown } from "type-spirit/library"
+import { z } from "zod"
 
-export const $pathToken = $union(
-	$object({ type: $literal("property"), prop: $string() }),
-	$object({ type: $literal("call"), args: $array($unknown()) })
-)
+export const $pathToken = z.union([
+	z.object({
+		type: z.literal("property"),
+		prop: z.string(),
+	}),
+	z.object({
+		type: z.literal("call"),
+		args: z.array(z.unknown()),
+	}),
+])
 
-export type PathToken = $infer<typeof $pathToken>
+export type PathToken = z.infer<typeof $pathToken>
 
 const allowedMethods = ["findUnique", "findUniqueOrThrow", "findFirst", "findFirstOrThrow", "findMany"] as const satisfies readonly Exclude<
 	{

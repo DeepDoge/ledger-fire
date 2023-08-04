@@ -1,28 +1,27 @@
 import { randomBigInt } from "@/utils/random"
 import type { Prisma, Transaction } from "@prisma/client"
-import type { Type, TypeObject } from "type-spirit/library"
-import { $array, $bigint, $null, $object, $string, $union, type $infer } from "type-spirit/library"
+import { z } from "zod"
 
 export type Method = {
 	call: (tx: Transaction, prisma: Prisma.TransactionClient, params: any) => unknown
-	$params: TypeObject<Record<PropertyKey, Type<unknown>>>
+	zod: z.ZodObject<Record<PropertyKey, z.ZodType>>
 }
 
-function method<TParams extends TypeObject<Record<PropertyKey, Type<any>>>, TReturns>(
-	$params: TParams,
-	fn: (tx: Transaction, prisma: Prisma.TransactionClient, params: $infer<TParams>) => TReturns
+function method<TParams extends Method["zod"], TReturns>(
+	zod: TParams,
+	fn: (tx: Transaction, prisma: Prisma.TransactionClient, params: z.infer<TParams>) => TReturns
 ) {
 	return {
 		call: fn,
-		$params,
+		zod,
 	} satisfies Method
 }
 
 export namespace methods {
 	export const createWarehouse = method(
-		$object({
-			name: $string(),
-			address: $string(),
+		z.object({
+			name: z.string(),
+			address: z.string(),
 		}),
 		async (_, prisma, { name, address }) => {
 			return await prisma.warehouse.create({
@@ -35,8 +34,8 @@ export namespace methods {
 	)
 
 	export const createBrand = method(
-		$object({
-			name: $string(),
+		z.object({
+			name: z.string(),
 		}),
 		async (_, prisma, { name }) => {
 			return await prisma.brand.create({
@@ -48,9 +47,9 @@ export namespace methods {
 	)
 
 	export const createProduct = method(
-		$object({
-			name: $string(),
-			brandId: $bigint(),
+		z.object({
+			name: z.string(),
+			brandId: z.bigint(),
 		}),
 		async (_, prisma, { name, brandId }) => {
 			return await prisma.product.create({
@@ -63,9 +62,9 @@ export namespace methods {
 	)
 
 	export const createProduct2 = method(
-		$object({
-			name: $string(),
-			brandName: $string(),
+		z.object({
+			name: z.string(),
+			brandName: z.string(),
 		}),
 		async (_, prisma, { name, brandName }) => {
 			return await prisma.product.create({
@@ -83,12 +82,12 @@ export namespace methods {
 	)
 
 	export const createAccount = method(
-		$object({
-			fullName: $union($string(), $object({ name: $string(), surname: $string() })),
-			tckn: $union($string(), $null()),
-			phone: $union($string(), $null()),
-			email: $union($string(), $null()),
-			address: $union($string(), $null()),
+		z.object({
+			fullName: z.union([z.string(), z.object({ name: z.string(), surname: z.string() })]),
+			tckn: z.string().optional(),
+			phone: z.string().optional(),
+			email: z.string().optional(),
+			address: z.string().optional(),
 		}),
 		async (_, prisma, { fullName, tckn, phone, email, address }) => {
 			return await prisma.account.create({
@@ -104,18 +103,18 @@ export namespace methods {
 	)
 
 	export const enterSupplierBill = method(
-		$object({
-			id: $string(),
-			supplierId: $bigint(),
-			items: $array(
-				$object({
-					name: $string(),
-					code: $string(),
-					quantity: $bigint(),
-					price: $bigint(),
+		z.object({
+			id: z.string(),
+			supplierId: z.bigint(),
+			items: z.array(
+				z.object({
+					name: z.string(),
+					code: z.string(),
+					quantity: z.bigint(),
+					price: z.bigint(),
 				})
 			),
-			timestamp: $bigint(),
+			timestamp: z.bigint(),
 		}),
 		async (tx, prisma, { id, supplierId, items, timestamp }) => {
 			await prisma.supplierBill.create({
@@ -146,10 +145,10 @@ export namespace methods {
 	)
 
 	export const matchSupplierProduct = method(
-		$object({
-			supplierId: $bigint(),
-			supplierProductCode: $string(),
-			localProductId: $bigint(),
+		z.object({
+			supplierId: z.bigint(),
+			supplierProductCode: z.string(),
+			localProductId: z.bigint(),
 		}),
 		async (_, prisma, { supplierId, supplierProductCode, localProductId }) => {
 			await prisma.supplierProduct.update({
@@ -160,9 +159,9 @@ export namespace methods {
 	)
 
 	export const verifySupplierBill = method(
-		$object({
-			id: $string(),
-			warehouseId: $bigint(),
+		z.object({
+			id: z.string(),
+			warehouseId: z.bigint(),
 		}),
 		async (_, prisma, { id, warehouseId }) => {
 			const bill = await prisma.supplierBill.update({

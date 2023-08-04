@@ -23,9 +23,9 @@
 		"prettier-plugin-organize-imports": "^3.2.2",
 		"prisma": "^5.0.0",
 		"tsx": "^3.12.7",
-		"type-spirit": "github:DeepDoge/type-spirit#0.0.3",
 		"typescript": "^5.1.6",
 		"vite": "^4.4.4",
-		"vite-plugin-singlefile": "^0.13.5"
+		"vite-plugin-singlefile": "^0.13.5",
+		"zod": "^3.21.4"
 	}
 }
