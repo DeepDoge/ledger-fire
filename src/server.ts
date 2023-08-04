@@ -1,9 +1,9 @@
 import colors from "colors"
 import express from "express"
 import { API_PORT } from "./config"
-import { runIndexer } from "./indexer"
-import { handleTransactionServerRequest } from "./indexer/transactionServer"
 import { handlePrismaProxyServerRequest } from "./prisma/proxyServer"
+import { runIndexer } from "./transactions/indexer"
+import { handleTransactionServerRequest } from "./transactions/transactionServer"
 
 const api = express()
 

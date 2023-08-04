@@ -32,6 +32,19 @@ export namespace methods {
 		}
 	)
 
+	export const deleteWarehouse = method(
+		z.object({
+			id: z.number(),
+		}),
+		async (_, prisma, { id }) => {
+			return await prisma.warehouse.delete({
+				where: {
+					id,
+				},
+			})
+		}
+	)
+
 	export const createBrand = method(
 		z.object({
 			name: z.string(),

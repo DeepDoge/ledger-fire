@@ -5,31 +5,31 @@ import type { TemplateValue } from "master-ts/library/template"
 import { css, html } from "master-ts/library/template"
 import { assert } from "master-ts/library/utils/assert"
 
-export type DialogBase<TValue extends any> = {
+export type DialogBase = {
 	title: string
 	message: string | ((close: () => void) => TemplateValue)
-	resolve(value: TValue): void
+	resolve(value: boolean): void
 }
 
-export type DialogAlert = DialogBase<void> & {
+export type DialogAlert = DialogBase & {
 	type: "alert"
 	confirm?: string
 }
 
-export type DialogConfirm = DialogBase<boolean> & {
+export type DialogConfirm = DialogBase & {
 	type: "confirm"
 	confirm?: string
 	cancel?: string
 }
 
-export type DialogCustom = DialogBase<void> & {
+export type DialogCustom = DialogBase & {
 	type: "custom"
 }
 
 export type Dialog = DialogAlert | DialogConfirm | DialogCustom
 
 export type DialogManager = {
-	create<T extends Dialog, U extends Omit<T, "resolve">>(init: U): Promise<ReturnType<T["resolve"]>>
+	create<T extends Dialog>(init: Omit<T, "resolve">): Promise<Parameters<T["resolve"]>[0]>
 	component: ReturnType<typeof DialogComponent>
 }
 
@@ -41,11 +41,11 @@ export function createDialogManager(): DialogManager {
 			return new Promise((resolve) => {
 				const dialog = {
 					...init,
-					resolver(...args: Parameters<typeof resolve>) {
+					resolve(...args: Parameters<typeof resolve>) {
 						dialogs.ref = dialogs.ref.filter((item) => item !== dialog)
 						resolve(...args)
 					},
-				} as unknown as Dialog
+				} as Dialog
 
 				dialogs.ref.push(dialog)
 				dialogs.signal()
@@ -85,7 +85,7 @@ function DialogComponent(dialogs: SignalReadable<Dialog[]>) {
 									assert<typeof type>(dialog.type)
 									return html`
 										<div class="actions">
-											<button on:click=${() => dialog.resolve()}>${() => dialog.confirm ?? "OK"}</button>
+											<button on:click=${() => dialog.resolve(true)}>${() => dialog.confirm ?? "OK"}</button>
 										</div>
 									`
 								})

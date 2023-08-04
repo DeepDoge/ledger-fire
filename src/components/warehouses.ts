@@ -5,6 +5,7 @@ import { defineComponent } from "master-ts/library/component"
 import { onMount$ } from "master-ts/library/lifecycle"
 import { css, html } from "master-ts/library/template"
 import { WarehouseComponent } from "./warehouse"
+import { WarehouseFormComponent } from "./warehouseForm"
 
 const ComponentConstructor = defineComponent("x-warehouses-page")
 
@@ -23,6 +24,8 @@ export function WarehousesComponent() {
 
 	component.$html = html`
 		<h2>Warehouses</h2>
+
+		<x ${WarehouseFormComponent()} class="form"></x>
 
 		<div class="warehouses">
 			${$.each(warehouses)

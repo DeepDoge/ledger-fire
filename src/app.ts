@@ -4,7 +4,6 @@ import { $ } from "master-ts/library/$"
 import { defineComponent } from "master-ts/library/component"
 import { css, html } from "master-ts/library/template"
 import { createDialogManager } from "./components/dialog"
-import { transaction } from "./indexer/transactionClient"
 import { NavigationComponent } from "./navigation"
 import { route } from "./router"
 
@@ -13,11 +12,6 @@ export const dialogManager = createDialogManager()
 const ComponentConstructor = defineComponent("x-app")
 function AppComponent() {
 	const component = new ComponentConstructor()
-
-	transaction.createWarehouse({
-		name: "Test",
-		address: "Test",
-	})
 
 	component.$html = html`
 		<header style:grid-area=${"header"}>
