@@ -1,31 +1,35 @@
 import { $ } from "master-ts/library/$"
 import { defineComponent } from "master-ts/library/component"
 import type { SignalReadable } from "master-ts/library/signal"
+import type { TemplateValue } from "master-ts/library/template"
 import { css, html } from "master-ts/library/template"
+import { assert } from "master-ts/library/utils/assert"
 
-export type DialogBase = {
-	id: unknown
+export type DialogBase<TValue extends any> = {
 	title: string
-	message: string
+	message: string | ((close: () => void) => TemplateValue)
+	resolve(value: TValue): void
 }
 
-export type DialogAlert = DialogBase & {
+export type DialogAlert = DialogBase<void> & {
 	type: "alert"
 	confirm?: string
-	resolver: () => void
 }
 
-export type DialogConfirm = DialogBase & {
+export type DialogConfirm = DialogBase<boolean> & {
 	type: "confirm"
 	confirm?: string
 	cancel?: string
-	resolver: (value: boolean) => void
 }
 
-export type Dialog = DialogAlert | DialogConfirm
+export type DialogCustom = DialogBase<void> & {
+	type: "custom"
+}
+
+export type Dialog = DialogAlert | DialogConfirm | DialogCustom
 
 export type DialogManager = {
-	create<T extends Dialog>(init: Omit<T, "resolver" | "id">): Promise<ReturnType<T["resolver"]>>
+	create<T extends Dialog, U extends Omit<T, "resolve">>(init: U): Promise<ReturnType<T["resolve"]>>
 	component: ReturnType<typeof DialogComponent>
 }
 
@@ -36,10 +40,9 @@ export function createDialogManager(): DialogManager {
 		create(init) {
 			return new Promise((resolve) => {
 				const dialog = {
-					id: Symbol(),
 					...init,
 					resolver(...args: Parameters<typeof resolve>) {
-						dialogs.ref = dialogs.ref.filter((dialog) => dialog.id !== dialog.id)
+						dialogs.ref = dialogs.ref.filter((item) => item !== dialog)
 						resolve(...args)
 					},
 				} as unknown as Dialog
@@ -70,28 +73,38 @@ function DialogComponent(dialogs: SignalReadable<Dialog[]>) {
 						<div class="backdrop"></div>
 						<div class="dialog">
 							<div class="title">${() => lastDialog.ref.title}</div>
-							<div class="message">${() => lastDialog.ref.message}</div>
-							${() => {
-								switch (lastDialog.ref.type) {
-									case "alert": {
-										const dialog = lastDialog.ref
-										return html`
-											<div class="actions">
-												<button on:click=${() => dialog.resolver()}>${() => dialog.confirm ?? "OK"}</button>
-											</div>
-										`
-									}
-									case "confirm": {
-										const dialog = lastDialog.ref
-										return html`
-											<div class="actions">
-												<button on:click=${() => dialog.resolver(true)}>${() => dialog.confirm ?? "OK"}</button>
-												<button on:click=${() => dialog.resolver(false)}>${() => dialog.cancel ?? "Cancel"}</button>
-											</div>
-										`
-									}
-								}
-							}}
+							<div class="message">
+								${$.match($.derive(() => lastDialog.ref.message))
+									.caseTypeOf("string", (message) => message)
+									.caseTypeOf("function", (message) => message(() => message(false)))
+									.default()}
+							</div>
+							${$.match($.derive(() => lastDialog.ref.type))
+								.case("alert", (type) => {
+									const dialog = lastDialog.ref
+									assert<typeof type>(dialog.type)
+									return html`
+										<div class="actions">
+											<button on:click=${() => dialog.resolve()}>${() => dialog.confirm ?? "OK"}</button>
+										</div>
+									`
+								})
+								.case("confirm", (type) => {
+									const dialog = lastDialog.ref
+									assert<typeof type>(dialog.type)
+									return html`
+										<div class="actions">
+											<button on:click=${() => dialog.resolve(true)}>${() => dialog.confirm ?? "OK"}</button>
+											<button on:click=${() => dialog.resolve(false)}>${() => dialog.cancel ?? "Cancel"}</button>
+										</div>
+									`
+								})
+								.case("custom", (type) => {
+									const dialog = lastDialog.ref
+									assert<typeof type>(dialog.type)
+									return html` <div class="actions"></div> `
+								})
+								.default()}
 						</div>
 					</div>
 				`

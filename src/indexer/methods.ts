@@ -1,4 +1,3 @@
-import { randomBigInt } from "@/utils/random"
 import type { Prisma, Transaction } from "@prisma/client"
 import { z } from "zod"
 
@@ -49,7 +48,7 @@ export namespace methods {
 	export const createProduct = method(
 		z.object({
 			name: z.string(),
-			brandId: z.bigint(),
+			brandId: z.number(),
 		}),
 		async (_, prisma, { name, brandId }) => {
 			return await prisma.product.create({
@@ -72,7 +71,6 @@ export namespace methods {
 					name,
 					brand: {
 						create: {
-							id: randomBigInt(),
 							name: brandName,
 						},
 					},
@@ -105,7 +103,7 @@ export namespace methods {
 	export const enterSupplierBill = method(
 		z.object({
 			id: z.string(),
-			supplierId: z.bigint(),
+			supplierId: z.number(),
 			items: z.array(
 				z.object({
 					name: z.string(),
@@ -146,9 +144,9 @@ export namespace methods {
 
 	export const matchSupplierProduct = method(
 		z.object({
-			supplierId: z.bigint(),
+			supplierId: z.number(),
 			supplierProductCode: z.string(),
-			localProductId: z.bigint(),
+			localProductId: z.number(),
 		}),
 		async (_, prisma, { supplierId, supplierProductCode, localProductId }) => {
 			await prisma.supplierProduct.update({
@@ -161,7 +159,7 @@ export namespace methods {
 	export const verifySupplierBill = method(
 		z.object({
 			id: z.string(),
-			warehouseId: z.bigint(),
+			warehouseId: z.number(),
 		}),
 		async (_, prisma, { id, warehouseId }) => {
 			const bill = await prisma.supplierBill.update({

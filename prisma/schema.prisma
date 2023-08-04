@@ -2,130 +2,130 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client-js"
+    provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = "file:./dev.db"
+    provider = "sqlite"
+    url      = "file:./dev.db"
 }
 
 model Transaction {
-  id        BigInt @id
-  from      Bytes
-  timestamp BigInt
+    id        BigInt @id
+    from      Bytes
+    timestamp BigInt
 
-  SupplierBill SupplierBill[]
+    SupplierBill SupplierBill[]
 
-  @@index([from])
+    @@index([from])
 }
 
 model Indexing {
-  id       BigInt @id @default(0)
-  nextTxId BigInt @default(0)
+    id       BigInt @id @default(0)
+    nextTxId BigInt @default(0)
 }
 
 model Warehouse {
-  id BigInt @id @default(autoincrement())
+    id Int @id @default(autoincrement())
 
-  name         String
-  address      String
-  stocks       Stock[]
-  SupplierBill SupplierBill[]
+    name         String
+    address      String
+    stocks       Stock[]
+    SupplierBill SupplierBill[]
 }
 
 model Brand {
-  id BigInt @id @default(autoincrement())
+    id Int @id @default(autoincrement())
 
-  name     String
-  products Product[]
+    name     String
+    products Product[]
 }
 
 model Product {
-  id BigInt @id @default(autoincrement())
+    id Int @id @default(autoincrement())
 
-  name    String
-  barcode String?
-  code    String  @unique @default(cuid())
-  brand   Brand   @relation(fields: [brandId], references: [id])
+    name    String
+    barcode String?
+    code    String  @unique @default(cuid())
+    brand   Brand   @relation(fields: [brandId], references: [id])
 
-  brandId BigInt
+    brandId Int
 
-  stocks          Stock[]
-  SupplierProduct SupplierProduct[]
+    stocks          Stock[]
+    SupplierProduct SupplierProduct[]
 }
 
 model Stock {
-  warehouse Warehouse @relation(fields: [warehouseId], references: [id])
-  product   Product   @relation(fields: [productId], references: [id])
-  quantity  BigInt
+    warehouse Warehouse @relation(fields: [warehouseId], references: [id])
+    product   Product   @relation(fields: [productId], references: [id])
+    quantity  BigInt
 
-  warehouseId BigInt
-  productId   BigInt
+    warehouseId Int
+    productId   Int
 
-  @@id([warehouseId, productId])
+    @@id([warehouseId, productId])
 }
 
 model Account {
-  id BigInt @id @default(autoincrement())
+    id Int @id @default(autoincrement())
 
-  tckn     String? @unique
-  fullName String
-  nickname String?
-  address  String?
-  email    String?
-  phone    String?
+    tckn     String? @unique
+    fullName String
+    nickname String?
+    address  String?
+    email    String?
+    phone    String?
 
-  Supplier Supplier?
+    Supplier Supplier?
 }
 
 model Supplier {
-  account   Account @relation(fields: [accountId], references: [id])
-  accountId BigInt  @id
+    account   Account @relation(fields: [accountId], references: [id])
+    accountId Int     @id
 
-  SupplierBill    SupplierBill[]
-  SupplierProduct SupplierProduct[]
+    SupplierBill    SupplierBill[]
+    SupplierProduct SupplierProduct[]
 }
 
 model SupplierBill {
-  id               String             @id
-  supplier         Supplier           @relation(fields: [supplierId], references: [accountId])
-  supplierId       BigInt
-  timestamp        BigInt
-  SupplierBillItem SupplierBillItem[]
-  verified         Boolean            @default(false)
+    id               String             @id
+    supplier         Supplier           @relation(fields: [supplierId], references: [accountId])
+    supplierId       Int
+    timestamp        BigInt
+    SupplierBillItem SupplierBillItem[]
+    verified         Boolean            @default(false)
 
-  tx          Transaction @relation(fields: [txId], references: [id])
-  txId        BigInt
-  Warehouse   Warehouse?  @relation(fields: [warehouseId], references: [id])
-  warehouseId BigInt?
+    tx          Transaction @relation(fields: [txId], references: [id])
+    txId        BigInt
+    Warehouse   Warehouse?  @relation(fields: [warehouseId], references: [id])
+    warehouseId Int?
 }
 
 model SupplierBillItem {
-  id BigInt @id @default(autoincrement())
+    id BigInt @id @default(autoincrement())
 
-  supplierBill   SupplierBill @relation(fields: [supplierBillId], references: [id])
-  supplierBillId String
+    supplierBill   SupplierBill @relation(fields: [supplierBillId], references: [id])
+    supplierBillId String
 
-  supplierProduct   SupplierProduct @relation(fields: [supplierProductId], references: [id])
-  supplierProductId BigInt
+    supplierProduct   SupplierProduct @relation(fields: [supplierProductId], references: [id])
+    supplierProductId Int
 
-  quantity BigInt
-  price    BigInt
+    quantity BigInt
+    price    BigInt
 }
 
 model SupplierProduct {
-  id BigInt @id @default(autoincrement())
+    id Int @id @default(autoincrement())
 
-  supplier   Supplier @relation(fields: [supplierId], references: [accountId])
-  supplierId BigInt
-  code       String
-  name       String
+    supplier   Supplier @relation(fields: [supplierId], references: [accountId])
+    supplierId Int
+    code       String
+    name       String
 
-  matchedProduct   Product? @relation(fields: [matchedProductId], references: [id])
-  matchedProductId BigInt?
+    matchedProduct   Product? @relation(fields: [matchedProductId], references: [id])
+    matchedProductId Int?
 
-  SupplierBillItem SupplierBillItem[]
+    SupplierBillItem SupplierBillItem[]
 
-  @@unique([supplierId, code])
+    @@unique([supplierId, code])
 }
