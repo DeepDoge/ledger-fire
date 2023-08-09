@@ -1,5 +1,5 @@
 import { API_URL } from "@/config"
-import { fromBytes, toBytes } from "@/utils/bytes"
+import { Bytes } from "@/utils/bytes"
 import type { PrismaClient } from "@prisma/client"
 import { accessCheck, type AllowedMethod, type PathToken } from "./proxy"
 
@@ -29,7 +29,7 @@ function createProxy(path: PathToken[] = []): unknown {
 async function callRemote(path: PathToken[]) {
 	const response = await fetch(`${API_URL}/prisma-proxy`, {
 		method: "POST",
-		body: toBytes(path),
+		body: Bytes.encode(path),
 		headers: {
 			"Content-Type": "application/octet-stream",
 		},
@@ -37,7 +37,7 @@ async function callRemote(path: PathToken[]) {
 
 	if (!response.ok) throw new Error("Server error")
 	const bytes = new Uint8Array(await response.arrayBuffer())
-	return fromBytes(bytes)
+	return Bytes.decode(bytes)
 }
 
 export const prismaProxy = PrismaClientReadonlyProxy.createClient()

@@ -1,5 +1,5 @@
 import { API_URL } from "@/config"
-import { toBytes } from "@/utils/bytes"
+import { Bytes } from "@/utils/bytes"
 import type { z } from "zod"
 import type { methods } from "./methods"
 import type { TransactionRequestData } from "./transactionServer"
@@ -10,7 +10,7 @@ export const transaction = new Proxy(() => {}, {
 			const requestData: TransactionRequestData = [methodKey, params, new Uint8Array(0)]
 			await fetch(`${API_URL}/tx`, {
 				method: "POST",
-				body: toBytes(requestData),
+				body: Bytes.encode(requestData),
 				headers: {
 					"Content-Type": "application/octet-stream",
 				},

@@ -3,7 +3,7 @@ import { z } from "zod"
 
 export type Method = {
 	call: (tx: Transaction, prisma: Prisma.TransactionClient, params: any) => unknown
-	zod: z.ZodObject<Record<PropertyKey, z.ZodType>>
+	zod: z.ZodType<Record<PropertyKey, any>>
 }
 
 function method<TParams extends Method["zod"], TReturns>(
@@ -92,22 +92,45 @@ export namespace methods {
 		}
 	)
 
-	export const createAccount = method(
+	export const createCustomerAccount = method(
 		z.object({
-			fullName: z.union([z.string(), z.object({ name: z.string(), surname: z.string() })]),
+			name: z.string(),
+			surname: z.string(),
 			tckn: z.string().optional(),
 			phone: z.string().optional(),
-			email: z.string().optional(),
+			email: z.string().email().optional(),
 			address: z.string().optional(),
 		}),
-		async (_, prisma, { fullName, tckn, phone, email, address }) => {
+		async (_, prisma, { name, surname, tckn, phone, email, address }) => {
 			return await prisma.account.create({
 				data: {
-					fullName: typeof fullName === "string" ? fullName : `${fullName.name} ${fullName.surname}`,
+					fullName: `${name} ${surname}`,
 					tckn,
 					phone,
 					email,
 					address,
+				},
+			})
+		}
+	)
+
+	export const createSupplierAccount = method(
+		z.object({
+			name: z.string(),
+			taxNumber: z.string(),
+			phone: z.string(),
+			email: z.string().email(),
+			address: z.string(),
+		}),
+		async (_, prisma, params) => {
+			return await prisma.account.create({
+				data: {
+					fullName: params.name,
+					tckn: params.taxNumber,
+					address: params.address,
+					email: params.email,
+					phone: params.phone,
+					Supplier: { create: {} },
 				},
 			})
 		}

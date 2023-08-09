@@ -15,10 +15,10 @@ export function ProductSearchComponent() {
 	const component = new ComponentConstructor()
 
 	const searchText = $.writable("")
-	const searchTextDeferred = $.deferred(searchText)
+	const searchTextDeferred = $.defer(searchText)
 
 	const results = $.await($.derive(async () => (searchTextDeferred.ref ? await searchProduct(searchTextDeferred.ref) : [])))
-		.placeholder(() => null)
+		.until(() => null)
 		.then()
 
 	const selectedIndex = $.writable(0)

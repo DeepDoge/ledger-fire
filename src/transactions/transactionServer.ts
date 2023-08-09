@@ -1,4 +1,4 @@
-import { fromBytes, toBytes } from "@/utils/bytes"
+import { Bytes } from "@/utils/bytes"
 import fs from "fs/promises"
 import path from "path"
 import { z } from "zod"
@@ -26,7 +26,7 @@ try {
 } catch {}
 
 export async function handleTransactionServerRequest(request: Uint8Array): Promise<Uint8Array> {
-	const data = fromBytes(request)
+	const data = Bytes.decode(request)
 	transactionRequestDataZod.parse(data)
 
 	// convert id to base64 and save the request bytes inside file, the path start from transactions/ folder and every letter is a folder except last letter if a file
@@ -38,5 +38,5 @@ export async function handleTransactionServerRequest(request: Uint8Array): Promi
 	id++
 	await fs.writeFile("./transactions/id", id.toString())
 
-	return toBytes(id)
+	return Bytes.encode(id)
 }

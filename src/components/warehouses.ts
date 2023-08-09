@@ -46,6 +46,6 @@ ComponentConstructor.$css = css`
 
 	.warehouses {
 		display: grid;
-		gap: calc(var(--span) * 0.25);
+		gap: calc(var(--span) * 0.5);
 	}
 `

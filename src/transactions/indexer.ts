@@ -1,5 +1,5 @@
 import { prisma } from "@/prisma/client"
-import { fromBytes } from "@/utils/bytes"
+import { Bytes } from "@/utils/bytes"
 import colors from "colors"
 import fs from "fs/promises"
 import path from "path"
@@ -9,24 +9,24 @@ import { transactionRequestDataZod } from "./transactionServer"
 
 let nextTxId = (await prisma.indexing.findUnique({ where: { id: 0 } }))?.nextTxId ?? (await prisma.indexing.create({})).nextTxId
 
-const logPrefixText = `[Indexer]` as const
-const logPrefix = colors.green(logPrefixText)
-const logPrefixEmpty = " ".repeat(logPrefixText.length)
+const LOG_PREFIX_TEXT = `[Indexer]` as const
+const LOG_PREFIX = colors.green(LOG_PREFIX_TEXT)
+const LOG_PREFIX_EMPTY = " ".repeat(LOG_PREFIX_TEXT.length)
 
 export async function runIndexer() {
-	console.log(logPrefix, "Indexer started")
+	console.log(LOG_PREFIX, "Indexer started")
 	let indexingCache = true
 	while (true) {
-		await new Promise((resolve) => setTimeout(resolve, 100))
 		const indexing = await indexNextTx()
 		if (indexingCache === indexing) continue
 		indexingCache = indexing
 		if (!indexing) {
-			console.log(logPrefix, `Waiting for next transaction...`)
-			console.log(logPrefixEmpty, colors.gray("➜ "), colors.dim(`txId = ${nextTxId}`))
+			console.log(LOG_PREFIX, `Waiting for next transaction...`)
+			console.log(LOG_PREFIX_EMPTY, colors.gray("➜ "), colors.dim(`txId = ${nextTxId}`))
+			await new Promise((resolve) => setTimeout(resolve, 500))
 		}
 	}
-	console.log(logPrefix, "Indexer stopped")
+	console.log(LOG_PREFIX, "Indexer stopped")
 }
 
 async function indexNextTx() {
@@ -36,7 +36,7 @@ async function indexNextTx() {
 
 	try {
 		await prisma.$transaction(async (prisma) => {
-			const txRequestData = fromBytes(txRequest)
+			const txRequestData = Bytes.decode(txRequest)
 			const [methodName, params, from] = transactionRequestDataZod.parse(txRequestData)
 
 			const tx = await prisma.transaction.create({
@@ -47,10 +47,10 @@ async function indexNextTx() {
 				},
 			})
 
-			console.log(logPrefix, `Indexing transaction`)
-			console.log(logPrefixEmpty, colors.gray("➜ "), colors.dim(`txId = ${txId}`))
-			console.log(logPrefixEmpty, colors.gray("➜ "), colors.dim(`method = ${methodName}`))
-			console.log(logPrefixEmpty, colors.gray("➜ "), colors.dim(`from = ${from}`))
+			console.log(LOG_PREFIX, `Indexing transaction`)
+			console.log(LOG_PREFIX_EMPTY, colors.gray("➜ "), colors.dim(`txId = ${txId}`))
+			console.log(LOG_PREFIX_EMPTY, colors.gray("➜ "), colors.dim(`method = ${methodName}`))
+			console.log(LOG_PREFIX_EMPTY, colors.gray("➜ "), colors.dim(`from = ${from}`))
 
 			const method = methods[methodName] as Method | undefined
 			if (!method) throw new Error(`Unknown method ${methodName}`)
@@ -58,9 +58,9 @@ async function indexNextTx() {
 			await method.call(tx, prisma, params)
 		})
 	} catch (error) {
-		console.log(logPrefix, colors.red(`Error while indexing transaction`))
-		console.log(logPrefixEmpty, colors.gray("➜ "), colors.dim(`txId = ${txId}`))
-		console.log(logPrefixEmpty, colors.red(`${error}`))
+		console.log(LOG_PREFIX, colors.red(`Error while indexing transaction`))
+		console.log(LOG_PREFIX_EMPTY, colors.gray("➜ "), colors.dim(`txId = ${txId}`))
+		console.log(LOG_PREFIX_EMPTY, colors.red(`${error}`))
 	}
 
 	nextTxId = (

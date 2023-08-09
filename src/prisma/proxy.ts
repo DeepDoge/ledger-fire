@@ -1,7 +1,7 @@
 import type { PrismaClient } from "@prisma/client"
 import { z } from "zod"
 
-export const $pathToken = z.union([
+export const pathTokenZod = z.union([
 	z.object({
 		type: z.literal("property"),
 		prop: z.string(),
@@ -12,7 +12,7 @@ export const $pathToken = z.union([
 	}),
 ])
 
-export type PathToken = z.infer<typeof $pathToken>
+export type PathToken = z.infer<typeof pathTokenZod>
 
 const allowedMethods = ["findUnique", "findUniqueOrThrow", "findFirst", "findFirstOrThrow", "findMany"] as const satisfies readonly Exclude<
 	{

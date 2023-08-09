@@ -5,6 +5,7 @@
 		"format": "prettier -w ./",
 		"dev:app": "vite --host",
 		"dev:api": "export NODE_NO_WARNINGS=1 && node --watch --loader=tsx ./src/server.ts",
+		"prisma:reset": "prisma migrate reset -f",
 		"build": "vite build",
 		"preview": "vite preview --host"
 	},
