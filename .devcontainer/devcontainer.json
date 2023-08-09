@@ -6,13 +6,8 @@
 	"image": "mcr.microsoft.com/devcontainers/typescript-node:0-20",
 	"customizations": {
 		"vscode": {
-			"extensions": [
-				"esbenp.prettier-vscode",
-				"dbaeumer.vscode-eslint",
-				"Prisma.prisma",
-				"pushqrdx.inline-html",
-				"EditorConfig.EditorConfig"
-			]
+			"extensions": ["esbenp.prettier-vscode", "dbaeumer.vscode-eslint", "Prisma.prisma", "pushqrdx.inline-html", "EditorConfig.EditorConfig"]
 		}
-	}
+	},
+	"postCreateCommand": "npm install"
 }
