@@ -28,7 +28,10 @@ export namespace SearchManager {
 				const queriesL = params.queries(text.toLocaleLowerCase(App.lang.ref))
 				const queries: Where<TQueryName>[] = []
 				for (let i = 0; i < queriesL.length; i++) queries.push({ OR: [queriesU[i], queriesL[i]] } as Where<TQueryName>)
-				// TODO: Solution above is good enough for now, but need a more elegant solution
+				// TODO: Solution above is good enough for now, but need a more elegant solution.
+				// Tbh we can index many things on db as lowercase or uppercase then on front end we can add the casing, upper, lower, capitilized etc...
+				// This way we dont have to relay on person doing the mutation for casing.
+				// Mutator can have the locale of the client, so it can do the lowercasing based on that
 
 				for (const where of queries) {
 					const result: Item<TQueryName>[] = await (db.query[queryName] as any).findMany({

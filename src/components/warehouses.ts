@@ -13,15 +13,7 @@ const searchManager = SearchManager.create("warehouse", {
 	include: undefined,
 	itemIdKey: "id",
 	queries(text) {
-		console.log(text)
-		return [
-			{ name: { equals: text } },
-			{ address: { equals: text } },
-			{ name: { startsWith: text } },
-			{ address: { startsWith: text } },
-			{ name: { contains: text } },
-			{ address: { contains: text } },
-		]
+		return [{ name: { startsWith: text } }, { address: { startsWith: text } }, { name: { contains: text } }, { address: { contains: text } }]
 	},
 })
 
@@ -45,7 +37,7 @@ export function WarehousesComponent() {
 
 		<x ${WarehouseFormComponent()} class="form"></x>
 
-		<x ${SearchComponent(searchManager)}></x>
+		<x ${SearchComponent(searchManager, (item) => console.log(item))}></x>
 
 		<div class="warehouses">
 			${$.each(warehouses)

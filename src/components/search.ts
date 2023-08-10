@@ -5,7 +5,10 @@ import { css, html } from "master-ts/library/template"
 
 const ComponentConstructor = defineComponent("x-search")
 
-export function SearchComponent<TSearchManager extends SearchManager>(searchManager: TSearchManager) {
+export function SearchComponent<TSearchManager extends SearchManager>(
+	searchManager: TSearchManager,
+	onSelect: (item: Awaited<ReturnType<TSearchManager["search"]>>[0] | null) => any
+) {
 	const component = new ComponentConstructor()
 
 	const searchText = $.writable("")
@@ -23,6 +26,7 @@ export function SearchComponent<TSearchManager extends SearchManager>(searchMana
 
 	const selectedIndex = $.writable(0)
 	const selected = $.derive(() => results.ref?.[selectedIndex.ref] ?? null)
+	selected.subscribe$(component, onSelect)
 	$.effect$(component, () => (selectedIndex.ref = 0), [results])
 
 	function selectByIndex(index: number) {
