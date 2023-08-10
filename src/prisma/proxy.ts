@@ -9,7 +9,7 @@ import { z } from "zod"
 	- "Why this big file exists and not separated into multiple files?" 
 	- "Why do I import some stuff async and not at the top of the file?"
 	
-	Then the answer is: Blame ES6 modules, and lack of namespace support with ES6 modules in TypeScript.
+	Then the answer is: Blame ES6 modules, and lack of good namespace support with ES6 modules in TypeScript.
 		Because without namespace support, I either separate this file into multiple files and then have to export internal stuff,
 		or I put everything in one file and then I don't have to export internal stuff.
 
