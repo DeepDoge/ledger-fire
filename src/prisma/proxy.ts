@@ -2,8 +2,7 @@ import { API_URL } from "@/config"
 import { Bytes } from "@/utils/bytes"
 import type { PrismaClient } from "@prisma/client"
 import { z } from "zod"
-let prismaImport: PrismaClient | null = null
-const prisma = async () => (prismaImport ??= await import("@/prisma/client").then((m) => m.prisma))
+const prisma = async () => await import("@/prisma/client").then((m) => m.prisma)
 
 /* 
 

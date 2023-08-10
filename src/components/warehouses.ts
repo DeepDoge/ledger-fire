@@ -1,4 +1,4 @@
-import { prismaProxy } from "@/prisma/proxyClient"
+import { prismaProxy } from "@/prisma/proxy"
 import type { Warehouse } from "@prisma/client"
 import { $ } from "master-ts/library/$"
 import { defineComponent } from "master-ts/library/component"
