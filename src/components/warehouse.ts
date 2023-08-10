@@ -1,5 +1,5 @@
 import { dialogManager } from "@/app"
-import { transaction } from "@/transactions/transactionClient"
+import { db } from "@/db/api"
 import type { Warehouse } from "@prisma/client"
 import { $ } from "master-ts/library/$"
 import { defineComponent } from "master-ts/library/component"
@@ -22,7 +22,7 @@ export function WarehouseComponent(warehouse: Warehouse) {
 			message: `Are you sure you want to delete ${warehouse.name}?`,
 		})
 		if (!confirm) return
-		destroyPromise.ref = transaction.deleteWarehouse({ id: warehouse.id })
+		destroyPromise.ref = db.mutate.deleteWarehouse({ id: warehouse.id })
 	}
 
 	component.$html = html`

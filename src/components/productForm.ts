@@ -1,4 +1,4 @@
-import { transaction } from "@/transactions/transactionClient"
+import { db } from "@/db/api"
 import { $ } from "master-ts/library/$"
 import { defineComponent } from "master-ts/library/component"
 import { html } from "master-ts/library/template"
@@ -11,7 +11,7 @@ export function ProductFormComponent() {
 	const brandName = $.writable("")
 
 	async function onSubmit() {
-		await transaction.createProduct2({
+		await db.mutate.createProduct2({
 			name: name.ref,
 			brandName: brandName.ref,
 		})

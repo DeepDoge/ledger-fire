@@ -5,7 +5,7 @@
 		"format": "prettier -w ./",
 		"dev": "run-p --race dev:*",
 		"dev:app": "vite --host",
-		"dev:api": "export NODE_NO_WARNINGS=1 && node --watch --loader=tsx ./src/api.ts",
+		"dev:api": "export NODE_NO_WARNINGS=1 && node --watch --loader=tsx ./src/db/api.ts",
 		"prisma:reset": "rm -rf ./prisma/migrations && rm ./prisma/dev.db && prisma migrate dev --name init && rm ./prisma/dev.db-journal",
 		"build": "vite build",
 		"preview": "vite preview --host",

@@ -1,4 +1,4 @@
-import { prismaProxy } from "@/prisma/proxy"
+import { db } from "@/db/api"
 import type { Warehouse } from "@prisma/client"
 import { $ } from "master-ts/library/$"
 import { defineComponent } from "master-ts/library/component"
@@ -15,7 +15,7 @@ export function WarehousesComponent() {
 	const warehouses = $.writable<Warehouse[]>([])
 
 	async function update() {
-		warehouses.ref = await prismaProxy.warehouse.findMany({})
+		warehouses.ref = await db.query.warehouse.findMany({})
 	}
 
 	onMount$(component, () => {

@@ -1,29 +1,14 @@
-import type { Prisma, Transaction } from "@prisma/client"
 import { z } from "zod"
+import { Database } from "."
 
-export type Method = {
-	call: (tx: Transaction, prisma: Prisma.TransactionClient, params: any) => unknown
-	zod: z.ZodType<Record<PropertyKey, any>>
-}
-
-function method<TParams extends Method["zod"], TReturns>(
-	zod: TParams,
-	fn: (tx: Transaction, prisma: Prisma.TransactionClient, params: z.infer<TParams>) => TReturns
-) {
-	return {
-		call: fn,
-		zod,
-	} satisfies Method
-}
-
-export namespace methods {
-	export const createWarehouse = method(
+export namespace mutators {
+	export const createWarehouse = Database.createMutator(
 		z.object({
 			name: z.string(),
 			address: z.string(),
 		}),
-		async (_, prisma, { name, address }) => {
-			return await prisma.warehouse.create({
+		async (_, db, { name, address }) => {
+			return await db.warehouse.create({
 				data: {
 					name,
 					address,
@@ -32,12 +17,12 @@ export namespace methods {
 		}
 	)
 
-	export const deleteWarehouse = method(
+	export const deleteWarehouse = Database.createMutator(
 		z.object({
 			id: z.number(),
 		}),
-		async (_, prisma, { id }) => {
-			return await prisma.warehouse.delete({
+		async (_, db, { id }) => {
+			return await db.warehouse.delete({
 				where: {
 					id,
 				},
@@ -45,12 +30,12 @@ export namespace methods {
 		}
 	)
 
-	export const createBrand = method(
+	export const createBrand = Database.createMutator(
 		z.object({
 			name: z.string(),
 		}),
-		async (_, prisma, { name }) => {
-			return await prisma.brand.create({
+		async (_, db, { name }) => {
+			return await db.brand.create({
 				data: {
 					name,
 				},
@@ -58,13 +43,13 @@ export namespace methods {
 		}
 	)
 
-	export const createProduct = method(
+	export const createProduct = Database.createMutator(
 		z.object({
 			name: z.string(),
 			brandId: z.number(),
 		}),
-		async (_, prisma, { name, brandId }) => {
-			return await prisma.product.create({
+		async (_, db, { name, brandId }) => {
+			return await db.product.create({
 				data: {
 					name,
 					brandId,
@@ -73,13 +58,13 @@ export namespace methods {
 		}
 	)
 
-	export const createProduct2 = method(
+	export const createProduct2 = Database.createMutator(
 		z.object({
 			name: z.string(),
 			brandName: z.string(),
 		}),
-		async (_, prisma, { name, brandName }) => {
-			return await prisma.product.create({
+		async (_, db, { name, brandName }) => {
+			return await db.product.create({
 				data: {
 					name,
 					brand: {
@@ -92,7 +77,7 @@ export namespace methods {
 		}
 	)
 
-	export const createCustomerAccount = method(
+	export const createCustomerAccount = Database.createMutator(
 		z.object({
 			name: z.string(),
 			surname: z.string(),
@@ -101,8 +86,8 @@ export namespace methods {
 			email: z.string().email().optional(),
 			address: z.string().optional(),
 		}),
-		async (_, prisma, { name, surname, tckn, phone, email, address }) => {
-			return await prisma.account.create({
+		async (_, db, { name, surname, tckn, phone, email, address }) => {
+			return await db.account.create({
 				data: {
 					fullName: `${name} ${surname}`,
 					tckn,
@@ -114,7 +99,7 @@ export namespace methods {
 		}
 	)
 
-	export const createSupplierAccount = method(
+	export const createSupplierAccount = Database.createMutator(
 		z.object({
 			name: z.string(),
 			taxNumber: z.string(),
@@ -122,8 +107,8 @@ export namespace methods {
 			email: z.string().email(),
 			address: z.string(),
 		}),
-		async (_, prisma, params) => {
-			return await prisma.account.create({
+		async (_, db, params) => {
+			return await db.account.create({
 				data: {
 					fullName: params.name,
 					tckn: params.taxNumber,
@@ -136,7 +121,7 @@ export namespace methods {
 		}
 	)
 
-	export const enterSupplierBill = method(
+	export const enterSupplierBill = Database.createMutator(
 		z.object({
 			id: z.string(),
 			supplierId: z.number(),
@@ -150,8 +135,8 @@ export namespace methods {
 			),
 			timestamp: z.bigint(),
 		}),
-		async (tx, prisma, { id, supplierId, items, timestamp }) => {
-			await prisma.supplierBill.create({
+		async (tx, db, { id, supplierId, items, timestamp }) => {
+			await db.supplierBill.create({
 				data: {
 					id,
 					txId: tx.id,
@@ -178,27 +163,27 @@ export namespace methods {
 		}
 	)
 
-	export const matchSupplierProduct = method(
+	export const matchSupplierProduct = Database.createMutator(
 		z.object({
 			supplierId: z.number(),
 			supplierProductCode: z.string(),
 			localProductId: z.number(),
 		}),
-		async (_, prisma, { supplierId, supplierProductCode, localProductId }) => {
-			await prisma.supplierProduct.update({
+		async (_, db, { supplierId, supplierProductCode, localProductId }) => {
+			await db.supplierProduct.update({
 				where: { supplierId_code: { supplierId, code: supplierProductCode } },
 				data: { matchedProductId: localProductId },
 			})
 		}
 	)
 
-	export const verifySupplierBill = method(
+	export const verifySupplierBill = Database.createMutator(
 		z.object({
 			id: z.string(),
 			warehouseId: z.number(),
 		}),
-		async (_, prisma, { id, warehouseId }) => {
-			const bill = await prisma.supplierBill.update({
+		async (_, db, { id, warehouseId }) => {
+			const bill = await db.supplierBill.update({
 				include: {
 					SupplierBillItem: {
 						include: {
@@ -219,7 +204,7 @@ export namespace methods {
 
 			if (!bill) throw new Error("Bill not found or cannot be verified")
 
-			await prisma.warehouse.update({
+			await db.warehouse.update({
 				where: { id: warehouseId },
 				data: {
 					stocks: {
