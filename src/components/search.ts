@@ -1,37 +1,34 @@
-import { searchProduct, type Product } from "@/utils/products"
+import type { SearchManager } from "@/utils/search"
 import { $ } from "master-ts/library/$"
 import { defineComponent } from "master-ts/library/component"
 import { css, html } from "master-ts/library/template"
 
-const ComponentConstructor = defineComponent("x-product-search")
+const ComponentConstructor = defineComponent("x-search")
 
-export class SelectProductEvent extends CustomEvent<{ product: Product }> {
-	constructor(product: Product) {
-		super("select-product", { detail: { product } })
-	}
-}
-
-export function ProductSearchComponent() {
+export function SearchComponent<TSearchManager extends SearchManager>(searchManager: TSearchManager) {
 	const component = new ComponentConstructor()
 
 	const searchText = $.writable("")
 	const searchTextDeferred = $.defer(searchText)
 
-	const results = $.await($.derive(async () => (searchTextDeferred.ref ? await searchProduct(searchTextDeferred.ref) : [])))
+	const results = $.await(
+		$.derive(async () => (searchTextDeferred.ref ? await searchManager.search(searchTextDeferred.ref) : []), [searchTextDeferred])
+	)
 		.until(() => null)
 		.then()
+
+	const active = $.writable(false)
+	results.subscribe$(component, updateActive)
+	function updateActive() {
+		active.ref = (results.ref?.length ?? 0) > 0
+	}
 
 	const selectedIndex = $.writable(0)
 	const selected = $.derive(() => results.ref?.[selectedIndex.ref] ?? null)
 	$.effect$(component, () => (selectedIndex.ref = 0), [results])
 
-	function dispatchEventForSelected() {
-		if (selected.ref) component.dispatchEvent(new SelectProductEvent(selected.ref))
-	}
-
-	function selectAndDispatch(index: number) {
+	function selectByIndex(index: number) {
 		selectedIndex.ref = index
-		dispatchEventForSelected()
 	}
 
 	function incrementSelectedIndex() {
@@ -53,29 +50,29 @@ export function ProductSearchComponent() {
 		}
 	}
 
+	function close() {
+		active.ref = false
+		searchElement.ref?.blur()
+	}
+
+	const searchElement = $.writable<HTMLInputElement | null>(null)
+
 	component.$html = html`
-		<form on:submit=${(event) => (event.preventDefault(), dispatchEventForSelected())}>
-			<input type="text" placeholder="Search for products..." bind:value=${searchText} on:keydown=${onKeyDown} />
-			<div class="results">
-				${$.match(results)
-					.case(null, () => null)
-					.default((results) =>
-						$.each(results)
-							.key((product) => product.id)
-							.as(
-								(product, index) => html`
-									<div
-										class="item"
-										on:click=${() => selectAndDispatch(index.ref)}
-										class:selected=${() => index.ref === selectedIndex.ref}>
-										<div class="name">${() => product.ref.name}</div>
-										<div class="brand">${() => product.ref.brand.name}</div>
-									</div>
-								`
-							)
-					)}
-			</div>
+		${() => JSON.stringify(selected.ref, null, "\t")}
+		<form on:submit=${(event) => (event.preventDefault(), close())} on:focusout=${close} on:focusin=${updateActive}>
+			<input ref:=${searchElement} type="text" placeholder="Search for products..." bind:value=${searchText} on:keydown=${onKeyDown} />
 		</form>
+		<div class="results" class:active=${active}>
+			${() =>
+				results.ref &&
+				$.each(results.ref).as(
+					(item, index) => html`
+						<button class="item" on:click=${() => selectByIndex(index)} class:selected=${$.derive(() => index === selectedIndex.ref)}>
+							${index} ${JSON.stringify(item, null, "\t")}
+						</button>
+					`
+				)}
+		</div>
 	`
 
 	return component
@@ -83,19 +80,21 @@ export function ProductSearchComponent() {
 
 ComponentConstructor.$css = css`
 	:host {
-		display: contents;
+		display: grid;
+		position: relative;
 	}
 
 	form {
-		display: grid;
-		position: relative;
-		height: 2em;
+		display: contents;
 	}
 
+	.results:not(.active) {
+		display: none;
+	}
 	.results {
 		position: absolute;
 		top: 100%;
-		height: 50vh;
+		max-height: 50vh;
 		left: 0;
 		right: 0;
 		overflow: auto;
