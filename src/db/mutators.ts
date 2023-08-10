@@ -1,11 +1,29 @@
+import type { Prisma, Transaction } from "@prisma/client"
 import { z } from "zod"
-import { Database } from "."
+import type { Database } from "."
+
+export function createMutator<TParams extends Database.Mutator["scheme"], TReturns>(
+	scheme: TParams,
+	fn: (tx: Transaction, db: Prisma.TransactionClient, params: z.infer<TParams>) => TReturns
+) {
+	return {
+		call: fn,
+		scheme,
+	} satisfies Database.Mutator
+}
+
+function toLowerCase(value: string) {
+	return value
+		.toLowerCase()
+		.normalize()
+		.replace(/[\u0300-\u036f]/g, "")
+}
 
 export namespace mutators {
-	export const createWarehouse = Database.createMutator(
+	export const createWarehouse = createMutator(
 		z.object({
-			name: z.string(),
-			address: z.string(),
+			name: z.string().transform(toLowerCase),
+			address: z.string().transform(toLowerCase),
 		}),
 		async (_, db, { name, address }) => {
 			return await db.warehouse.create({
@@ -17,7 +35,7 @@ export namespace mutators {
 		}
 	)
 
-	export const deleteWarehouse = Database.createMutator(
+	export const deleteWarehouse = createMutator(
 		z.object({
 			id: z.number(),
 		}),
@@ -30,7 +48,7 @@ export namespace mutators {
 		}
 	)
 
-	export const createBrand = Database.createMutator(
+	export const createBrand = createMutator(
 		z.object({
 			name: z.string(),
 		}),
@@ -43,7 +61,7 @@ export namespace mutators {
 		}
 	)
 
-	export const createProduct = Database.createMutator(
+	export const createProduct = createMutator(
 		z.object({
 			name: z.string(),
 			brandId: z.number(),
@@ -58,7 +76,7 @@ export namespace mutators {
 		}
 	)
 
-	export const createProduct2 = Database.createMutator(
+	export const createProduct2 = createMutator(
 		z.object({
 			name: z.string(),
 			brandName: z.string(),
@@ -77,7 +95,7 @@ export namespace mutators {
 		}
 	)
 
-	export const createCustomerAccount = Database.createMutator(
+	export const createCustomerAccount = createMutator(
 		z.object({
 			name: z.string(),
 			surname: z.string(),
@@ -99,7 +117,7 @@ export namespace mutators {
 		}
 	)
 
-	export const createSupplierAccount = Database.createMutator(
+	export const createSupplierAccount = createMutator(
 		z.object({
 			name: z.string(),
 			taxNumber: z.string(),
@@ -121,7 +139,7 @@ export namespace mutators {
 		}
 	)
 
-	export const enterSupplierBill = Database.createMutator(
+	export const enterSupplierBill = createMutator(
 		z.object({
 			id: z.string(),
 			supplierId: z.number(),
@@ -163,7 +181,7 @@ export namespace mutators {
 		}
 	)
 
-	export const matchSupplierProduct = Database.createMutator(
+	export const matchSupplierProduct = createMutator(
 		z.object({
 			supplierId: z.number(),
 			supplierProductCode: z.string(),
@@ -177,7 +195,7 @@ export namespace mutators {
 		}
 	)
 
-	export const verifySupplierBill = Database.createMutator(
+	export const verifySupplierBill = createMutator(
 		z.object({
 			id: z.string(),
 			warehouseId: z.number(),

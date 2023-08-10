@@ -16,11 +16,10 @@ export namespace SearchManager {
 			itemIdKey: TItemIdKey
 			include: Include<TQueryName>
 			queries: (text: string) => Where<TQueryName>[]
-			take: number
 		}
 	): SearchManager<TQueryName> {
 		return {
-			async search(text) {
+			async search(text, take: number = 256) {
 				const ignoreIds: unknown[] = []
 				const results: Item<TQueryName>[] = []
 
@@ -28,7 +27,7 @@ export namespace SearchManager {
 					const result: Item<TQueryName>[] = await (db.query[queryName] as any).findMany({
 						where: { AND: [{ [params.itemIdKey]: { notIn: ignoreIds } }, where] },
 						include: params.include,
-						take: params.take,
+						take,
 					})
 
 					for (const item of result) {
@@ -36,7 +35,7 @@ export namespace SearchManager {
 						ignoreIds.push(item[params.itemIdKey])
 					}
 
-					params.take -= result.length
+					take -= result.length
 				}
 
 				return results

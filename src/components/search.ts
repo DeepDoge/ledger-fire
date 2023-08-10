@@ -13,9 +13,7 @@ export function SearchComponent<TSearchManager extends SearchManager>(searchMana
 
 	const results = $.await(
 		$.derive(async () => (searchTextDeferred.ref ? await searchManager.search(searchTextDeferred.ref) : []), [searchTextDeferred])
-	)
-		.until(() => null)
-		.then()
+	).then()
 
 	const active = $.writable(false)
 	results.subscribe$(component, updateActive)

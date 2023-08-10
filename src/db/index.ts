@@ -36,15 +36,6 @@ export namespace Database {
 	export type MutationProxy<T extends Mutators> = {
 		[K in keyof T]: (params: z.infer<T[K]["scheme"]>) => ReturnType<T[K]["call"]>
 	}
-	export function createMutator<TParams extends Mutator["scheme"], TReturns>(
-		scheme: TParams,
-		fn: (tx: Transaction, db: Prisma.TransactionClient, params: z.infer<TParams>) => TReturns
-	) {
-		return {
-			call: fn,
-			scheme,
-		} satisfies Mutator
-	}
 
 	export type QueryProxy = {
 		[K in Exclude<keyof PrismaClient, `$${string}` | symbol>]: {
@@ -57,19 +48,18 @@ export namespace Database {
 		mutate: MutationProxy<T>
 	}
 
-	export function createClient<T extends Mutators>(apiUrl: string): Client<T> {
+	export function createClient<T extends Mutators>(mutators: T, apiUrl: string): Client<T> {
 		return {
 			query: createQueryProxy(apiUrl),
-			mutate: createMutationProxy<T>(apiUrl),
+			mutate: createMutationProxy<T>(mutators, apiUrl),
 		}
 	}
 
-	export async function startServer(port: number) {
+	export async function startServer<T extends Mutators>(mutators: T, port: number) {
 		const express = await import("express").then((m) => m.default)
 		const fs = await import("fs/promises").then((m) => m.default)
 		const path = await import("path").then((m) => m.default)
 		const colors = await import("colors/safe").then((m) => m.default)
-		const { mutators }: { mutators: Mutators } = await import("./mutators")
 
 		const LOG_PREFIX_TEXT = `[Indexer]` as const
 		const LOG_PREFIX = colors.green(LOG_PREFIX_TEXT)
@@ -212,7 +202,7 @@ export namespace Database {
 					const mutator = mutators[methodName]
 					if (!mutator) throw new Error(`Unknown method ${methodName}`)
 
-					await mutator.call(tx, prisma, params)
+					await mutator.call(tx, prisma, mutator.scheme.parse(params))
 				})
 			} catch (error) {
 				console.log(LOG_PREFIX, colors.red(`Error while indexing transaction`))
@@ -267,11 +257,11 @@ export namespace Database {
 		return createProxy() as QueryProxy
 	}
 
-	function createMutationProxy<T extends Mutators>(apiUrl: string): MutationProxy<T> {
+	function createMutationProxy<T extends Mutators>(mutators: T, apiUrl: string): MutationProxy<T> {
 		return new Proxy(() => {}, {
-			get(_: never, methodKey: string) {
+			get(_: never, mutatorName: string) {
 				return async (params: unknown) => {
-					const requestData: TransactionRequestData = [methodKey, params, new Uint8Array(0)]
+					const requestData: TransactionRequestData = [mutatorName, mutators[mutatorName]!.scheme.parse(params), new Uint8Array(0)]
 					await fetch(`${apiUrl}${MUTATION_PATH}`, {
 						method: "POST",
 						body: Bytes.encode(requestData),

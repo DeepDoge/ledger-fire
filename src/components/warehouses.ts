@@ -22,7 +22,6 @@ const searchManager = SearchManager.create("warehouse", {
 			{ address: { contains: text } },
 		]
 	},
-	take: 10,
 })
 
 const ComponentConstructor = defineComponent("x-warehouses-page")
