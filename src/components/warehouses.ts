@@ -13,6 +13,7 @@ const searchManager = SearchManager.create("warehouse", {
 	include: undefined,
 	itemIdKey: "id",
 	queries(text) {
+		console.log(text)
 		return [
 			{ name: { equals: text } },
 			{ address: { equals: text } },

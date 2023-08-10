@@ -1,3 +1,4 @@
+import { App } from "@/app"
 import { db } from "@/db/api"
 
 export type SearchManager<TQueryName extends SearchManager.QueryName = SearchManager.QueryName> = {
@@ -23,7 +24,13 @@ export namespace SearchManager {
 				const ignoreIds: unknown[] = []
 				const results: Item<TQueryName>[] = []
 
-				for (const where of params.queries(text)) {
+				const queriesU = params.queries(text.toLocaleUpperCase(App.lang.ref))
+				const queriesL = params.queries(text.toLocaleLowerCase(App.lang.ref))
+				const queries: Where<TQueryName>[] = []
+				for (let i = 0; i < queriesL.length; i++) queries.push({ OR: [queriesU[i], queriesL[i]] } as Where<TQueryName>)
+				// TODO: Solution above is good enough for now, but need a more elegant solution
+
+				for (const where of queries) {
 					const result: Item<TQueryName>[] = await (db.query[queryName] as any).findMany({
 						where: { AND: [{ [params.itemIdKey]: { notIn: ignoreIds } }, where] },
 						include: params.include,

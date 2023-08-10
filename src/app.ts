@@ -9,6 +9,14 @@ import { route } from "./router"
 
 export const dialogManager = createDialogManager()
 
+export namespace App {
+	export const lang = $.readable<string | undefined>((set) => {
+		set(document.body.parentElement?.lang)
+		const interval = setInterval(() => set(document.body.parentElement?.lang), 100)
+		return () => clearInterval(interval)
+	})
+}
+
 const ComponentConstructor = defineComponent("x-app")
 function AppComponent() {
 	const component = new ComponentConstructor()

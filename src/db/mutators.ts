@@ -12,18 +12,11 @@ export function createMutator<TParams extends Database.Mutator["scheme"], TRetur
 	} satisfies Database.Mutator
 }
 
-function toLowerCase(value: string) {
-	return value
-		.toLowerCase()
-		.normalize()
-		.replace(/[\u0300-\u036f]/g, "")
-}
-
 export namespace mutators {
 	export const createWarehouse = createMutator(
 		z.object({
-			name: z.string().transform(toLowerCase),
-			address: z.string().transform(toLowerCase),
+			name: z.string(),
+			address: z.string(),
 		}),
 		async (_, db, { name, address }) => {
 			return await db.warehouse.create({

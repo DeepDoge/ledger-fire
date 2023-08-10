@@ -44,11 +44,6 @@ ComponentConstructor.$css = css`
 		color: hsl(var(--base-text--hsl));
 	}
 
-	.name,
-	.address {
-		text-transform: capitalize;
-	}
-
 	.address {
 		font-size: 0.75rem;
 		color: hsl(var(--base-text--hsl), 85%);
