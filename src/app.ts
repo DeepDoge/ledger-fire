@@ -9,11 +9,8 @@ import { NavigationComponent } from "./navigation"
 import { route } from "./router"
 
 export namespace App {
-	export const lang = $.readable<string | undefined>((set) => {
-		set(document.body.parentElement?.lang)
-		const interval = setInterval(() => set(document.body.parentElement?.lang), 100)
-		return () => clearInterval(interval)
-	})
+	export const language = $.writable(navigator.language)
+	language.subscribe((lang) => (document.documentElement.lang = lang), { mode: "immediate" })
 	export const dialogManager = createDialogManager()
 
 	const ComponentConstructor = defineComponent("x-app")

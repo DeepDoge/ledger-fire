@@ -1,3 +1,3 @@
-export function toLowerCaseTurkish(value: string) {
-	return value.toLocaleLowerCase("tr-TR")
+export function toLocaleLowerCase(lang?: string) {
+	return (value: string) => value.toLocaleLowerCase(lang)
 }

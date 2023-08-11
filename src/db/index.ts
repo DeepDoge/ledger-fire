@@ -30,8 +30,8 @@ const QUERY_PATH = "/db/query"
 export namespace Database {
 	export namespace Mutator {
 		export type Tx = Transaction & {}
-		export type Call<TScheme extends Scheme = any> = (tx: Tx, db: Prisma.TransactionClient, params: z.infer<TScheme>) => unknown
-		export type Scheme = z.ZodType<Record<PropertyKey, unknown>>
+		export type Call<TScheme extends Scheme = any> = (tx: Tx, db: Prisma.TransactionClient, params: z.infer<ReturnType<TScheme>>) => unknown
+		export type Scheme = (lang?: string) => z.ZodType<Record<PropertyKey, unknown>>
 	}
 	export type Mutator<TScheme extends Mutator.Scheme = Mutator.Scheme, TCall extends Mutator.Call<TScheme> = Mutator.Call> = {
 		call: TCall
@@ -39,7 +39,7 @@ export namespace Database {
 	}
 	export type Mutators = Record<string, Mutator>
 	export type MutationProxy<TMutators extends Mutators> = {
-		[K in keyof TMutators]: (params: z.infer<TMutators[K]["scheme"]>) => ReturnType<TMutators[K]["call"]>
+		[K in keyof TMutators]: (params: z.infer<ReturnType<TMutators[K]["scheme"]>>) => ReturnType<TMutators[K]["call"]>
 	}
 
 	export type QueryProxy = {
@@ -91,13 +91,18 @@ export namespace Database {
 	}
 
 	function createMutationProxy<TMutators extends Mutators>(mutators: TMutators, apiUrl: string): MutationProxy<TMutators> {
+		const txScheme = txSchemeFromMutators(mutators)
 		return new Proxy(() => {}, {
 			get(_: never, mutatorName: string) {
-				return async (params: unknown) => {
-					const requestData: TransactionRequestData = [mutatorName, mutators[mutatorName]!.scheme.parse(params), new Uint8Array(0)]
+				return async (mutatorParams: unknown) => {
+					const txRequestData = txScheme.requestScheme.parse({
+						mutatorName,
+						mutatorParams,
+						from: new Uint8Array(0),
+					} satisfies z.infer<typeof txScheme.requestScheme>)
 					await fetch(`${apiUrl}${MUTATION_PATH}`, {
 						method: "POST",
-						body: Bytes.encode(requestData),
+						body: Bytes.encode(txRequestData),
 						headers: {
 							"Content-Type": "application/octet-stream",
 						},
@@ -121,8 +126,8 @@ export namespace Database {
 		const api = express()
 
 		api.use(express.raw({ type: "application/octet-stream" }))
-		handlePath(api, QUERY_PATH, async (data) => {
-			const path = z.array(pathTokenScheme).parse(Bytes.decode(data))
+		handlePath(api, QUERY_PATH, async (request) => {
+			const path = z.array(pathTokenScheme).parse(Bytes.decode(request.body))
 
 			let current = prisma
 			for (const token of path) {
@@ -148,14 +153,24 @@ export namespace Database {
 		} catch {
 			id = 0n
 		}
+		const txScheme = txSchemeFromMutators(mutators)
 		handlePath(api, MUTATION_PATH, async (request) => {
-			const data = Bytes.decode(request)
-			transactionRequestDataScheme(mutators).parse(data)
+			const txRequestData = txScheme.requestScheme.parse(Bytes.decode(request.body))
 
 			// convert id to base64 and save the request bytes inside file, the path start from transactions/ folder and every letter is a folder except last letter if a file
 			const pathToTx = path.join("./transactions", ...id.toString(36))
 			await fs.mkdir(pathToTx, { recursive: true })
-			await fs.writeFile(path.join(pathToTx, "tx"), request)
+			await fs.writeFile(
+				path.join(pathToTx, "tx"),
+				Bytes.encode(
+					txScheme.fileScheme.parse({
+						from: txRequestData.from,
+						mutatorName: txRequestData.mutatorName,
+						mutatorParams: txRequestData.mutatorParams,
+						language: request.headers["accept-language"]?.split(",")[0],
+					} satisfies z.infer<typeof txScheme.fileScheme>)
+				)
+			)
 
 			// increment id and save it to file
 			id++
@@ -179,7 +194,7 @@ export namespace Database {
 			res.header("Access-Control-Allow-Headers", "Content-Type")
 		}
 
-		function handlePath(api: Express.Express, path: string, handler: (body: Uint8Array) => Promise<Uint8Array>) {
+		function handlePath(api: Express.Express, path: string, handler: (request: Express.Request) => Promise<Uint8Array>) {
 			api.options(path, (_, res) => {
 				applyHeaders(res)
 				res.send()
@@ -189,7 +204,7 @@ export namespace Database {
 				applyHeaders(res)
 
 				try {
-					res.send(Buffer.from(await handler(req.body)))
+					res.send(Buffer.from(await handler(req)))
 				} catch (error) {
 					console.error(error)
 					if (error instanceof Error) res.status(500).send(error.message)
@@ -230,31 +245,30 @@ export namespace Database {
 		}
 
 		async function indexTx(txId: bigint) {
-			const txRequest = await fs.readFile(path.join("./transactions", ...txId.toString(36), "tx")).catch(() => null)
-			if (!txRequest) return false
+			const txFile = await fs.readFile(path.join("./transactions", ...txId.toString(36), "tx")).catch(() => null)
+			if (!txFile) return false
 
 			try {
 				await prisma.$transaction(async (prisma) => {
-					const txRequestData = Bytes.decode(txRequest)
-					const [methodName, params, from] = transactionRequestDataScheme(mutators).parse(txRequestData)
+					const txFileData = txScheme.fileScheme.parse(Bytes.decode(txFile))
 
 					const tx = await prisma.transaction.create({
 						data: {
 							id: txId,
-							from: Buffer.from(from),
+							from: Buffer.from(txFileData.from),
 							timestamp: Date.now(),
 						},
 					})
 
 					console.log(LOG_PREFIX, `Indexing transaction`)
 					console.log(LOG_PREFIX_EMPTY, colors.gray("➜ "), colors.dim(`txId = ${txId}`))
-					console.log(LOG_PREFIX_EMPTY, colors.gray("➜ "), colors.dim(`method = ${methodName}`))
-					console.log(LOG_PREFIX_EMPTY, colors.gray("➜ "), colors.dim(`from = ${from}`))
+					console.log(LOG_PREFIX_EMPTY, colors.gray("➜ "), colors.dim(`mutatorName = ${txFileData.mutatorName}`))
+					console.log(LOG_PREFIX_EMPTY, colors.gray("➜ "), colors.dim(`from = ${txFileData.from}`))
 
-					const mutator = mutators[methodName]
-					if (!mutator) throw new Error(`Unknown method ${methodName}`)
+					const mutator = mutators[txFileData.mutatorName]
+					if (!mutator) throw new Error(`Unknown mutator ${txFileData.mutatorName}`)
 
-					await mutator.call(tx, prisma, mutator.scheme.parse(params))
+					await mutator.call(tx, prisma, mutator.scheme(txFileData.language).parse(txFileData.mutatorParams))
 				})
 			} catch (error) {
 				console.log(LOG_PREFIX, colors.red(`Error while indexing transaction`))
@@ -302,7 +316,17 @@ export namespace Database {
 		if (path.length === 1 && !allowedPrismaMethodNamesSet.has(prop)) throw new Error("Not Allowed")
 	}
 
-	const transactionRequestDataScheme = (mutators: Mutators) =>
-		z.tuple([z.enum(Object.keys(mutators) as [string, ...string[]]), z.unknown(), z.instanceof(Uint8Array)])
-	type TransactionRequestData = z.infer<ReturnType<typeof transactionRequestDataScheme>>
+	const txSchemeFromMutators = (mutators: Mutators) => ({
+		requestScheme: z.object({
+			mutatorName: z.enum(Object.keys(mutators) as [string, ...string[]]),
+			mutatorParams: z.unknown(),
+			from: z.instanceof(Uint8Array),
+		}),
+		fileScheme: z.object({
+			mutatorName: z.enum(Object.keys(mutators) as [string, ...string[]]),
+			mutatorParams: z.unknown(),
+			language: z.string().optional(),
+			from: z.instanceof(Uint8Array),
+		}),
+	})
 }

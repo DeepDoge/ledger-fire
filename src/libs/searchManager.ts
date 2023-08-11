@@ -1,5 +1,5 @@
+import { App } from "@/app"
 import type { db } from "@/db/api"
-import { toLowerCaseTurkish } from "@/utils/casing"
 import type { Prisma } from "@prisma/client"
 
 export type SearchManager<
@@ -39,7 +39,7 @@ export namespace SearchManager {
 				// @ts-ignore
 				const results: Item<TQuery, TInclude>[] = []
 
-				const queries = params.queries(toLowerCaseTurkish(text))
+				const queries = params.queries(text.toLocaleLowerCase(App.language.ref))
 
 				for (const where of queries) {
 					const result: typeof results = await (query as any).findMany({

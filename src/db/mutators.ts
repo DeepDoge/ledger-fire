@@ -1,4 +1,4 @@
-import { toLowerCaseTurkish } from "@/utils/casing"
+import { toLocaleLowerCase } from "@/utils/casing"
 import { z } from "zod"
 import type { Database } from "."
 
@@ -11,10 +11,12 @@ export function createMutator<const TScheme extends Database.Mutator["scheme"]>(
 
 export namespace mutators {
 	export const createWarehouse = createMutator({
-		scheme: z.object({
-			name: z.string().transform(toLowerCaseTurkish),
-			address: z.string().transform(toLowerCaseTurkish),
-		}),
+		scheme(lang) {
+			return z.object({
+				name: z.string().transform(toLocaleLowerCase(lang)),
+				address: z.string().transform(toLocaleLowerCase(lang)),
+			})
+		},
 	})({
 		async call(_, db, { name, address }) {
 			return await db.warehouse.create({
@@ -27,9 +29,11 @@ export namespace mutators {
 	})
 
 	export const deleteWarehouse = createMutator({
-		scheme: z.object({
-			id: z.number(),
-		}),
+		scheme() {
+			return z.object({
+				id: z.number(),
+			})
+		},
 	})({
 		async call(_, db, { id }) {
 			return await db.warehouse.delete({
@@ -41,9 +45,11 @@ export namespace mutators {
 	})
 
 	export const createBrand = createMutator({
-		scheme: z.object({
-			name: z.string().transform(toLowerCaseTurkish),
-		}),
+		scheme(lang) {
+			return z.object({
+				name: z.string().transform(toLocaleLowerCase(lang)),
+			})
+		},
 	})({
 		async call(_, db, { name }) {
 			return await db.brand.create({
@@ -55,10 +61,12 @@ export namespace mutators {
 	})
 
 	export const createProduct = createMutator({
-		scheme: z.object({
-			name: z.string().transform(toLowerCaseTurkish),
-			brandId: z.number(),
-		}),
+		scheme(lang) {
+			return z.object({
+				name: z.string().transform(toLocaleLowerCase(lang)),
+				brandId: z.number(),
+			})
+		},
 	})({
 		async call(_, db, { name, brandId }) {
 			return await db.product.create({
@@ -71,10 +79,12 @@ export namespace mutators {
 	})
 
 	export const createProduct2 = createMutator({
-		scheme: z.object({
-			name: z.string().transform(toLowerCaseTurkish),
-			brandName: z.string().transform(toLowerCaseTurkish),
-		}),
+		scheme(lang) {
+			return z.object({
+				name: z.string().transform(toLocaleLowerCase(lang)),
+				brandName: z.string().transform(toLocaleLowerCase(lang)),
+			})
+		},
 	})({
 		async call(_, db, { name, brandName }) {
 			return await db.product.create({
@@ -92,9 +102,11 @@ export namespace mutators {
 	})
 
 	export const deleteProduct = createMutator({
-		scheme: z.object({
-			id: z.number(),
-		}),
+		scheme() {
+			return z.object({
+				id: z.number(),
+			})
+		},
 	})({
 		async call(_, db, { id }) {
 			return await db.product.delete({
@@ -106,14 +118,19 @@ export namespace mutators {
 	})
 
 	export const createCustomerAccount = createMutator({
-		scheme: z.object({
-			name: z.string(),
-			surname: z.string(),
-			tckn: z.string().optional(),
-			phone: z.string().optional(),
-			email: z.string().email().optional(),
-			address: z.string().optional(),
-		}),
+		scheme(lang) {
+			return z.object({
+				name: z.string().transform(toLocaleLowerCase(lang)),
+				surname: z.string().transform(toLocaleLowerCase(lang)),
+				tckn: z
+					.string()
+					.regex(/^\d{11}$/)
+					.optional(),
+				phone: z.string().optional(),
+				email: z.string().email().transform(toLocaleLowerCase(lang)).optional(),
+				address: z.string().transform(toLocaleLowerCase(lang)).optional(),
+			})
+		},
 	})({
 		async call(_, db, { name, surname, tckn, phone, email, address }) {
 			return await db.account.create({
@@ -129,13 +146,15 @@ export namespace mutators {
 	})
 
 	export const createSupplierAccount = createMutator({
-		scheme: z.object({
-			name: z.string(),
-			taxNumber: z.string(),
-			phone: z.string(),
-			email: z.string().email(),
-			address: z.string(),
-		}),
+		scheme(lang) {
+			return z.object({
+				name: z.string().transform(toLocaleLowerCase(lang)),
+				taxNumber: z.string(),
+				phone: z.string().optional(),
+				email: z.string().email().transform(toLocaleLowerCase(lang)).optional(),
+				address: z.string().transform(toLocaleLowerCase(lang)).optional(),
+			})
+		},
 	})({
 		async call(_, db, params) {
 			return await db.account.create({
@@ -152,19 +171,21 @@ export namespace mutators {
 	})
 
 	export const enterSupplierBill = createMutator({
-		scheme: z.object({
-			id: z.string(),
-			supplierId: z.number(),
-			items: z.array(
-				z.object({
-					name: z.string(),
-					code: z.string(),
-					quantity: z.bigint(),
-					price: z.bigint(),
-				})
-			),
-			timestamp: z.bigint(),
-		}),
+		scheme(lang) {
+			return z.object({
+				id: z.string(),
+				supplierId: z.number(),
+				items: z.array(
+					z.object({
+						name: z.string().transform(toLocaleLowerCase(lang)),
+						code: z.string(),
+						quantity: z.bigint(),
+						price: z.bigint(),
+					})
+				),
+				timestamp: z.bigint(),
+			})
+		},
 	})({
 		async call(tx, db, { id, supplierId, items, timestamp }) {
 			await db.supplierBill.create({
@@ -195,11 +216,13 @@ export namespace mutators {
 	})
 
 	export const matchSupplierProduct = createMutator({
-		scheme: z.object({
-			supplierId: z.number(),
-			supplierProductCode: z.string(),
-			localProductId: z.number(),
-		}),
+		scheme() {
+			return z.object({
+				supplierId: z.number(),
+				supplierProductCode: z.string(),
+				localProductId: z.number(),
+			})
+		},
 	})({
 		async call(_, db, { supplierId, supplierProductCode, localProductId }) {
 			await db.supplierProduct.update({
@@ -210,10 +233,12 @@ export namespace mutators {
 	})
 
 	export const verifySupplierBill = createMutator({
-		scheme: z.object({
-			id: z.string(),
-			warehouseId: z.number(),
-		}),
+		scheme() {
+			return z.object({
+				id: z.string(),
+				warehouseId: z.number(),
+			})
+		},
 	})({
 		async call(_, db, { id, warehouseId }) {
 			const bill = await db.supplierBill.update({
