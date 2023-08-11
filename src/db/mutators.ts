@@ -1,6 +1,6 @@
 import type { Prisma, Transaction } from "@prisma/client"
 import { z } from "zod"
-import type { Database } from "."
+import { Database } from "."
 
 export function createMutator<TParams extends Database.Mutator["scheme"], TReturns>(
 	scheme: TParams,
@@ -13,12 +13,12 @@ export function createMutator<TParams extends Database.Mutator["scheme"], TRetur
 }
 
 export namespace mutators {
-	export const createWarehouse = createMutator(
-		z.object({
+	export const createWarehouse = {
+		scheme: z.object({
 			name: z.string(),
 			address: z.string(),
 		}),
-		async (_, db, { name, address }) => {
+		async call(_, db, { name, address }) {
 			return await db.warehouse.create({
 				data: {
 					name,
@@ -26,7 +26,9 @@ export namespace mutators {
 				},
 			})
 		}
-	)
+	} satisfies Database.Mutator
+
+	
 
 	export const deleteWarehouse = createMutator(
 		z.object({
