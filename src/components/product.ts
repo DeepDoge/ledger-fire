@@ -1,5 +1,6 @@
 import { App } from "@/app"
 import { db } from "@/db/api"
+import { toLocaleCapitalized } from "@/utils/casing"
 import type { Prisma } from "@prisma/client"
 import { $ } from "master-ts/library/$"
 import { defineComponent } from "master-ts/library/component"
@@ -25,8 +26,8 @@ export function ProductComponent(product: Prisma.ProductGetPayload<{ include: { 
 	}
 
 	component.$html = html`
-		<div class="name">${product.name}</div>
-		<div class="brandName">${product.brand.name}</div>
+		<div class="name">${() => toLocaleCapitalized(App.language.ref)(product.name)}</div>
+		<div class="brandName">${() => toLocaleCapitalized(App.language.ref)(product.brand.name)}</div>
 		<button on:click=${destroy} disabled=${() => (destroying.ref ? "" : null)}>${() => (destroying.ref ? "Deleting..." : "Delete")}</button>
 	`
 

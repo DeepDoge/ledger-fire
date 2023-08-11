@@ -1,5 +1,6 @@
 import { App } from "@/app"
 import { db } from "@/db/api"
+import { toLocaleCapitalized } from "@/utils/casing"
 import type { Warehouse } from "@prisma/client"
 import { $ } from "master-ts/library/$"
 import { defineComponent } from "master-ts/library/component"
@@ -26,8 +27,8 @@ export function WarehouseComponent(warehouse: Warehouse) {
 	}
 
 	component.$html = html`
-		<div class="name">${warehouse.name}</div>
-		<div class="address">${warehouse.address}</div>
+		<div class="name">${() => toLocaleCapitalized(App.language.ref)(warehouse.name)}</div>
+		<div class="address">${() => toLocaleCapitalized(App.language.ref)(warehouse.address)}</div>
 		<button class="destroy" class:destroying=${destroying} on:click=${destroy}>Delete</button>
 	`
 
@@ -42,8 +43,6 @@ ComponentConstructor.$css = css`
 
 		background-color: hsl(var(--base--hsl));
 		color: hsl(var(--base-text--hsl));
-
-		text-transform: capitalize;
 	}
 
 	.address {
