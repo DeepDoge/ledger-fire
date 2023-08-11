@@ -217,13 +217,13 @@ export namespace Database {
 						})
 					).nextTxId
 				}
+
+				if (!indexedCurrentTx) await new Promise((resolve) => setTimeout(resolve, 500))
 				if (indexedPreviousTx === indexedCurrentTx) continue
 				indexedPreviousTx = indexedCurrentTx
-
 				if (!indexedCurrentTx) {
 					console.log(LOG_PREFIX, `Waiting for next transaction...`)
 					console.log(LOG_PREFIX_EMPTY, colors.gray("➜ "), colors.dim(`txId = ${nextTxId}`))
-					await new Promise((resolve) => setTimeout(resolve, 500))
 				}
 			}
 			console.log(LOG_PREFIX, "Indexer stopped")

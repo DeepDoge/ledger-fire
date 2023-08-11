@@ -33,8 +33,6 @@ export function WarehousesComponent() {
 	})
 
 	component.$html = html`
-		<h2>Warehouses</h2>
-
 		<x ${WarehouseFormComponent()} class="form"></x>
 
 		<x ${SearchComponent(searchManager, (item) => console.log(item))}></x>

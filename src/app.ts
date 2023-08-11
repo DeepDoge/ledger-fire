@@ -28,7 +28,17 @@ function AppComponent() {
 		<main style:grid-area=${"main"}>
 			${() => {
 				if (route.pathArr.ref[0] === "#warehouses") {
-					return $.await(import("./components/warehouses")).then((m) => m.WarehousesComponent())
+					return html`
+						<h1>Warehouses</h1>
+						${$.await(import("./components/warehouses")).then((m) => m.WarehousesComponent())}
+					`
+				}
+
+				if (route.pathArr.ref[0] === "#products") {
+					return html`
+						<h1>Products</h1>
+						${$.await(import("./components/products")).then((m) => m.ProductsComponent())}
+					`
 				}
 
 				return null
@@ -57,7 +67,8 @@ ComponentConstructor.$css = css`
 
 	main {
 		display: grid;
-
+		align-content: start;
+		gap: calc(var(--span) * 1);
 		padding: calc(var(--span) * 2);
 	}
 `

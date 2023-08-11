@@ -10,6 +10,7 @@ export function NavigationComponent() {
 	component.$html = html`
 		<nav>
 			<a href=${routeHash({ path: "warehouses" })}>Warehouses</a>
+			<a href=${routeHash({ path: "products" })}>Products</a>
 		</nav>
 	`
 
