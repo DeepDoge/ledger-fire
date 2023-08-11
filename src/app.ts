@@ -1,7 +1,8 @@
-import "@/import-styles"
+import "@/importStyles"
 
 import { $ } from "master-ts/library/$"
 import { defineComponent } from "master-ts/library/component"
+import type { TemplateValue } from "master-ts/library/template"
 import { css, html } from "master-ts/library/template"
 import { createDialogManager } from "./components/dialog"
 import { NavigationComponent } from "./navigation"
@@ -21,29 +22,41 @@ const ComponentConstructor = defineComponent("x-app")
 function AppComponent() {
 	const component = new ComponentConstructor()
 
+	const routeView = $.readable<Promise<TemplateValue>>(
+		(set) =>
+			route.pathArr.subscribe(
+				(pathArr) => {
+					if (pathArr[0] === "#warehouses") {
+						set(
+							import("./components/warehouses").then(
+								(m) => html`
+									<h1>Warehouses</h1>
+									${m.WarehousesComponent()}
+								`
+							)
+						)
+					} else if (pathArr[0] === "#products") {
+						set(
+							import("./components/products").then(
+								(m) => html`
+									<h1>Products</h1>
+									${m.ProductsComponent()}
+								`
+							)
+						)
+					} else {
+						set(Promise.resolve(null))
+					}
+				},
+				{ mode: "immediate" }
+			).unsubscribe
+	)
+
 	component.$html = html`
 		<header style:grid-area=${"header"}>
 			<x ${NavigationComponent()}></x>
 		</header>
-		<main style:grid-area=${"main"}>
-			${() => {
-				if (route.pathArr.ref[0] === "#warehouses") {
-					return html`
-						<h1>Warehouses</h1>
-						${$.await(import("./components/warehouses")).then((m) => m.WarehousesComponent())}
-					`
-				}
-
-				if (route.pathArr.ref[0] === "#products") {
-					return html`
-						<h1>Products</h1>
-						${$.await(import("./components/products")).then((m) => m.ProductsComponent())}
-					`
-				}
-
-				return null
-			}}
-		</main>
+		<main style:grid-area=${"main"}>${$.await(routeView)}</main>
 		<x ${dialogManager.component}></x>
 	`
 

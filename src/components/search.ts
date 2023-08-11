@@ -1,4 +1,4 @@
-import type { SearchManager } from "@/utils/search"
+import type { SearchManager } from "@/libs/searchManager"
 import { $ } from "master-ts/library/$"
 import { defineComponent } from "master-ts/library/component"
 import { css, html } from "master-ts/library/template"

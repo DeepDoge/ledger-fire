@@ -1,5 +1,5 @@
 import { db } from "@/db/api"
-import { SearchManager } from "@/utils/search"
+import { SearchManager } from "@/libs/searchManager"
 import type { Warehouse } from "@prisma/client"
 import { $ } from "master-ts/library/$"
 import { defineComponent } from "master-ts/library/component"

@@ -3,7 +3,7 @@ import type { db } from "@/db/api"
 import type { Prisma } from "@prisma/client"
 
 export type SearchManager<TQuery extends SearchManager.Query, TInclude extends SearchManager.Include<TQuery>> = {
-	search(text: string): Promise<SearchManager.Item<TQuery, TInclude>[]>
+	search(text: string, take: number): Promise<SearchManager.Item<TQuery, TInclude>[]>
 }
 
 export namespace SearchManager {
@@ -27,7 +27,7 @@ export namespace SearchManager {
 			include?: TInclude
 			queries: (text: string) => Where<TQuery>[]
 		}
-	): SearchManager<TQuery, TInclude> {
+	) {
 		return {
 			async search(text, take: number = 256) {
 				const ignoreIds: unknown[] = []
@@ -61,6 +61,6 @@ export namespace SearchManager {
 
 				return results
 			},
-		}
+		} as const satisfies SearchManager<TQuery, TInclude>
 	}
 }

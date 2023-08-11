@@ -1,9 +1,10 @@
 import { db } from "@/db/api"
-import { SearchManager } from "@/utils/search"
+import { SearchManager } from "@/libs/searchManager"
 import { $ } from "master-ts/library/$"
 import { defineComponent } from "master-ts/library/component"
 import { css, html } from "master-ts/library/template"
 import { ProductComponent } from "./product"
+import { ProductFormComponent } from "./productForm"
 
 const searchManager = SearchManager.create(db.query.product, {
 	itemIdKey: "id",
@@ -25,9 +26,11 @@ export function ProductsComponent() {
 	const searchText = $.writable("")
 	const searchTextDeferred = $.defer(searchText)
 
-	const productsPromise = $.derive(() => searchManager.search(searchTextDeferred.ref), [searchTextDeferred])
+	const productsPromise = $.derive(() => searchManager.search(searchTextDeferred.ref, 1024), [searchTextDeferred])
 
 	component.$html = html`
+		<x ${ProductFormComponent()} class="form"></x>
+
 		<input type="text" placeholder="Search" bind:value=${searchText} />
 
 		<div class="products">
