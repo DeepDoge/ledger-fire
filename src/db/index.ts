@@ -59,6 +59,53 @@ export namespace Database {
 		}
 	}
 
+	function createQueryProxy(apiUrl: string): QueryProxy {
+		function createProxy(path: PathToken[] = []): unknown {
+			return new Proxy(() => {}, {
+				get(_, prop) {
+					accessCheck(path, prop)
+					return createProxy([...path, { type: "property", prop }])
+				},
+				apply(_, __, args) {
+					return callRemote([...path, { type: "call", args }])
+				},
+			})
+		}
+
+		async function callRemote(path: PathToken[]) {
+			const response = await fetch(`${apiUrl}${QUERY_PATH}`, {
+				method: "POST",
+				body: Bytes.encode(path),
+				headers: {
+					"Content-Type": "application/octet-stream",
+				},
+			})
+
+			if (!response.ok) throw new Error("Server error")
+			const bytes = new Uint8Array(await response.arrayBuffer())
+			return Bytes.decode(bytes)
+		}
+
+		return createProxy() as QueryProxy
+	}
+
+	function createMutationProxy<TMutators extends Mutators>(mutators: TMutators, apiUrl: string): MutationProxy<TMutators> {
+		return new Proxy(() => {}, {
+			get(_: never, mutatorName: string) {
+				return async (params: unknown) => {
+					const requestData: TransactionRequestData = [mutatorName, mutators[mutatorName]!.scheme.parse(params), new Uint8Array(0)]
+					await fetch(`${apiUrl}${MUTATION_PATH}`, {
+						method: "POST",
+						body: Bytes.encode(requestData),
+						headers: {
+							"Content-Type": "application/octet-stream",
+						},
+					})
+				}
+			},
+		}) as unknown as MutationProxy<TMutators>
+	}
+
 	export async function startServer<TMutators extends Mutators>(mutators: TMutators, port: number) {
 		const express = await import("express").then((m) => m.default)
 		const fs = await import("fs/promises").then((m) => m.default)
@@ -230,53 +277,6 @@ export namespace Database {
 	])
 
 	type PathToken = z.infer<typeof pathTokenScheme>
-
-	function createQueryProxy(apiUrl: string): QueryProxy {
-		function createProxy(path: PathToken[] = []): unknown {
-			return new Proxy(() => {}, {
-				get(_, prop) {
-					accessCheck(path, prop)
-					return createProxy([...path, { type: "property", prop }])
-				},
-				apply(_, __, args) {
-					return callRemote([...path, { type: "call", args }])
-				},
-			})
-		}
-
-		async function callRemote(path: PathToken[]) {
-			const response = await fetch(`${apiUrl}${QUERY_PATH}`, {
-				method: "POST",
-				body: Bytes.encode(path),
-				headers: {
-					"Content-Type": "application/octet-stream",
-				},
-			})
-
-			if (!response.ok) throw new Error("Server error")
-			const bytes = new Uint8Array(await response.arrayBuffer())
-			return Bytes.decode(bytes)
-		}
-
-		return createProxy() as QueryProxy
-	}
-
-	function createMutationProxy<TMutators extends Mutators>(mutators: TMutators, apiUrl: string): MutationProxy<TMutators> {
-		return new Proxy(() => {}, {
-			get(_: never, mutatorName: string) {
-				return async (params: unknown) => {
-					const requestData: TransactionRequestData = [mutatorName, mutators[mutatorName]!.scheme.parse(params), new Uint8Array(0)]
-					await fetch(`${apiUrl}${MUTATION_PATH}`, {
-						method: "POST",
-						body: Bytes.encode(requestData),
-						headers: {
-							"Content-Type": "application/octet-stream",
-						},
-					})
-				}
-			},
-		}) as unknown as MutationProxy<TMutators>
-	}
 
 	const allowedPrismaMethodNames = [
 		"findUnique",
