@@ -1,4 +1,4 @@
-import { dialogManager } from "@/app"
+import { App } from "@/app"
 import { db } from "@/db/api"
 import type { Warehouse } from "@prisma/client"
 import { $ } from "master-ts/library/$"
@@ -16,7 +16,7 @@ export function WarehouseComponent(warehouse: Warehouse) {
 		.then(() => false)
 	async function destroy() {
 		await destroyPromise.ref
-		const confirm = await dialogManager.create({
+		const confirm = await App.dialogManager.create({
 			type: "confirm",
 			title: "Delete Warehouse",
 			message: `Are you sure you want to delete ${warehouse.name}?`,
@@ -42,6 +42,8 @@ ComponentConstructor.$css = css`
 
 		background-color: hsl(var(--base--hsl));
 		color: hsl(var(--base-text--hsl));
+
+		text-transform: capitalize;
 	}
 
 	.address {

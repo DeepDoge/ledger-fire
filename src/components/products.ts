@@ -48,5 +48,6 @@ export function ProductsComponent() {
 ComponentConstructor.$css = css`
 	:host {
 		display: grid;
+		text-transform: capitalize;
 	}
 `

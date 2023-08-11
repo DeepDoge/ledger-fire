@@ -1,3 +1,4 @@
+import { toLowerCaseTurkish } from "@/utils/casing"
 import { z } from "zod"
 import type { Database } from "."
 
@@ -11,8 +12,8 @@ export function createMutator<const TScheme extends Database.Mutator["scheme"]>(
 export namespace mutators {
 	export const createWarehouse = createMutator({
 		scheme: z.object({
-			name: z.string(),
-			address: z.string(),
+			name: z.string().transform(toLowerCaseTurkish),
+			address: z.string().transform(toLowerCaseTurkish),
 		}),
 	})({
 		async call(_, db, { name, address }) {
@@ -41,7 +42,7 @@ export namespace mutators {
 
 	export const createBrand = createMutator({
 		scheme: z.object({
-			name: z.string(),
+			name: z.string().transform(toLowerCaseTurkish),
 		}),
 	})({
 		async call(_, db, { name }) {
@@ -55,7 +56,7 @@ export namespace mutators {
 
 	export const createProduct = createMutator({
 		scheme: z.object({
-			name: z.string(),
+			name: z.string().transform(toLowerCaseTurkish),
 			brandId: z.number(),
 		}),
 	})({
@@ -71,8 +72,8 @@ export namespace mutators {
 
 	export const createProduct2 = createMutator({
 		scheme: z.object({
-			name: z.string(),
-			brandName: z.string(),
+			name: z.string().transform(toLowerCaseTurkish),
+			brandName: z.string().transform(toLowerCaseTurkish),
 		}),
 	})({
 		async call(_, db, { name, brandName }) {
@@ -80,10 +81,25 @@ export namespace mutators {
 				data: {
 					name,
 					brand: {
-						create: {
-							name: brandName,
+						connectOrCreate: {
+							where: { name: brandName },
+							create: { name: brandName },
 						},
 					},
+				},
+			})
+		},
+	})
+
+	export const deleteProduct = createMutator({
+		scheme: z.object({
+			id: z.number(),
+		}),
+	})({
+		async call(_, db, { id }) {
+			return await db.product.delete({
+				where: {
+					id,
 				},
 			})
 		},

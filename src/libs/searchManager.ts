@@ -1,9 +1,12 @@
-import { App } from "@/app"
 import type { db } from "@/db/api"
+import { toLowerCaseTurkish } from "@/utils/casing"
 import type { Prisma } from "@prisma/client"
 
-export type SearchManager<TQuery extends SearchManager.Query, TInclude extends SearchManager.Include<TQuery>> = {
-	search(text: string, take: number): Promise<SearchManager.Item<TQuery, TInclude>[]>
+export type SearchManager<
+	TQuery extends SearchManager.Query = SearchManager.Query,
+	TInclude extends SearchManager.Include<TQuery> = SearchManager.Include<TQuery>
+> = {
+	search(text: string, take?: number): Promise<SearchManager.Item<TQuery, TInclude>[]>
 }
 
 export namespace SearchManager {
@@ -28,7 +31,7 @@ export namespace SearchManager {
 			include?: TInclude
 			queries: (text: string) => Where<TQuery>[]
 		}
-	) {
+	): SearchManager<TQuery, TInclude> {
 		return {
 			async search(text, take: number = 256) {
 				const ignoreIds: unknown[] = []
@@ -36,14 +39,7 @@ export namespace SearchManager {
 				// @ts-ignore
 				const results: Item<TQuery, TInclude>[] = []
 
-				const queriesU = params.queries(text.toLocaleUpperCase(App.lang.ref))
-				const queriesL = params.queries(text.toLocaleLowerCase(App.lang.ref))
-				const queries: Where<TQuery>[] = []
-				for (let i = 0; i < queriesL.length; i++) queries.push({ OR: [queriesU[i], queriesL[i]] } as Where<TQuery>)
-				// TODO: Solution above is good enough for now, but need a more elegant solution.
-				// Tbh we can index many things on db as lowercase or uppercase then on front end we can add the casing, upper, lower, capitilized etc...
-				// This way we dont have to relay on person doing the mutation for casing.
-				// Mutator can have the locale of the client, so it can do the lowercasing based on that
+				const queries = params.queries(toLowerCaseTurkish(text))
 
 				for (const where of queries) {
 					const result: typeof results = await (query as any).findMany({
@@ -62,6 +58,6 @@ export namespace SearchManager {
 
 				return results
 			},
-		} as const satisfies SearchManager<TQuery, TInclude>
+		}
 	}
 }

@@ -38,7 +38,7 @@ model Warehouse {
 model Brand {
     id Int @id @default(autoincrement())
 
-    name     String
+    name     String    @unique
     products Product[]
 }
 
@@ -46,7 +46,7 @@ model Product {
     id Int @id @default(autoincrement())
 
     name    String
-    barcode String?
+    barcode String? @unique
     code    String  @unique @default(cuid())
     brand   Brand   @relation(fields: [brandId], references: [id])
 
@@ -54,6 +54,8 @@ model Product {
 
     stocks          Stock[]
     SupplierProduct SupplierProduct[]
+
+    @@unique([brandId, name])
 }
 
 model Stock {
