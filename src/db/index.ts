@@ -28,20 +28,17 @@ const MUTATION_PATH = "/db/mutate"
 const QUERY_PATH = "/db/query"
 
 export namespace Database {
-	export type Mutator<
-		TScheme extends z.ZodType<Record<PropertyKey, any>> = z.ZodType<Record<PropertyKey, any>>,
-		TCall extends (tx: Transaction, db: Prisma.TransactionClient, params: z.infer<TScheme>) => unknown = (
-			tx: Transaction,
-			db: Prisma.TransactionClient,
-			params: z.infer<TScheme>
-		) => unknown
-	> = {
+	namespace Mutator {
+		export type Call<TScheme extends Scheme> = (tx: Transaction, db: Prisma.TransactionClient, params: z.infer<TScheme>) => unknown
+		export type Scheme = z.ZodType<Record<PropertyKey, any>>
+	}
+	export type Mutator<TScheme extends Mutator.Scheme = Mutator.Scheme, TCall extends Mutator.Call<TScheme> = Mutator.Call<TScheme>> = {
 		call: TCall
 		scheme: TScheme
 	}
 	export type Mutators = Record<string, Mutator>
-	export type MutationProxy<T extends Mutators> = {
-		[K in keyof T]: (params: z.infer<T[K]["scheme"]>) => ReturnType<T[K]["call"]>
+	export type MutationProxy<TMutators extends Mutators> = {
+		[K in keyof TMutators]: (params: z.infer<TMutators[K]["scheme"]>) => ReturnType<TMutators[K]["call"]>
 	}
 
 	export type QueryProxy = {
@@ -50,19 +47,19 @@ export namespace Database {
 		}
 	}
 
-	export type Client<T extends Mutators> = {
+	export type Client<TMutators extends Mutators> = {
 		query: QueryProxy
-		mutate: MutationProxy<T>
+		mutate: MutationProxy<TMutators>
 	}
 
-	export function createClient<T extends Mutators>(mutators: T, apiUrl: string): Client<T> {
+	export function createClient<TMutators extends Mutators>(mutators: TMutators, apiUrl: string): Client<TMutators> {
 		return {
 			query: createQueryProxy(apiUrl),
-			mutate: createMutationProxy<T>(mutators, apiUrl),
+			mutate: createMutationProxy<TMutators>(mutators, apiUrl),
 		}
 	}
 
-	export async function startServer<T extends Mutators>(mutators: T, port: number) {
+	export async function startServer<TMutators extends Mutators>(mutators: TMutators, port: number) {
 		const express = await import("express").then((m) => m.default)
 		const fs = await import("fs/promises").then((m) => m.default)
 		const path = await import("path").then((m) => m.default)
@@ -264,7 +261,7 @@ export namespace Database {
 		return createProxy() as QueryProxy
 	}
 
-	function createMutationProxy<T extends Mutators>(mutators: T, apiUrl: string): MutationProxy<T> {
+	function createMutationProxy<TMutators extends Mutators>(mutators: TMutators, apiUrl: string): MutationProxy<TMutators> {
 		return new Proxy(() => {}, {
 			get(_: never, mutatorName: string) {
 				return async (params: unknown) => {
@@ -278,7 +275,7 @@ export namespace Database {
 					})
 				}
 			},
-		}) as unknown as MutationProxy<T>
+		}) as unknown as MutationProxy<TMutators>
 	}
 
 	const allowedPrismaMethodNames = [
