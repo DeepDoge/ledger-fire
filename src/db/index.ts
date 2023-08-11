@@ -28,11 +28,12 @@ const MUTATION_PATH = "/db/mutate"
 const QUERY_PATH = "/db/query"
 
 export namespace Database {
-	namespace Mutator {
-		export type Call<TScheme extends Scheme> = (tx: Transaction, db: Prisma.TransactionClient, params: z.infer<TScheme>) => unknown
-		export type Scheme = z.ZodType<Record<PropertyKey, any>>
+	export namespace Mutator {
+		export type Tx = Transaction & {}
+		export type Call<TScheme extends Scheme = any> = (tx: Tx, db: Prisma.TransactionClient, params: z.infer<TScheme>) => unknown
+		export type Scheme = z.ZodType<Record<PropertyKey, unknown>>
 	}
-	export type Mutator<TScheme extends Mutator.Scheme = Mutator.Scheme, TCall extends Mutator.Call<TScheme> = Mutator.Call<TScheme>> = {
+	export type Mutator<TScheme extends Mutator.Scheme = Mutator.Scheme, TCall extends Mutator.Call<TScheme> = Mutator.Call> = {
 		call: TCall
 		scheme: TScheme
 	}
@@ -52,7 +53,7 @@ export namespace Database {
 		mutate: MutationProxy<TMutators>
 	}
 
-	export function createClient<TMutators extends Mutators>(mutators: TMutators, apiUrl: string): Client<TMutators> {
+	export function createClient<const TMutators extends Mutators>(mutators: TMutators, apiUrl: string): Client<TMutators> {
 		return {
 			query: createQueryProxy(apiUrl),
 			mutate: createMutationProxy<TMutators>(mutators, apiUrl),
@@ -106,7 +107,7 @@ export namespace Database {
 		}) as unknown as MutationProxy<TMutators>
 	}
 
-	export async function startServer<TMutators extends Mutators>(mutators: TMutators, port: number) {
+	export async function startServer<const TMutators extends Mutators>(mutators: TMutators, port: number) {
 		const express = await import("express").then((m) => m.default)
 		const fs = await import("fs/promises").then((m) => m.default)
 		const path = await import("path").then((m) => m.default)

@@ -2,7 +2,7 @@ import { z } from "zod"
 import type { Database } from "."
 
 export function createMutator<const TScheme extends Database.Mutator["scheme"]>({ scheme }: { scheme: TScheme }) {
-	return <const TCall extends Database.Mutator<TScheme>["call"]>({ call }: { call: TCall }): Database.Mutator<TScheme, TCall> => ({
+	return <const TCall extends Database.Mutator.Call<TScheme>>({ call }: { call: TCall }): Database.Mutator<TScheme, TCall> => ({
 		scheme,
 		call,
 	})
