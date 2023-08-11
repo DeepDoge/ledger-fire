@@ -28,9 +28,16 @@ const MUTATION_PATH = "/db/mutate"
 const QUERY_PATH = "/db/query"
 
 export namespace Database {
-	export type Mutator = {
-		call: (tx: Transaction, db: Prisma.TransactionClient, params: any) => unknown
-		scheme: z.ZodType<Record<PropertyKey, any>>
+	export type Mutator<
+		TScheme extends z.ZodType<Record<PropertyKey, any>> = z.ZodType<Record<PropertyKey, any>>,
+		TCall extends (tx: Transaction, db: Prisma.TransactionClient, params: z.infer<TScheme>) => unknown = (
+			tx: Transaction,
+			db: Prisma.TransactionClient,
+			params: z.infer<TScheme>
+		) => unknown
+	> = {
+		call: TCall
+		scheme: TScheme
 	}
 	export type Mutators = Record<string, Mutator>
 	export type MutationProxy<T extends Mutators> = {

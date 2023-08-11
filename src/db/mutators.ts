@@ -1,23 +1,20 @@
-import type { Prisma, Transaction } from "@prisma/client"
 import { z } from "zod"
-import { Database } from "."
+import type { Database } from "."
 
-export function createMutator<TParams extends Database.Mutator["scheme"], TReturns>(
-	scheme: TParams,
-	fn: (tx: Transaction, db: Prisma.TransactionClient, params: z.infer<TParams>) => TReturns
-) {
-	return {
-		call: fn,
+export function createMutator<const TScheme extends Database.Mutator["scheme"]>({ scheme }: { scheme: TScheme }) {
+	return <const TCall extends Database.Mutator<TScheme>["call"]>({ call }: { call: TCall }): Database.Mutator<TScheme, TCall> => ({
 		scheme,
-	} satisfies Database.Mutator
+		call,
+	})
 }
 
 export namespace mutators {
-	export const createWarehouse = {
+	export const createWarehouse = createMutator({
 		scheme: z.object({
 			name: z.string(),
 			address: z.string(),
 		}),
+	})({
 		async call(_, db, { name, address }) {
 			return await db.warehouse.create({
 				data: {
@@ -25,58 +22,60 @@ export namespace mutators {
 					address,
 				},
 			})
-		}
-	} satisfies Database.Mutator
+		},
+	})
 
-	
-
-	export const deleteWarehouse = createMutator(
-		z.object({
+	export const deleteWarehouse = createMutator({
+		scheme: z.object({
 			id: z.number(),
 		}),
-		async (_, db, { id }) => {
+	})({
+		async call(_, db, { id }) {
 			return await db.warehouse.delete({
 				where: {
 					id,
 				},
 			})
-		}
-	)
+		},
+	})
 
-	export const createBrand = createMutator(
-		z.object({
+	export const createBrand = createMutator({
+		scheme: z.object({
 			name: z.string(),
 		}),
-		async (_, db, { name }) => {
+	})({
+		async call(_, db, { name }) {
 			return await db.brand.create({
 				data: {
 					name,
 				},
 			})
-		}
-	)
+		},
+	})
 
-	export const createProduct = createMutator(
-		z.object({
+	export const createProduct = createMutator({
+		scheme: z.object({
 			name: z.string(),
 			brandId: z.number(),
 		}),
-		async (_, db, { name, brandId }) => {
+	})({
+		async call(_, db, { name, brandId }) {
 			return await db.product.create({
 				data: {
 					name,
 					brandId,
 				},
 			})
-		}
-	)
+		},
+	})
 
-	export const createProduct2 = createMutator(
-		z.object({
+	export const createProduct2 = createMutator({
+		scheme: z.object({
 			name: z.string(),
 			brandName: z.string(),
 		}),
-		async (_, db, { name, brandName }) => {
+	})({
+		async call(_, db, { name, brandName }) {
 			return await db.product.create({
 				data: {
 					name,
@@ -87,11 +86,11 @@ export namespace mutators {
 					},
 				},
 			})
-		}
-	)
+		},
+	})
 
-	export const createCustomerAccount = createMutator(
-		z.object({
+	export const createCustomerAccount = createMutator({
+		scheme: z.object({
 			name: z.string(),
 			surname: z.string(),
 			tckn: z.string().optional(),
@@ -99,7 +98,8 @@ export namespace mutators {
 			email: z.string().email().optional(),
 			address: z.string().optional(),
 		}),
-		async (_, db, { name, surname, tckn, phone, email, address }) => {
+	})({
+		async call(_, db, { name, surname, tckn, phone, email, address }) {
 			return await db.account.create({
 				data: {
 					fullName: `${name} ${surname}`,
@@ -109,18 +109,19 @@ export namespace mutators {
 					address,
 				},
 			})
-		}
-	)
+		},
+	})
 
-	export const createSupplierAccount = createMutator(
-		z.object({
+	export const createSupplierAccount = createMutator({
+		scheme: z.object({
 			name: z.string(),
 			taxNumber: z.string(),
 			phone: z.string(),
 			email: z.string().email(),
 			address: z.string(),
 		}),
-		async (_, db, params) => {
+	})({
+		async call(_, db, params) {
 			return await db.account.create({
 				data: {
 					fullName: params.name,
@@ -131,11 +132,11 @@ export namespace mutators {
 					Supplier: { create: {} },
 				},
 			})
-		}
-	)
+		},
+	})
 
-	export const enterSupplierBill = createMutator(
-		z.object({
+	export const enterSupplierBill = createMutator({
+		scheme: z.object({
 			id: z.string(),
 			supplierId: z.number(),
 			items: z.array(
@@ -148,7 +149,8 @@ export namespace mutators {
 			),
 			timestamp: z.bigint(),
 		}),
-		async (tx, db, { id, supplierId, items, timestamp }) => {
+	})({
+		async call(tx, db, { id, supplierId, items, timestamp }) {
 			await db.supplierBill.create({
 				data: {
 					id,
@@ -173,29 +175,31 @@ export namespace mutators {
 					},
 				},
 			})
-		}
-	)
+		},
+	})
 
-	export const matchSupplierProduct = createMutator(
-		z.object({
+	export const matchSupplierProduct = createMutator({
+		scheme: z.object({
 			supplierId: z.number(),
 			supplierProductCode: z.string(),
 			localProductId: z.number(),
 		}),
-		async (_, db, { supplierId, supplierProductCode, localProductId }) => {
+	})({
+		async call(_, db, { supplierId, supplierProductCode, localProductId }) {
 			await db.supplierProduct.update({
 				where: { supplierId_code: { supplierId, code: supplierProductCode } },
 				data: { matchedProductId: localProductId },
 			})
-		}
-	)
+		},
+	})
 
-	export const verifySupplierBill = createMutator(
-		z.object({
+	export const verifySupplierBill = createMutator({
+		scheme: z.object({
 			id: z.string(),
 			warehouseId: z.number(),
 		}),
-		async (_, db, { id, warehouseId }) => {
+	})({
+		async call(_, db, { id, warehouseId }) {
 			const bill = await db.supplierBill.update({
 				include: {
 					SupplierBillItem: {
@@ -229,6 +233,6 @@ export namespace mutators {
 					},
 				},
 			})
-		}
-	)
+		},
+	})
 }
