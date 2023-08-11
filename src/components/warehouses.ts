@@ -9,8 +9,7 @@ import { SearchComponent } from "./search"
 import { WarehouseComponent } from "./warehouse"
 import { WarehouseFormComponent } from "./warehouseForm"
 
-const searchManager = SearchManager.create("warehouse", {
-	include: undefined,
+const searchManager = SearchManager.create(db.query.warehouse, {
 	itemIdKey: "id",
 	queries(text) {
 		return [{ name: { startsWith: text } }, { address: { startsWith: text } }, { name: { contains: text } }, { address: { contains: text } }]

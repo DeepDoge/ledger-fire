@@ -1,40 +1,51 @@
 import { App } from "@/app"
-import { db } from "@/db/api"
+import type { db } from "@/db/api"
+import type { Prisma } from "@prisma/client"
 
-export type SearchManager<TQueryName extends SearchManager.QueryName = SearchManager.QueryName> = {
-	search(text: string): Promise<SearchManager.Item<TQueryName>[]>
+export type SearchManager<TQuery extends SearchManager.Query, TInclude extends SearchManager.Include<TQuery>> = {
+	search(text: string): Promise<SearchManager.Item<TQuery, TInclude>[]>
 }
-export namespace SearchManager {
-	export type QueryName = keyof typeof db.query
-	export type Item<TQueryName extends QueryName> = Awaited<ReturnType<(typeof db.query)[TQueryName]["findUniqueOrThrow"]>>
-	export type Where<TQueryName extends QueryName> = NonNullable<Parameters<(typeof db.query)[TQueryName]["findMany"]>[0]>["where"]
-	// @ts-ignore
-	export type Include<TQueryName extends QueryName> = NonNullable<Parameters<(typeof db.query)[TQueryName]["findMany"]>[0]>["include"]
 
-	export function create<TQueryName extends QueryName, TItemIdKey extends keyof Item<TQueryName>>(
-		queryName: TQueryName,
+export namespace SearchManager {
+	export type Query = (typeof db.query)[keyof typeof db.query]
+	export type Where<TQuery extends Query> = NonNullable<Parameters<TQuery["findMany"]>[0]>["where"]
+	export type Include<TQuery extends Query> = ({ include: {} } & NonNullable<Parameters<TQuery["findMany"]>[0]>)["include"]
+
+	// Hacks to get correct type from prisma, because prisma cant just generete good types
+	// @ts-ignore
+	function ItemTypeHelper<TQuery extends Query["findMany"], TArgs extends Prisma.Args>() {
+		const query = null as unknown as TQuery
+		return null as unknown as Awaited<ReturnType<typeof query<TArgs>>>[number]
+	}
+	export type Item<TQuery extends Query, TInclude extends Include<TQuery>> = Awaited<ReturnType<TQuery["findMany"]>>[number] &
+		ReturnType<typeof ItemTypeHelper<TQuery["findMany"], { include: TInclude }>>
+
+	export function create<TQuery extends Query, const TInclude extends Include<TQuery>, const TItemIdKey extends keyof Item<TQuery, TInclude>>(
+		query: TQuery,
 		params: {
 			itemIdKey: TItemIdKey
-			include: Include<TQueryName>
-			queries: (text: string) => Where<TQueryName>[]
+			include?: TInclude
+			queries: (text: string) => Where<TQuery>[]
 		}
-	): SearchManager<TQueryName> {
+	): SearchManager<TQuery, TInclude> {
 		return {
 			async search(text, take: number = 256) {
 				const ignoreIds: unknown[] = []
-				const results: Item<TQueryName>[] = []
+
+				// @ts-ignore
+				const results: Item<TQuery, TInclude>[] = []
 
 				const queriesU = params.queries(text.toLocaleUpperCase(App.lang.ref))
 				const queriesL = params.queries(text.toLocaleLowerCase(App.lang.ref))
-				const queries: Where<TQueryName>[] = []
-				for (let i = 0; i < queriesL.length; i++) queries.push({ OR: [queriesU[i], queriesL[i]] } as Where<TQueryName>)
+				const queries: Where<TQuery>[] = []
+				for (let i = 0; i < queriesL.length; i++) queries.push({ OR: [queriesU[i], queriesL[i]] } as Where<TQuery>)
 				// TODO: Solution above is good enough for now, but need a more elegant solution.
 				// Tbh we can index many things on db as lowercase or uppercase then on front end we can add the casing, upper, lower, capitilized etc...
 				// This way we dont have to relay on person doing the mutation for casing.
 				// Mutator can have the locale of the client, so it can do the lowercasing based on that
 
 				for (const where of queries) {
-					const result: Item<TQueryName>[] = await (db.query[queryName] as any).findMany({
+					const result: typeof results = await (query as any).findMany({
 						where: { AND: [{ [params.itemIdKey]: { notIn: ignoreIds } }, where] },
 						include: params.include,
 						take,

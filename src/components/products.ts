@@ -1,8 +1,11 @@
+import { db } from "@/db/api"
 import { SearchManager } from "@/utils/search"
+import { $ } from "master-ts/library/$"
 import { defineComponent } from "master-ts/library/component"
 import { css, html } from "master-ts/library/template"
+import { ProductComponent } from "./product"
 
-const searchManager = SearchManager.create("product", {
+const searchManager = SearchManager.create(db.query.product, {
 	itemIdKey: "id",
 	include: { brand: true },
 	queries(text) {
@@ -19,7 +22,22 @@ const ComponentConstructor = defineComponent("x-products")
 export function ProductsComponent() {
 	const component = new ComponentConstructor()
 
-	component.$html = html``
+	const searchText = $.writable("")
+	const searchTextDeferred = $.defer(searchText)
+
+	const productsPromise = $.derive(() => searchManager.search(searchTextDeferred.ref), [searchTextDeferred])
+
+	component.$html = html`
+		<input type="text" placeholder="Search" bind:value=${searchText} />
+
+		<div class="products">
+			${$.await(productsPromise).then((products) =>
+				$.each(products)
+					.key((product) => product.id)
+					.as((product) => html` <x ${ProductComponent(product.ref)}></x> `)
+			)}
+		</div>
+	`
 
 	return component
 }
