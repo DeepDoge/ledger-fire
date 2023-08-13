@@ -15,15 +15,11 @@ model Transaction {
     id        BigInt @id
     from      Bytes
     timestamp BigInt
+    result    Bytes
 
     SupplierBill SupplierBill[]
 
     @@index([from])
-}
-
-model Indexing {
-    id       BigInt @id @default(0)
-    nextTxId BigInt @default(0)
 }
 
 model Warehouse {

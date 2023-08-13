@@ -9,7 +9,7 @@
 		"db:reset": "rm -rf ./prisma/migrations && rm ./prisma/dev.db && prisma migrate dev --name init && rm ./prisma/dev.db-journal",
 		"build": "vite build",
 		"preview": "vite preview --host",
-		"postinstall": "npm run prisma:reset"
+		"postinstall": "npm run db:reset"
 	},
 	"devDependencies": {
 		"@prisma/client": "^4.15.0",
