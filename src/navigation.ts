@@ -1,8 +1,8 @@
-import { defineComponent } from "master-ts/library/component"
+import { $ } from "master-ts/library/$"
 import { css, html } from "master-ts/library/template"
 import { routeHash } from "./router"
 
-const ComponentConstructor = defineComponent("x-navigation")
+const ComponentConstructor = $.component("x-navigation")
 
 export function NavigationComponent() {
 	const component = new ComponentConstructor()

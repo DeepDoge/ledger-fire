@@ -1,9 +1,8 @@
 import { db } from "@/db/api"
 import { $ } from "master-ts/library/$"
-import { defineComponent } from "master-ts/library/component"
 import { html } from "master-ts/library/template"
 
-const ComponentConstructor = defineComponent("x-supplier-form")
+const ComponentConstructor = $.component("x-supplier-form")
 export function SupplierFormComponent() {
 	const component = new ComponentConstructor()
 

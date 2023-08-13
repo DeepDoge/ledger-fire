@@ -1,7 +1,6 @@
 import { db } from "@/db/api"
 import { SearchManager } from "@/libs/searchManager"
 import { $ } from "master-ts/library/$"
-import { defineComponent } from "master-ts/library/component"
 import { css, html } from "master-ts/library/template"
 import { ProductComponent } from "./product"
 import { ProductFormComponent } from "./productForm"
@@ -19,7 +18,7 @@ const searchManager = SearchManager.create(db.query.product, {
 	},
 })
 
-const ComponentConstructor = defineComponent("x-products")
+const ComponentConstructor = $.component("x-products")
 export function ProductsComponent() {
 	const component = new ComponentConstructor()
 

@@ -1,5 +1,4 @@
 import { $ } from "master-ts/library/$"
-import { defineComponent } from "master-ts/library/component"
 import type { SignalReadable } from "master-ts/library/signal"
 import type { TemplateValue } from "master-ts/library/template"
 import { css, html } from "master-ts/library/template"
@@ -57,7 +56,7 @@ export function createDialogManager(): DialogManager {
 	return self
 }
 
-const ComponentConstructor = defineComponent("x-dialog")
+const ComponentConstructor = $.component("x-dialog")
 
 function DialogComponent(dialogs: SignalReadable<Dialog[]>) {
 	const component = new ComponentConstructor()

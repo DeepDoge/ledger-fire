@@ -3,10 +3,9 @@ import { db } from "@/db/api"
 import { toLocaleCapitalized } from "@/utils/casing"
 import type { Prisma } from "@prisma/client"
 import { $ } from "master-ts/library/$"
-import { defineComponent } from "master-ts/library/component"
 import { css, html } from "master-ts/library/template"
 
-const ComponentConstructor = defineComponent("x-product")
+const ComponentConstructor = $.component("x-product")
 export function ProductComponent(product: Prisma.ProductGetPayload<{ include: { brand: true } }>) {
 	const component = new ComponentConstructor()
 

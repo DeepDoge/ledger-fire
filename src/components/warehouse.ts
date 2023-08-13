@@ -3,10 +3,9 @@ import { db } from "@/db/api"
 import { toLocaleCapitalized } from "@/utils/casing"
 import type { Warehouse } from "@prisma/client"
 import { $ } from "master-ts/library/$"
-import { defineComponent } from "master-ts/library/component"
 import { css, html } from "master-ts/library/template"
 
-const ComponentConstructor = defineComponent("x-warehouse")
+const ComponentConstructor = $.component("x-warehouse")
 
 export function WarehouseComponent(warehouse: Warehouse) {
 	const component = new ComponentConstructor()

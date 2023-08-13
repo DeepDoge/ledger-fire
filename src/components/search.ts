@@ -1,9 +1,8 @@
 import type { SearchManager } from "@/libs/searchManager"
 import { $ } from "master-ts/library/$"
-import { defineComponent } from "master-ts/library/component"
 import { css, html } from "master-ts/library/template"
 
-const ComponentConstructor = defineComponent("x-search")
+const ComponentConstructor = $.component("x-search")
 
 export function SearchComponent<TSearchManager extends SearchManager>(
 	searchManager: TSearchManager,

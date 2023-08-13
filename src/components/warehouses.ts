@@ -2,7 +2,6 @@ import { db } from "@/db/api"
 import { SearchManager } from "@/libs/searchManager"
 import type { Warehouse } from "@prisma/client"
 import { $ } from "master-ts/library/$"
-import { defineComponent } from "master-ts/library/component"
 import { onMount$ } from "master-ts/library/lifecycle"
 import { css, html } from "master-ts/library/template"
 import { SearchComponent } from "./search"
@@ -16,7 +15,7 @@ const searchManager = SearchManager.create(db.query.warehouse, {
 	},
 })
 
-const ComponentConstructor = defineComponent("x-warehouses-page")
+const ComponentConstructor = $.component("x-warehouses-page")
 
 export function WarehousesComponent() {
 	const component = new ComponentConstructor()

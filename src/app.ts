@@ -1,7 +1,6 @@
 import "@/importStyles"
 
 import { $ } from "master-ts/library/$"
-import { defineComponent } from "master-ts/library/component"
 import type { TemplateValue } from "master-ts/library/template"
 import { css, html } from "master-ts/library/template"
 import { createDialogManager } from "./components/dialog"
@@ -13,7 +12,7 @@ export namespace App {
 	language.subscribe((lang) => (document.documentElement.lang = lang), { mode: "immediate" })
 	export const dialogManager = createDialogManager()
 
-	const ComponentConstructor = defineComponent("x-app")
+	const ComponentConstructor = $.component("x-app")
 	function Component() {
 		const component = new ComponentConstructor()
 
