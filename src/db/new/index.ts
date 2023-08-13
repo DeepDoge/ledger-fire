@@ -1,165 +1,73 @@
 import { Bytes } from "@/utils/bytes"
 import { PrismaClient } from "@prisma/client"
-import fs from "fs/promises"
-import path from "path"
-import { z } from "zod"
-import type { Database } from "./database"
+import colors from "colors/safe"
+import express from "express"
+import { Database } from "./database"
+import { FileBasedTxStore } from "./implementation/fileBasedTxStore"
+import { PrismaTxIndexer } from "./implementation/prismaTxIndexer"
+import { PrismaTxOperationFactory } from "./implementation/prismaTxOperationFactory"
+import { dbOperations } from "./operations"
 
-export const txRequestParser = z.object({
-	mutatorName: z.string(),
-	params: z.unknown(),
-	from: z.instanceof(Uint8Array),
-	language: z.string(),
-})
-export type TxRequest = z.infer<typeof txRequestParser>
+const LOG_PREFIX_TEXT = `[Database]` as const
+const LOG_PREFIX = colors.green(LOG_PREFIX_TEXT)
+const LOG_PREFIX_EMPTY = " ".repeat(LOG_PREFIX_TEXT.length)
 
-export const txParser = z.intersection(
-	txRequestParser,
-	z.object({
-		id: z.bigint(),
-		timestamp: z.number(),
-	})
-)
-export type Tx = z.infer<typeof txParser>
+const API_PORT = 23450 as const
 
-export type MutatorParserOptions = Pick<Tx, "language">
+const MUTATE_PATH = "/db/mutate" as const
+const QUERY_PATH = "/db/query" as const
 
-function createDatabase<TStore extends Database.TxStore<TxRequest, Tx>, TIndexer extends Database.TxIndexer<TxRequest, Tx>>({
-	txStore,
-	txIndexer,
-}: {
-	txStore: TStore
-	txIndexer: TIndexer
-}): Database {
-	return {
-		async startIndexer() {
-			await txIndexer.start({ txStore })
-		},
-		async handleTxRequest({ body }) {
-			if (!(body instanceof Uint8Array)) throw new Error("Request body must be a Uint8Array")
-			const txRequest = txRequestParser.parse(Bytes.decode(body))
+const txStore = await FileBasedTxStore.create({ dirname: "data" })
+const operationFactory = PrismaTxOperationFactory.create({ operations: dbOperations })
 
-			const tx = await txStore.add({ txRequest })
-
-			return Bytes.encode(tx)
-		},
-		async handleQueryRequest({ headers, body }) {
-			throw new Error("Not implemented")
-		},
-	}
-}
-
-async function createTxFileBasedStore({ dirname }: { dirname: string }): Promise<Database.TxStore<TxRequest, Tx>> {
-	dirname = path.resolve(dirname)
-	const idFilename = path.join(dirname, "id")
-
-	let nextId = await fs
-		.readFile(idFilename)
-		.then((data) => BigInt(data.toString("utf-8")))
-		.catch(() => BigInt(0))
-
-	return {
-		async add({ txRequest }) {
-			const tx: Tx = {
-				...txRequest,
-				id: nextId,
-				timestamp: Date.now(),
-			}
-
-			const txIdHex = tx.id.toString(16).padStart(16, "0")
-			const txFilename = path.join(dirname, ...txIdHex, "tx")
-			await fs.mkdir(path.dirname(txFilename), { recursive: true })
-			await fs.writeFile(txFilename, Bytes.encode(tx))
-
-			nextId++
-			await fs.writeFile(idFilename, nextId.toString())
-
-			return tx
-		},
-		async get({ id }) {
-			const txIdHex = id.toString(16).padStart(16, "0")
-			const txFilename = path.join(dirname, ...txIdHex, "tx")
-			const tx = await fs
-				.readFile(txFilename)
-				.then((data) => txParser.parse(Bytes.decode(data)))
-				.catch(() => null)
-
-			return tx
-		},
-	}
-}
-
-function createTxPrismaIndexer<TMutatorFactories extends Record<string, Database.Mutator.Factory<Tx, MutatorParserOptions>>>({
-	mutatorFactories,
+const prisma = new PrismaClient()
+const txIndexer = PrismaTxIndexer.create({
 	prisma,
-}: {
-	mutatorFactories: TMutatorFactories
-	prisma: PrismaClient
-}): Database.TxIndexer<TxRequest, Tx> {
-	return {
-		async start({ txStore }) {
-			while (true) {
-				await prisma.$transaction(async (prisma) => {
-					const txId = await prisma.transaction
-						.findFirstOrThrow({ select: { id: true }, orderBy: { id: "desc" } })
-						.then((tx) => tx.id + 1n)
-						.catch(() => 0n)
-					const tx = await txStore.get({ id: txId })
-					if (!tx) {
-						console.log(`Waiting for new tx ${txId.toString()}`)
-						await new Promise((resolve) => setTimeout(resolve, 1000))
-						return
-					}
-
-					console.log(`Indexing tx ${tx.id.toString()}`)
-
-					const mutatorFactory = mutatorFactories[tx.mutatorName]
-					if (!mutatorFactory) throw new Error(`Mutator ${tx.mutatorName} not found`)
-					const mutator = mutatorFactory({ language: tx.language })
-					const params = mutator.parser.parse(tx.params)
-					const result = await mutator.call({ tx, params, db: prisma })
-
-					await prisma.transaction.create({
-						data: {
-							id: tx.id,
-							from: Buffer.from(tx.from),
-							timestamp: tx.timestamp,
-							result: Buffer.from(Bytes.encode(result)),
-						},
-					})
-
-					console.log(`Indexed tx ${tx.id.toString()}`)
-				})
-			}
-		},
-	}
-}
-
-function createMutatorFactory() {
-	return {
-		parserFactory<TParser extends Database.Parser>(parserFactory: ({ language }: MutatorParserOptions) => TParser) {
-			return {
-				call<TReturns>(call: Database.Mutator.Call<Tx, TParser, TReturns>) {
-					return (options: MutatorParserOptions): Database.Mutator<Tx, TParser, TReturns> => ({
-						parser: parserFactory(options),
-						call,
-					})
-				},
-			}
-		},
-	}
-}
-
-const database = createDatabase({
-	txStore: await createTxFileBasedStore({ dirname: "data" }),
-	txIndexer: createTxPrismaIndexer({
-		mutatorFactories: {
-			"add-1": createMutatorFactory()
-				.parserFactory(() => z.number())
-				.call(async ({ params }) => {
-					return params + 1
-				}),
-		},
-		prisma: new PrismaClient(),
-	}),
+	txStore,
+	operationFactory,
 })
+
+const api = express()
+
+api.use(express.raw({ type: "application/octet-stream" }))
+
+handlePath(MUTATE_PATH, async ({ body }) => {
+	if (!(body instanceof Uint8Array)) throw new Error("Request body must be a Uint8Array")
+	const txRequest = Database.TxRequest.parser.parse(Bytes.decode(body))
+	const tx = await txStore.add({ txRequest })
+	return Bytes.encode(tx.id)
+})
+
+handlePath(QUERY_PATH, async ({ body }) => {
+	throw new Error("Not implemented")
+})
+
+api.listen(API_PORT, () => {
+	console.log(`${LOG_PREFIX} Listening on port ${API_PORT}`)
+	txIndexer.start()
+})
+
+function applyHeaders(res: express.Response) {
+	res.header("Access-Control-Allow-Origin", "*")
+	res.header("Access-Control-Allow-Methods", "POST")
+	res.header("Access-Control-Allow-Headers", "Content-Type")
+}
+
+function handlePath(path: string, handler: (request: express.Request) => Promise<Uint8Array>) {
+	api.options(path, (_, res) => {
+		applyHeaders(res)
+		res.send()
+	})
+
+	api.post(path, async (req, res) => {
+		applyHeaders(res)
+
+		try {
+			res.send(Buffer.from(await handler(req)))
+		} catch (error) {
+			console.error(error)
+			if (error instanceof Error) res.status(500).send(error.message)
+			else res.status(500).send("Unknown error")
+		}
+	})
+}
