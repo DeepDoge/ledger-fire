@@ -12,8 +12,8 @@ export function DialogComponent({ dialogs }: DialogManager) {
 	const lastDialog = $.derive(() => (dialogs.ref.length > 0 ? dialogs.ref[dialogs.ref.length - 1]! : null))
 
 	component.$html = html`
-		${$.match(lastDialog)
-			.case(null, () => null)
+		${$.switch(lastDialog)
+			.match(null, () => null)
 			.default(
 				(lastDialog) => html`
 					<div class="overlay">
@@ -33,23 +33,22 @@ export function DialogComponent({ dialogs }: DialogManager) {
 								}, [$.derive(() => typeof lastDialog.ref.message)])}
 							</div>
 							<div class="actions">
-								${$.derive(() => {
-									switch (lastDialog.ref.type) {
-										case "alert":
-											assert<SignalReadable<{ type: typeof lastDialog.ref.type }>>(lastDialog)
-											return html` <button on:click=${() => lastDialog.ref.resolve()}>${() => lastDialog.ref.confirm ?? "OK"}</button> `
-										case "confirm":
-											assert<SignalReadable<{ type: typeof lastDialog.ref.type }>>(lastDialog)
-											return html`
-												<button on:click=${() => lastDialog.ref.resolve(true)}>${() => lastDialog.ref.confirm ?? "OK"}</button>
-												<button on:click=${() => lastDialog.ref.resolve(false)}>${() => lastDialog.ref.cancel ?? "Cancel"}</button>
-											`
-										case "custom":
-											assert<SignalReadable<{ type: typeof lastDialog.ref.type }>>(lastDialog)
-											return null
-									}
-									lastDialog.ref satisfies never
-								}, [$.derive(() => lastDialog.ref.type)])}
+								${$.switch(lastDialog)
+									.match(
+										{ type: "alert" },
+										(lastDialog) => html`
+											<button on:click=${() => lastDialog.ref.resolve()}>${() => lastDialog.ref.confirm ?? "OK"}</button>
+										`
+									)
+									.match(
+										{ type: "confirm" },
+										(lastDialog) => html`
+											<button on:click=${() => lastDialog.ref.resolve(true)}>${() => lastDialog.ref.confirm ?? "OK"}</button>
+											<button on:click=${() => lastDialog.ref.resolve(false)}>${() => lastDialog.ref.cancel ?? "Cancel"}</button>
+										`
+									)
+									.match({ type: "custom" }, () => html``)
+									.default()}
 							</div>
 						</div>
 					</div>
