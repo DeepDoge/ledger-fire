@@ -1,4 +1,5 @@
 import { $ } from "master-ts/library/$"
+import type { SignalReadable } from "master-ts/library/signal"
 import { css, html } from "master-ts/library/template"
 import { assert } from "master-ts/library/utils/assert"
 import type { DialogManager } from "./dialogManager"
@@ -19,36 +20,34 @@ export function DialogComponent({ dialogs }: DialogManager) {
 						<div class="backdrop"></div>
 						<div class="dialog">
 							<div class="title">${() => lastDialog.ref.title}</div>
-							<div class="message">
-								${$.match($.derive(() => lastDialog.ref.message))
-									.caseTypeOf("string", (message) => message)
-									.caseTypeOf("function", (message) => message(() => message(false)))
-									.default()}
-							</div>
 							${$.match($.derive(() => lastDialog.ref.type))
 								.case("alert", (type) => {
-									const dialog = lastDialog.ref
-									assert<typeof type>(dialog.type)
+									assert<SignalReadable<{ type: typeof type }>>(lastDialog)
 									return html`
+										<div class="message">${() => lastDialog.ref.message}</div>
 										<div class="actions">
-											<button on:click=${() => dialog.resolve(true)}>${() => dialog.confirm ?? "OK"}</button>
+											<button on:click=${() => lastDialog.ref.resolve()}>${() => lastDialog.ref.confirm ?? "OK"}</button>
 										</div>
 									`
 								})
 								.case("confirm", (type) => {
-									const dialog = lastDialog.ref
-									assert<typeof type>(dialog.type)
+									assert<SignalReadable<{ type: typeof type }>>(lastDialog)
 									return html`
+										<div class="message">${() => lastDialog.ref.message}</div>
 										<div class="actions">
-											<button on:click=${() => dialog.resolve(true)}>${() => dialog.confirm ?? "OK"}</button>
-											<button on:click=${() => dialog.resolve(false)}>${() => dialog.cancel ?? "Cancel"}</button>
+											<button on:click=${() => lastDialog.ref.resolve(true)}>${() => lastDialog.ref.confirm ?? "OK"}</button>
+											<button on:click=${() => lastDialog.ref.resolve(false)}>
+												${() => lastDialog.ref.cancel ?? "Cancel"}
+											</button>
 										</div>
 									`
 								})
 								.case("custom", (type) => {
-									const dialog = lastDialog.ref
-									assert<typeof type>(dialog.type)
-									return html` <div class="actions"></div> `
+									assert<SignalReadable<{ type: typeof type }>>(lastDialog)
+									return html`
+										<div class="message">${() => lastDialog.ref.message(lastDialog.ref.resolve)}</div>
+										<div class="actions"></div>
+									`
 								})
 								.default()}
 						</div>

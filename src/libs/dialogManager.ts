@@ -4,23 +4,27 @@ import type { TemplateValue } from "master-ts/library/template"
 
 export type DialogBase = {
 	title: string
-	message: string | ((close: () => void) => TemplateValue)
-	resolve(value: boolean): void
 }
 
 export type DialogAlert = DialogBase & {
 	type: "alert"
+	message: string
 	confirm?: string
+	resolve(): void
 }
 
 export type DialogConfirm = DialogBase & {
 	type: "confirm"
+	message: string
 	confirm?: string
 	cancel?: string
+	resolve(value: boolean): void
 }
 
 export type DialogCustom = DialogBase & {
 	type: "custom"
+	message(close: () => void): TemplateValue
+	resolve(): void
 }
 
 export type Dialog = DialogAlert | DialogConfirm | DialogCustom
