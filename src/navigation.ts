@@ -2,10 +2,10 @@ import { $ } from "master-ts/library/$"
 import { css, html } from "master-ts/library/template"
 import { routeHash } from "./router"
 
-const ComponentConstructor = $.component("x-navigation")
+const Component = $.component("x-navigation")
 
 export function NavigationComponent() {
-	const component = new ComponentConstructor()
+	const component = new Component()
 
 	component.$html = html`
 		<nav>
@@ -17,7 +17,7 @@ export function NavigationComponent() {
 	return component
 }
 
-ComponentConstructor.$css = css`
+Component.$css = css`
 	:host {
 		display: contents;
 	}

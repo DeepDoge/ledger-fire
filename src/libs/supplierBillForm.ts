@@ -2,7 +2,7 @@ import { db } from "@/db/api"
 import { $ } from "master-ts/library/$"
 import { html } from "master-ts/library/template"
 
-const ComponentConstructor = $.component("x-supplier-bill-form")
+const Component = $.component("x-supplier-bill-form")
 export function SupplierBillFormComponent() {
 	/* 
 		TODO:
@@ -28,7 +28,7 @@ export function SupplierBillFormComponent() {
 		it should be simple and shouldnt require any mouse use.
 	*/
 
-	const component = new ComponentConstructor()
+	const component = new Component()
 
 	const name = $.writable("")
 	const address = $.writable("")

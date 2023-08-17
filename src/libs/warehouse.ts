@@ -5,10 +5,10 @@ import type { Warehouse } from "@prisma/client"
 import { $ } from "master-ts/library/$"
 import { css, html } from "master-ts/library/template"
 
-const ComponentConstructor = $.component("x-warehouse")
+const Component = $.component("x-warehouse")
 
 export function WarehouseComponent(warehouse: Warehouse) {
-	const component = new ComponentConstructor()
+	const component = new Component()
 
 	const destroyPromise = $.writable<Promise<unknown>>(Promise.resolve())
 	const destroying = $.await(destroyPromise)
@@ -34,7 +34,7 @@ export function WarehouseComponent(warehouse: Warehouse) {
 	return component
 }
 
-ComponentConstructor.$css = css`
+Component.$css = css`
 	:host {
 		display: grid;
 		gap: calc(var(--span) * 0.25);

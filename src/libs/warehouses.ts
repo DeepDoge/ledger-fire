@@ -15,10 +15,10 @@ const searchManager = SearchManager.create(db.query.warehouse, {
 	},
 })
 
-const ComponentConstructor = $.component("x-warehouses-page")
+const Component = $.component("x-warehouses-page")
 
 export function WarehousesComponent() {
-	const component = new ComponentConstructor()
+	const component = new Component()
 
 	const warehouses = $.writable<Warehouse[]>([])
 
@@ -45,7 +45,7 @@ export function WarehousesComponent() {
 	return component
 }
 
-ComponentConstructor.$css = css`
+Component.$css = css`
 	:host {
 		display: grid;
 		gap: calc(var(--span) * 0.25);

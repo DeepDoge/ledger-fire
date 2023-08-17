@@ -18,9 +18,9 @@ const searchManager = SearchManager.create(db.query.product, {
 	},
 })
 
-const ComponentConstructor = $.component("x-products")
+const Component = $.component("x-products")
 export function ProductsComponent() {
-	const component = new ComponentConstructor()
+	const component = new Component()
 
 	const searchText = $.writable("")
 	const searchTextDeferred = $.defer(searchText)
@@ -44,7 +44,7 @@ export function ProductsComponent() {
 	return component
 }
 
-ComponentConstructor.$css = css`
+Component.$css = css`
 	:host {
 		display: grid;
 	}

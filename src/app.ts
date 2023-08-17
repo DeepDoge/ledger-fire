@@ -3,7 +3,8 @@ import "@/importStyles"
 import { $ } from "master-ts/library/$"
 import type { TemplateValue } from "master-ts/library/template"
 import { css, html } from "master-ts/library/template"
-import { createDialogManager } from "./components/dialog"
+import { DialogComponent } from "./libs/dialog"
+import { createDialogManager } from "./libs/dialogManager"
 import { NavigationComponent } from "./navigation"
 import { route } from "./router"
 
@@ -12,9 +13,9 @@ export namespace App {
 	language.subscribe((lang) => (document.documentElement.lang = lang), { mode: "immediate" })
 	export const dialogManager = createDialogManager()
 
-	const ComponentConstructor = $.component("x-app")
-	function Component() {
-		const component = new ComponentConstructor()
+	const Component = $.component("x-app")
+	function AppComponent() {
+		const component = new Component()
 
 		const routeView = $.readable<Promise<TemplateValue>>(
 			(set) =>
@@ -22,7 +23,7 @@ export namespace App {
 					(pathArr) => {
 						if (pathArr[0] === "#warehouses") {
 							set(
-								import("./components/warehouses").then(
+								import("./libs/warehouses").then(
 									(m) => html`
 										<h1>Warehouses</h1>
 										${m.WarehousesComponent()}
@@ -31,7 +32,7 @@ export namespace App {
 							)
 						} else if (pathArr[0] === "#products") {
 							set(
-								import("./components/products").then(
+								import("./libs/products").then(
 									(m) => html`
 										<h1>Products</h1>
 										${m.ProductsComponent()}
@@ -51,13 +52,13 @@ export namespace App {
 				<x ${NavigationComponent()}></x>
 			</header>
 			<main style:grid-area=${"main"}>${$.await(routeView)}</main>
-			<x ${App.dialogManager.component}></x>
+			<x ${DialogComponent(dialogManager)}></x>
 		`
 
 		return component
 	}
 
-	ComponentConstructor.$css = css`
+	Component.$css = css`
 		:host {
 			display: grid;
 			grid-template-areas: "header main";
@@ -80,5 +81,5 @@ export namespace App {
 		}
 	`
 
-	document.querySelector("#app")?.replaceWith(Component())
+	document.querySelector("#app")?.replaceWith(AppComponent())
 }

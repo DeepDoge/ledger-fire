@@ -5,9 +5,9 @@ import type { Prisma } from "@prisma/client"
 import { $ } from "master-ts/library/$"
 import { css, html } from "master-ts/library/template"
 
-const ComponentConstructor = $.component("x-product")
+const Component = $.component("x-product")
 export function ProductComponent(product: Prisma.ProductGetPayload<{ include: { brand: true } }>) {
-	const component = new ComponentConstructor()
+	const component = new Component()
 
 	const destroyPromise = $.writable<Promise<unknown>>(Promise.resolve())
 	const destroying = $.await(destroyPromise)
@@ -33,7 +33,7 @@ export function ProductComponent(product: Prisma.ProductGetPayload<{ include: { 
 	return component
 }
 
-ComponentConstructor.$css = css`
+Component.$css = css`
 	:host {
 		display: grid;
 		padding: calc(var(--span) * 2);

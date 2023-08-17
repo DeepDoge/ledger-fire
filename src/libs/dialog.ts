@@ -1,65 +1,12 @@
 import { $ } from "master-ts/library/$"
-import type { SignalReadable } from "master-ts/library/signal"
-import type { TemplateValue } from "master-ts/library/template"
 import { css, html } from "master-ts/library/template"
 import { assert } from "master-ts/library/utils/assert"
+import type { DialogManager } from "./dialogManager"
 
-export type DialogBase = {
-	title: string
-	message: string | ((close: () => void) => TemplateValue)
-	resolve(value: boolean): void
-}
+const Component = $.component("x-dialog")
 
-export type DialogAlert = DialogBase & {
-	type: "alert"
-	confirm?: string
-}
-
-export type DialogConfirm = DialogBase & {
-	type: "confirm"
-	confirm?: string
-	cancel?: string
-}
-
-export type DialogCustom = DialogBase & {
-	type: "custom"
-}
-
-export type Dialog = DialogAlert | DialogConfirm | DialogCustom
-
-export type DialogManager = {
-	create<T extends Dialog>(init: Omit<T, "resolve">): Promise<Parameters<T["resolve"]>[0]>
-	component: ReturnType<typeof DialogComponent>
-}
-
-export function createDialogManager(): DialogManager {
-	const dialogs = $.writable<Dialog[]>([])
-
-	const self: DialogManager = {
-		create(init) {
-			return new Promise((resolve) => {
-				const dialog = {
-					...init,
-					resolve(...args: Parameters<typeof resolve>) {
-						dialogs.ref = dialogs.ref.filter((item) => item !== dialog)
-						resolve(...args)
-					},
-				} as Dialog
-
-				dialogs.ref.push(dialog)
-				dialogs.signal()
-			})
-		},
-		component: DialogComponent(dialogs),
-	}
-
-	return self
-}
-
-const ComponentConstructor = $.component("x-dialog")
-
-function DialogComponent(dialogs: SignalReadable<Dialog[]>) {
-	const component = new ComponentConstructor()
+export function DialogComponent({ dialogs }: DialogManager) {
+	const component = new Component()
 
 	const lastDialog = $.derive(() => (dialogs.ref.length > 0 ? dialogs.ref[dialogs.ref.length - 1]! : null))
 
@@ -113,7 +60,7 @@ function DialogComponent(dialogs: SignalReadable<Dialog[]>) {
 	return component
 }
 
-ComponentConstructor.$css = css`
+Component.$css = css`
 	:host {
 		display: contents;
 	}

@@ -2,9 +2,9 @@ import { db } from "@/db/api"
 import { $ } from "master-ts/library/$"
 import { html } from "master-ts/library/template"
 
-const ComponentConstructor = $.component("x-supplier-form")
+const Component = $.component("x-supplier-form")
 export function SupplierFormComponent() {
-	const component = new ComponentConstructor()
+	const component = new Component()
 
 	const name = $.writable("")
 	const address = $.writable("")

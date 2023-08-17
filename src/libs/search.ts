@@ -2,13 +2,13 @@ import type { SearchManager } from "@/libs/searchManager"
 import { $ } from "master-ts/library/$"
 import { css, html } from "master-ts/library/template"
 
-const ComponentConstructor = $.component("x-search")
+const Component = $.component("x-search")
 
 export function SearchComponent<TSearchManager extends SearchManager>(
 	searchManager: TSearchManager,
 	onSelect: (item: Awaited<ReturnType<TSearchManager["search"]>>[0] | null) => any
 ) {
-	const component = new ComponentConstructor()
+	const component = new Component()
 
 	const searchText = $.writable("")
 	const searchTextDeferred = $.defer(searchText)
@@ -79,7 +79,7 @@ export function SearchComponent<TSearchManager extends SearchManager>(
 	return component
 }
 
-ComponentConstructor.$css = css`
+Component.$css = css`
 	:host {
 		display: grid;
 		position: relative;
