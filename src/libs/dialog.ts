@@ -20,36 +20,43 @@ export function DialogComponent({ dialogs }: DialogManager) {
 						<div class="backdrop"></div>
 						<div class="dialog">
 							<div class="title">${() => lastDialog.ref.title}</div>
-							${$.match($.derive(() => lastDialog.ref.type))
-								.case("alert", (type) => {
-									assert<SignalReadable<{ type: typeof type }>>(lastDialog)
-									return html`
-										<div class="message">${() => lastDialog.ref.message}</div>
-										<div class="actions">
-											<button on:click=${() => lastDialog.ref.resolve()}>${() => lastDialog.ref.confirm ?? "OK"}</button>
-										</div>
-									`
-								})
-								.case("confirm", (type) => {
-									assert<SignalReadable<{ type: typeof type }>>(lastDialog)
-									return html`
-										<div class="message">${() => lastDialog.ref.message}</div>
-										<div class="actions">
-											<button on:click=${() => lastDialog.ref.resolve(true)}>${() => lastDialog.ref.confirm ?? "OK"}</button>
-											<button on:click=${() => lastDialog.ref.resolve(false)}>
-												${() => lastDialog.ref.cancel ?? "Cancel"}
-											</button>
-										</div>
-									`
-								})
-								.case("custom", (type) => {
-									assert<SignalReadable<{ type: typeof type }>>(lastDialog)
-									return html`
-										<div class="message">${() => lastDialog.ref.message(lastDialog.ref.resolve)}</div>
-										<div class="actions"></div>
-									`
-								})
-								.default()}
+							<div class="message">
+								${$.derive(() => {
+									switch (typeof lastDialog.ref.message) {
+										case "string":
+											assert<SignalReadable<{ message: string }>>(lastDialog)
+											return html`${() => lastDialog.ref.message}`
+										case "function":
+											assert<SignalReadable<{ message(...args: any[]): any }>>(lastDialog)
+											return html` ${$.derive(() => lastDialog.ref.message(lastDialog.ref.resolve), [lastDialog])} `
+									}
+								}, [$.derive(() => typeof lastDialog.ref.message)])}
+							</div>
+							<div class="actions">
+								${$.derive(() => {
+									switch (lastDialog.ref.type) {
+										case "alert":
+											assert<SignalReadable<{ type: typeof lastDialog.ref.type }>>(lastDialog)
+											return html`
+												<button on:click=${() => lastDialog.ref.resolve()}>${() => lastDialog.ref.confirm ?? "OK"}</button>
+											`
+										case "confirm":
+											assert<SignalReadable<{ type: typeof lastDialog.ref.type }>>(lastDialog)
+											return html`
+												<button on:click=${() => lastDialog.ref.resolve(true)}>
+													${() => lastDialog.ref.confirm ?? "OK"}
+												</button>
+												<button on:click=${() => lastDialog.ref.resolve(false)}>
+													${() => lastDialog.ref.cancel ?? "Cancel"}
+												</button>
+											`
+										case "custom":
+											assert<SignalReadable<{ type: typeof lastDialog.ref.type }>>(lastDialog)
+											return null
+									}
+									lastDialog.ref satisfies never
+								}, [$.derive(() => lastDialog.ref.type)])}
+							</div>
 						</div>
 					</div>
 				`
