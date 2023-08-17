@@ -3,7 +3,7 @@
 		{
 			"files": ["*"],
 			"options": {
-				"tabWidth": 4,
+				"tabWidth": 3,
 				"useTabs": true,
 				"bracketSameLine": true,
 				"printWidth": 150,
