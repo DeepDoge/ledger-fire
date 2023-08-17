@@ -37,18 +37,12 @@ export function DialogComponent({ dialogs }: DialogManager) {
 									switch (lastDialog.ref.type) {
 										case "alert":
 											assert<SignalReadable<{ type: typeof lastDialog.ref.type }>>(lastDialog)
-											return html`
-												<button on:click=${() => lastDialog.ref.resolve()}>${() => lastDialog.ref.confirm ?? "OK"}</button>
-											`
+											return html` <button on:click=${() => lastDialog.ref.resolve()}>${() => lastDialog.ref.confirm ?? "OK"}</button> `
 										case "confirm":
 											assert<SignalReadable<{ type: typeof lastDialog.ref.type }>>(lastDialog)
 											return html`
-												<button on:click=${() => lastDialog.ref.resolve(true)}>
-													${() => lastDialog.ref.confirm ?? "OK"}
-												</button>
-												<button on:click=${() => lastDialog.ref.resolve(false)}>
-													${() => lastDialog.ref.cancel ?? "Cancel"}
-												</button>
+												<button on:click=${() => lastDialog.ref.resolve(true)}>${() => lastDialog.ref.confirm ?? "OK"}</button>
+												<button on:click=${() => lastDialog.ref.resolve(false)}>${() => lastDialog.ref.cancel ?? "Cancel"}</button>
 											`
 										case "custom":
 											assert<SignalReadable<{ type: typeof lastDialog.ref.type }>>(lastDialog)

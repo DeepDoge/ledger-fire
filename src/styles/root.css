@@ -208,9 +208,7 @@
 						var(--text--lightness-min),
 						min(
 							var(--text--lightness-max),
-							calc(
-								calc(calc(var(--text--flip-after) - var(--background--lightness-value)) + var(--number--epsilon)) * var(--number--max)
-							)
+							calc(calc(calc(var(--text--flip-after) - var(--background--lightness-value)) + var(--number--epsilon)) * var(--number--max))
 						)
 					)
 			);
