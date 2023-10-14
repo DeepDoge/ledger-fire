@@ -1,8 +1,5 @@
 {
 	"compilerOptions": {
-		"types": ["bun-types"],
-
-		"lib": ["ESNext"],
 		"module": "ESNext",
 		"target": "ESNext",
 
@@ -11,8 +8,8 @@
 		"noEmit": true,
 		"moduleDetection": "force",
 
-		"allowJs": true, // allow importing `.js` from `.ts`
-		"esModuleInterop": true, // allow default imports for CommonJS modules
+		"allowJs": true,
+		"esModuleInterop": true,
 
 		"skipLibCheck": true,
 		"strict": true,
@@ -26,5 +23,5 @@
 			"@/*": ["./src/*"]
 		}
 	},
-	"include": ["src", "scripts"]
+	"include": ["."]
 }

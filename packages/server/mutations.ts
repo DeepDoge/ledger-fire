@@ -1,4 +1,4 @@
-import { toLocaleLowerCase } from "@/utils/casing"
+import { toLocaleLowerCase } from "common/utils/casing"
 import { z } from "zod"
 import { Database } from "./database"
 import { PrismaTxMutationFactory } from "./implementation/prismaTxMutationFactory"

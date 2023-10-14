@@ -1,5 +1,5 @@
-import { Bytes } from "@/utils/bytes"
 import type { PrismaClient } from "@prisma/client"
+import { Bytes } from "common/utils/bytes"
 import type { Database } from "../database"
 
 export type PrismaTxIndexer = Database.TxIndexer & {}
@@ -46,7 +46,7 @@ export namespace PrismaTxIndexer {
 
 							console.log(`Indexed tx ${tx.id.toString()}`)
 						} catch (error) {
-							console.error(`Failed to index tx ${tx.id.toString()}`, error)
+							console.error(`Failed to index tx ${tx.id.toString()}`, "\n", error)
 							await prisma.transaction.create({
 								data: {
 									id: tx.id,

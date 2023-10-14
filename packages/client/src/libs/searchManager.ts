@@ -17,12 +17,12 @@ export namespace SearchManager {
 	// Hacks to get correct type from prisma, because prisma cant just generete good types
 	// Because Prisma doesnt have something nice like this Prisma.GetResult<TModelName, TInclude, TSelect>
 	// @ts-ignore
-	function ItemTypeHelper<TQuery extends Query["findMany"], TArgs extends Prisma.Args>() {
-		const findMany = null as unknown as TQuery
-		return null as unknown as Awaited<ReturnType<typeof findMany<TArgs>>>[number]
+	function ItemTypeHelper<TQuery extends Query["findFirstOrThrow"], TArgs extends Prisma.Args>() {
+		const findFirstOrThrow = null as unknown as TQuery
+		return null as unknown as Awaited<ReturnType<typeof findFirstOrThrow<TArgs>>>
 	}
-	export type Item<TQuery extends Query, TInclude extends Include<TQuery>> = Awaited<ReturnType<TQuery["findMany"]>>[number] &
-		ReturnType<typeof ItemTypeHelper<TQuery["findMany"], { include: TInclude }>>
+	export type Item<TQuery extends Query, TInclude extends Include<TQuery>> = Awaited<ReturnType<TQuery["findFirstOrThrow"]>> &
+		ReturnType<typeof ItemTypeHelper<TQuery["findFirstOrThrow"], { include: TInclude }>>
 
 	export function create<TQuery extends Query, const TInclude extends Include<TQuery>, const TItemIdKey extends keyof Item<TQuery, TInclude>>(
 		query: TQuery,

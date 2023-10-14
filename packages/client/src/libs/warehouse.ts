@@ -1,8 +1,8 @@
 import { tx } from "@/api/client"
 import { App } from "@/app"
 import { commonStyle } from "@/importStyles"
-import { toLocaleCapitalized } from "@/utils/casing"
 import type { Warehouse } from "@prisma/client"
+import { toLocaleCapitalized } from "common/utils/casing"
 import { derive, fragment, signal } from "master-ts/core"
 import { awaited, css, defineCustomTag, flatten, html } from "master-ts/extra"
 

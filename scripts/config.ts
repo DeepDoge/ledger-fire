@@ -1,11 +1,12 @@
 import path from "path"
 
 export namespace ScriptsConfig {
-	export const root = path.resolve(path.join(import.meta.dir, ".."))
-	export const distDirname = path.join(root, "dist")
-	export const srcDirname = path.join(root, "src")
+	export const root = path.resolve(".")
 
-	export const html = path.join(root, "index.html")
-	export const ts = path.join(srcDirname, "app.ts")
-	export const dist = path.join(distDirname, "index.html")
+	export const clientDir = path.join(root, "packages", "client")
+	export const html = path.join(clientDir, "index.html")
+	export const ts = path.join(clientDir, "src", "app.ts")
+
+	export const outDir = path.join(root, "out")
+	export const out = path.join(outDir, "index.html")
 }
