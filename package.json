@@ -3,30 +3,22 @@
 	"name": "ledger-fire",
 	"scripts": {
 		"format": "prettier -w ./",
-		"dev": "run-p --race dev:*",
-		"dev:app": "vite --host",
-		"dev:api": "export NODE_NO_WARNINGS=1 && node --watch --loader=tsx ./src/db/api.ts",
-		"db:reset": "rm -rf ./prisma/migrations && rm -f ./prisma/dev.db && prisma migrate dev --name init && rm ./prisma/dev.db-journal",
-		"build": "vite build",
-		"preview": "vite preview --host",
-		"postinstall": "npm run db:reset"
+		"dev": "bun --watch ./scripts/dev.ts",
+		"build": "bun ./scripts/build.ts",
+		"start": "bun ./scripts/start.ts",
+		"db:reset": "rm -rf ./prisma/migrations && rm -f ./prisma/dev.db && prisma migrate dev --name init && rm -f ./prisma/dev.db-journal && bun db:push",
+		"db:push": "prisma db push"
 	},
 	"devDependencies": {
 		"@prisma/client": "^4.15.0",
 		"@total-typescript/ts-reset": "^0.4.2",
-		"@types/express": "^4.17.17",
-		"@types/node": "^20.4.2",
 		"colors": "^1.4.0",
-		"express": "^4.18.2",
 		"hotscript": "^1.0.13",
 		"master-ts": "https://github.com/DeepDoge/master-ts/releases/download/0.0.109/package.tar.gz",
-		"npm-run-all": "^4.1.5",
 		"prettier": "^2.8.8",
 		"prettier-plugin-organize-imports": "^3.2.2",
 		"prisma": "^5.0.0",
-		"tsx": "^3.12.7",
-		"vite": "^4.4.4",
-		"vite-plugin-singlefile": "^0.13.5",
-		"zod": "^3.21.4"
+		"zod": "^3.21.4",
+		"bun-types": "^1.0.6"
 	}
 }

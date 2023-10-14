@@ -1,5 +1,5 @@
+import { tx } from "@/api/client"
 import { App } from "@/app"
-import { db } from "@/db/api"
 import { commonStyle } from "@/importStyles"
 import { toLocaleCapitalized } from "@/utils/casing"
 import type { Warehouse } from "@prisma/client"
@@ -13,7 +13,7 @@ export function WarehouseComponent(warehouse: Warehouse) {
 	const dom = root.attachShadow({ mode: "open" })
 	dom.adoptedStyleSheets.push(commonStyle, style)
 
-	const destroyPromise = signal<Promise<unknown>>(Promise.resolve())
+	const destroyPromise = signal<Promise<unknown>>(Promise.reject())
 	const destroying = flatten(
 		derive(() =>
 			awaited(
@@ -30,7 +30,7 @@ export function WarehouseComponent(warehouse: Warehouse) {
 			message: `Are you sure you want to delete ${warehouse.name}?`,
 		})
 		if (!confirm) return
-		destroyPromise.ref = db.mutate.deleteWarehouse({ id: warehouse.id })
+		destroyPromise.ref = tx.deleteWarehouse({ id: warehouse.id })
 	}
 
 	dom.append(

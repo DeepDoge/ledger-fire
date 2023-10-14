@@ -1,4 +1,4 @@
-import { db } from "@/db/api"
+import { tx } from "@/api/client"
 import { commonStyle } from "@/importStyles"
 import { fragment, signal } from "master-ts/core"
 import { defineCustomTag, html } from "master-ts/extra"
@@ -13,7 +13,7 @@ export function WarehouseFormComponent() {
 	const address = signal("")
 
 	async function onSubmit() {
-		await db.mutate.createWarehouse({
+		await tx.createWarehouse({
 			name: name.ref,
 			address: address.ref,
 		})

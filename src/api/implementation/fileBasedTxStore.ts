@@ -37,7 +37,7 @@ export namespace FileBasedTxStore {
 				const txFilename = path.join(dirname, ...txIdHex, "tx")
 				const tx = await fs
 					.readFile(txFilename)
-					.then((data) => Database.Tx.parser.parse(Bytes.decode(data)))
+					.then((data) => Database.Tx.Parser.parse(Bytes.decode(data)))
 					.catch(() => null)
 
 				return tx

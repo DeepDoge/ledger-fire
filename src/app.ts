@@ -2,9 +2,11 @@ import "@/importStyles"
 
 import { commonStyle } from "@/importStyles"
 import { TagsNS, fragment, signal } from "master-ts/core"
-import { awaited, css, defineCustomTag, html } from "master-ts/extra"
+import { css, defineCustomTag, html } from "master-ts/extra"
 import { DialogComponent } from "./libs/dialog"
 import { createDialogManager } from "./libs/dialogManager"
+import { ProductsComponent } from "./libs/products"
+import { WarehousesComponent } from "./libs/warehouses"
 import { NavigationComponent } from "./navigation"
 import { route } from "./router"
 
@@ -19,31 +21,27 @@ export namespace App {
 		const dom = root.attachShadow({ mode: "open" })
 		dom.adoptedStyleSheets.push(commonStyle, style)
 
-		const routeView = signal<Promise<TagsNS.AcceptedChild>>(
+		const routeView = signal<TagsNS.AcceptedChild>(
 			null!,
 			(set) =>
 				route.pathArr.follow(
 					(pathArr) => {
 						if (pathArr[0] === "#warehouses") {
 							set(
-								import("./libs/warehouses").then(
-									(m) => html`
-										<h1>Warehouses</h1>
-										${m.WarehousesComponent()}
-									`
-								)
+								html`
+									<h1>Warehouses</h1>
+									${WarehousesComponent()}
+								`
 							)
 						} else if (pathArr[0] === "#products") {
 							set(
-								import("./libs/products").then(
-									(m) => html`
-										<h1>Products</h1>
-										${m.ProductsComponent()}
-									`
-								)
+								html`
+									<h1>Products</h1>
+									${ProductsComponent()}
+								`
 							)
 						} else {
-							set(Promise.resolve(null))
+							set(null)
 						}
 					},
 					{ mode: "immediate" }
@@ -55,7 +53,7 @@ export namespace App {
 				<header style:grid-area=${"header"}>
 					<x ${NavigationComponent()}></x>
 				</header>
-				<main style:grid-area=${"main"}>${() => awaited(routeView.ref)}</main>
+				<main style:grid-area=${"main"}>${routeView}</main>
 				<x ${DialogComponent(dialogManager)}></x>
 			`)
 		)

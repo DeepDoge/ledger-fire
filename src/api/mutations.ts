@@ -1,10 +1,11 @@
 import { toLocaleLowerCase } from "@/utils/casing"
 import { z } from "zod"
-import { PrismaTxOperationFactory } from "./implementation/prismaTxOperationFactory"
+import { Database } from "./database"
+import { PrismaTxMutationFactory } from "./implementation/prismaTxMutationFactory"
 
-export namespace dbOperations {
-	export const createWarehouse = PrismaTxOperationFactory.createOperation()
-		.paramsParserFactory(({ tx: { language } }) =>
+namespace Mutations {
+	export const createWarehouse = PrismaTxMutationFactory.createMutation()
+		.paramsParser(({ tx: { language } }) =>
 			z.object({
 				name: z.string().transform(toLocaleLowerCase(language)),
 				address: z.string().transform(toLocaleLowerCase(language)),
@@ -19,8 +20,8 @@ export namespace dbOperations {
 			})
 		})
 
-	export const deleteWarehouse = PrismaTxOperationFactory.createOperation()
-		.paramsParserFactory(() =>
+	export const deleteWarehouse = PrismaTxMutationFactory.createMutation()
+		.paramsParser(() =>
 			z.object({
 				id: z.number(),
 			})
@@ -33,8 +34,8 @@ export namespace dbOperations {
 			})
 		})
 
-	export const createBrand = PrismaTxOperationFactory.createOperation()
-		.paramsParserFactory(({ tx: { language } }) =>
+	export const createBrand = PrismaTxMutationFactory.createMutation()
+		.paramsParser(({ tx: { language } }) =>
 			z.object({
 				name: z.string().transform(toLocaleLowerCase(language)),
 			})
@@ -47,8 +48,8 @@ export namespace dbOperations {
 			})
 		})
 
-	export const createProduct = PrismaTxOperationFactory.createOperation()
-		.paramsParserFactory(({ tx: { language } }) =>
+	export const createProduct = PrismaTxMutationFactory.createMutation()
+		.paramsParser(({ tx: { language } }) =>
 			z.object({
 				name: z.string().transform(toLocaleLowerCase(language)),
 				brandId: z.number(),
@@ -63,8 +64,8 @@ export namespace dbOperations {
 			})
 		})
 
-	export const createProduct2 = PrismaTxOperationFactory.createOperation()
-		.paramsParserFactory(({ tx: { language } }) =>
+	export const createProduct2 = PrismaTxMutationFactory.createMutation()
+		.paramsParser(({ tx: { language } }) =>
 			z.object({
 				name: z.string().transform(toLocaleLowerCase(language)),
 				brandName: z.string().transform(toLocaleLowerCase(language)),
@@ -84,9 +85,9 @@ export namespace dbOperations {
 			})
 		})
 
-	export const deleteProduct = PrismaTxOperationFactory.createOperation()
+	export const deleteProduct = PrismaTxMutationFactory.createMutation()
 
-		.paramsParserFactory(() =>
+		.paramsParser(() =>
 			z.object({
 				id: z.number(),
 			})
@@ -99,8 +100,8 @@ export namespace dbOperations {
 			})
 		})
 
-	export const createCustomerAccount = PrismaTxOperationFactory.createOperation()
-		.paramsParserFactory(({ tx: { language } }) =>
+	export const createCustomerAccount = PrismaTxMutationFactory.createMutation()
+		.paramsParser(({ tx: { language } }) =>
 			z.object({
 				name: z.string().transform(toLocaleLowerCase(language)),
 				surname: z.string().transform(toLocaleLowerCase(language)),
@@ -117,16 +118,16 @@ export namespace dbOperations {
 			return await db.account.create({
 				data: {
 					fullName: `${params.name} ${params.surname}`,
-					tckn: params.tckn,
-					phone: params.phone,
-					email: params.email,
-					address: params.address,
+					tckn: params.tckn ?? null,
+					phone: params.phone ?? null,
+					email: params.email ?? null,
+					address: params.address ?? null,
 				},
 			})
 		})
 
-	export const createSupplierAccount = PrismaTxOperationFactory.createOperation()
-		.paramsParserFactory(({ tx: { language } }) =>
+	export const createSupplierAccount = PrismaTxMutationFactory.createMutation()
+		.paramsParser(({ tx: { language } }) =>
 			z.object({
 				name: z.string().transform(toLocaleLowerCase(language)),
 				taxNumber: z.string(),
@@ -138,18 +139,18 @@ export namespace dbOperations {
 		.call(async ({ db, params }) => {
 			return await db.account.create({
 				data: {
-					fullName: params.name,
-					tckn: params.taxNumber,
-					address: params.address,
-					email: params.email,
-					phone: params.phone,
+					fullName: params.name ?? null,
+					tckn: params.taxNumber ?? null,
+					address: params.address ?? null,
+					email: params.email ?? null,
+					phone: params.phone ?? null,
 					Supplier: { create: {} },
 				},
 			})
 		})
 
-	export const enterSupplierBill = PrismaTxOperationFactory.createOperation()
-		.paramsParserFactory(({ tx: { language } }) =>
+	export const enterSupplierBill = PrismaTxMutationFactory.createMutation()
+		.paramsParser(({ tx: { language } }) =>
 			z.object({
 				id: z.string(),
 				supplierId: z.number(),
@@ -191,8 +192,8 @@ export namespace dbOperations {
 			})
 		})
 
-	export const matchSupplierProduct = PrismaTxOperationFactory.createOperation()
-		.paramsParserFactory(() =>
+	export const matchSupplierProduct = PrismaTxMutationFactory.createMutation()
+		.paramsParser(() =>
 			z.object({
 				supplierId: z.number(),
 				supplierProductCode: z.string(),
@@ -206,8 +207,8 @@ export namespace dbOperations {
 			})
 		})
 
-	export const verifySupplierBill = PrismaTxOperationFactory.createOperation()
-		.paramsParserFactory(() =>
+	export const verifySupplierBill = PrismaTxMutationFactory.createMutation()
+		.paramsParser(() =>
 			z.object({
 				id: z.string(),
 				warehouseId: z.number(),
@@ -249,3 +250,4 @@ export namespace dbOperations {
 			})
 		})
 }
+export const mutations = Mutations satisfies Database.TxMutationFactory.Mutations

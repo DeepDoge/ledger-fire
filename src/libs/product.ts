@@ -1,5 +1,5 @@
+import { tx } from "@/api/client"
 import { App } from "@/app"
-import { db } from "@/db/api"
 import { commonStyle } from "@/importStyles"
 import { toLocaleCapitalized } from "@/utils/casing"
 import type { Prisma } from "@prisma/client"
@@ -12,7 +12,7 @@ export function ProductComponent(product: Prisma.ProductGetPayload<{ include: { 
 	const dom = root.attachShadow({ mode: "open" })
 	dom.adoptedStyleSheets.push(commonStyle, style)
 
-	const destroyPromise = signal<Promise<unknown>>(Promise.resolve())
+	const destroyPromise = signal<Promise<unknown>>(Promise.reject())
 	const destroying = flatten(
 		derive(() =>
 			awaited(
@@ -29,7 +29,7 @@ export function ProductComponent(product: Prisma.ProductGetPayload<{ include: { 
 			message: `Are you sure you want to delete ${product.name}?`,
 		})
 		if (!confirm) return
-		destroyPromise.ref = db.mutate.deleteProduct({ id: product.id })
+		destroyPromise.ref = tx.deleteProduct({ id: product.id })
 	}
 
 	dom.append(

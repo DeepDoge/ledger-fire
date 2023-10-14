@@ -1,4 +1,4 @@
-import { db } from "@/db/api"
+import { query } from "@/api/client"
 import { commonStyle } from "@/importStyles"
 import { SearchManager } from "@/libs/searchManager"
 import type { Warehouse } from "@prisma/client"
@@ -8,7 +8,7 @@ import { SearchComponent } from "./search"
 import { WarehouseComponent } from "./warehouse"
 import { WarehouseFormComponent } from "./warehouseForm"
 
-const searchManager = SearchManager.create(db.query.warehouse, {
+const searchManager = SearchManager.create(query.warehouse, {
 	itemIdKey: "id",
 	queries(text) {
 		return [{ name: { startsWith: text } }, { address: { startsWith: text } }, { name: { contains: text } }, { address: { contains: text } }]
@@ -25,7 +25,7 @@ export function WarehousesComponent() {
 	const warehouses = signal<Warehouse[]>([])
 
 	async function update() {
-		warehouses.ref = await db.query.warehouse.findMany({})
+		warehouses.ref = await query.warehouse.findMany({})
 	}
 
 	onConnected$(root, () => {

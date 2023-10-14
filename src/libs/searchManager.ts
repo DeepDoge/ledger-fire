@@ -1,5 +1,5 @@
+import { query } from "@/api/client"
 import { App } from "@/app"
-import type { db } from "@/db/api"
 import type { Prisma } from "@prisma/client"
 
 export type SearchManager<
@@ -10,7 +10,7 @@ export type SearchManager<
 }
 
 export namespace SearchManager {
-	export type Query = (typeof db.query)[keyof typeof db.query]
+	export type Query = (typeof query)[keyof typeof query]
 	export type Where<TQuery extends Query> = NonNullable<Parameters<TQuery["findMany"]>[0]>["where"]
 	export type Include<TQuery extends Query> = ({ include: {} } & NonNullable<Parameters<TQuery["findMany"]>[0]>)["include"]
 
@@ -35,10 +35,7 @@ export namespace SearchManager {
 		return {
 			async search(text, take: number = 256) {
 				const ignoreIds: unknown[] = []
-
-				// @ts-ignore
 				const results: Item<TQuery, TInclude>[] = []
-
 				const queries = params.queries(text.toLocaleLowerCase(App.language.ref))
 
 				for (const where of queries) {

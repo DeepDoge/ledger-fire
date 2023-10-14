@@ -1,4 +1,4 @@
-import { db } from "@/db/api"
+import { tx } from "@/api/client"
 import { commonStyle } from "@/importStyles"
 import { fragment, signal } from "master-ts/core"
 import { defineCustomTag, html } from "master-ts/extra"
@@ -16,7 +16,7 @@ export function SupplierFormComponent() {
 	const taxNumber = signal("")
 
 	async function onSubmit() {
-		await db.mutate.createSupplierAccount({
+		await tx.createSupplierAccount({
 			name: name.ref,
 			address: address.ref,
 			email: email.ref,

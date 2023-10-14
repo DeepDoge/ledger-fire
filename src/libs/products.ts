@@ -1,4 +1,4 @@
-import { db } from "@/db/api"
+import { query } from "@/api/client"
 import { commonStyle } from "@/importStyles"
 import { SearchManager } from "@/libs/searchManager"
 import { derive, fragment, signal } from "master-ts/core"
@@ -6,7 +6,7 @@ import { awaited, css, defer, defineCustomTag, each, flatten, html, match } from
 import { ProductComponent } from "./product"
 import { ProductFormComponent } from "./productForm"
 
-const searchManager = SearchManager.create(db.query.product, {
+const searchManager = SearchManager.create(query.product, {
 	itemIdKey: "id",
 	include: { brand: true },
 	queries(text) {

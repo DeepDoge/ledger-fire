@@ -1,5 +1,7 @@
-import globalCss from "@/styles/global.css?inline"
-import rootCss from "@/styles/root.css?inline"
+import { importCss } from "./styles" assert { type: "macro" }
+
+const globalCss = await importCss("global.css")
+const rootCss = await importCss("root.css")
 
 export const commonStyle = new CSSStyleSheet()
 const rootStyle = new CSSStyleSheet()
