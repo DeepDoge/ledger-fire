@@ -13,3 +13,5 @@ Bun.serve({
 		return new Response(buffer, { headers: { "Content-Type": "text/html" } })
 	},
 })
+
+process.on("SIGINT", process.exit)

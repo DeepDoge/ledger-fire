@@ -33,3 +33,5 @@ Bun.serve({
 		)
 	},
 })
+
+process.on("SIGINT", process.exit)
