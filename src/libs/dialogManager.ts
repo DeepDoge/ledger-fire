@@ -1,6 +1,4 @@
-import { $ } from "master-ts/library/$"
-import type { SignalReadable } from "master-ts/library/signal"
-import type { TemplateValue } from "master-ts/library/template"
+import { Signal, TagsNS, signal } from "master-ts/core"
 
 export type DialogBase = {
 	title: string
@@ -23,7 +21,7 @@ export type DialogConfirm = DialogBase & {
 
 export type DialogCustom = DialogBase & {
 	type: "custom"
-	message(close: () => void): TemplateValue
+	message(close: () => void): TagsNS.AcceptedChild
 	resolve(): void
 }
 
@@ -31,11 +29,11 @@ export type Dialog = DialogAlert | DialogConfirm | DialogCustom
 
 export type DialogManager = {
 	create<T extends Dialog>(init: Omit<T, "resolve">): Promise<Parameters<T["resolve"]>[0]>
-	dialogs: SignalReadable<readonly Readonly<Dialog>[]>
+	dialogs: Signal<readonly Readonly<Dialog>[]>
 }
 
 export function createDialogManager(): DialogManager {
-	const dialogs = $.writable<Dialog[]>([])
+	const dialogs = signal<Dialog[]>([])
 
 	const self: DialogManager = {
 		create(init) {
@@ -49,7 +47,7 @@ export function createDialogManager(): DialogManager {
 				} as Dialog
 
 				dialogs.ref.push(dialog)
-				dialogs.signal()
+				dialogs.ping()
 			})
 		},
 		dialogs,

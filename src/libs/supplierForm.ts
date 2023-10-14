@@ -1,16 +1,19 @@
 import { db } from "@/db/api"
-import { $ } from "master-ts/library/$"
-import { html } from "master-ts/library/template"
+import { commonStyle } from "@/importStyles"
+import { fragment, signal } from "master-ts/core"
+import { defineCustomTag, html } from "master-ts/extra"
 
-const Component = $.component("x-supplier-form")
+const supplierFormTag = defineCustomTag("x-supplier-form")
 export function SupplierFormComponent() {
-	const component = new Component()
+	const root = supplierFormTag()
+	const dom = root.attachShadow({ mode: "open" })
+	dom.adoptedStyleSheets.push(commonStyle)
 
-	const name = $.writable("")
-	const address = $.writable("")
-	const phone = $.writable("")
-	const email = $.writable("")
-	const taxNumber = $.writable("")
+	const name = signal("")
+	const address = signal("")
+	const phone = signal("")
+	const email = signal("")
+	const taxNumber = signal("")
 
 	async function onSubmit() {
 		await db.mutate.createSupplierAccount({
@@ -22,14 +25,16 @@ export function SupplierFormComponent() {
 		})
 	}
 
-	component.$html = html`
-		<form on:submit=${(event) => (event.preventDefault(), onSubmit())}>
-			<input type="text" placeholder="Full Name" bind:value=${name} />
-			<input type="text" placeholder="Address" bind:value=${address} />
+	dom.append(
+		fragment(html`
+			<form on:submit=${(event) => (event.preventDefault(), onSubmit())}>
+				<input type="text" placeholder="Full Name" bind:value=${name} />
+				<input type="text" placeholder="Address" bind:value=${address} />
 
-			<button type="submit">Create</button>
-		</form>
-	`
+				<button type="submit">Create</button>
+			</form>
+		`)
+	)
 
-	return component
+	return root
 }

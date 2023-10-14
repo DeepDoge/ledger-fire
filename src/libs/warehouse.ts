@@ -1,19 +1,27 @@
 import { App } from "@/app"
 import { db } from "@/db/api"
+import { commonStyle } from "@/importStyles"
 import { toLocaleCapitalized } from "@/utils/casing"
 import type { Warehouse } from "@prisma/client"
-import { $ } from "master-ts/library/$"
-import { css, html } from "master-ts/library/template"
+import { derive, fragment, signal } from "master-ts/core"
+import { awaited, css, defineCustomTag, flatten, html } from "master-ts/extra"
 
-const Component = $.component("x-warehouse")
+const warehouseTag = defineCustomTag("x-warehouse")
 
 export function WarehouseComponent(warehouse: Warehouse) {
-	const component = new Component()
+	const root = warehouseTag()
+	const dom = root.attachShadow({ mode: "open" })
+	dom.adoptedStyleSheets.push(commonStyle, style)
 
-	const destroyPromise = $.writable<Promise<unknown>>(Promise.resolve())
-	const destroying = $.await(destroyPromise)
-		.until(() => true)
-		.then(() => false)
+	const destroyPromise = signal<Promise<unknown>>(Promise.resolve())
+	const destroying = flatten(
+		derive(() =>
+			awaited(
+				destroyPromise.ref.catch(() => false).then(() => true),
+				false
+			)
+		)
+	)
 	async function destroy() {
 		await destroyPromise.ref
 		const confirm = await App.dialogManager.create({
@@ -25,16 +33,18 @@ export function WarehouseComponent(warehouse: Warehouse) {
 		destroyPromise.ref = db.mutate.deleteWarehouse({ id: warehouse.id })
 	}
 
-	component.$html = html`
-		<div class="name">${() => toLocaleCapitalized(App.language.ref)(warehouse.name)}</div>
-		<div class="address">${() => toLocaleCapitalized(App.language.ref)(warehouse.address)}</div>
-		<button class="destroy" class:destroying=${destroying} on:click=${destroy}>Delete</button>
-	`
+	dom.append(
+		fragment(html`
+			<div class="name">${() => toLocaleCapitalized(App.language.ref)(warehouse.name)}</div>
+			<div class="address">${() => toLocaleCapitalized(App.language.ref)(warehouse.address)}</div>
+			<button class="destroy" class:destroying=${destroying} on:click=${destroy}>Delete</button>
+		`)
+	)
 
-	return component
+	return root
 }
 
-Component.$css = css`
+const style = css`
 	:host {
 		display: grid;
 		gap: calc(var(--span) * 0.25);

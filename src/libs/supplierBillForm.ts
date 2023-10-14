@@ -1,8 +1,9 @@
 import { db } from "@/db/api"
-import { $ } from "master-ts/library/$"
-import { html } from "master-ts/library/template"
+import { commonStyle } from "@/importStyles"
+import { fragment, signal } from "master-ts/core"
+import { defineCustomTag, html } from "master-ts/extra"
 
-const Component = $.component("x-supplier-bill-form")
+const supplierBillFormTag = defineCustomTag("x-supplier-bill-form")
 export function SupplierBillFormComponent() {
 	/* 
 		TODO:
@@ -28,10 +29,12 @@ export function SupplierBillFormComponent() {
 		it should be simple and shouldnt require any mouse use.
 	*/
 
-	const component = new Component()
+	const root = supplierBillFormTag()
+	const dom = root.attachShadow({ mode: "open" })
+	dom.adoptedStyleSheets.push(commonStyle)
 
-	const name = $.writable("")
-	const address = $.writable("")
+	const name = signal("")
+	const address = signal("")
 
 	async function onSubmit() {
 		await db.mutate.createWarehouse({
@@ -40,13 +43,15 @@ export function SupplierBillFormComponent() {
 		})
 	}
 
-	component.$html = html`
-		<form on:submit=${(event) => (event.preventDefault(), onSubmit())}>
-			<input type="text" placeholder="Name" bind:value=${name} />
-			<input type="text" placeholder="Address" bind:value=${address} />
-			<button type="submit">Create</button>
-		</form>
-	`
+	dom.append(
+		fragment(html`
+			<form on:submit=${(event) => (event.preventDefault(), onSubmit())}>
+				<input type="text" placeholder="Name" bind:value=${name} />
+				<input type="text" placeholder="Address" bind:value=${address} />
+				<button type="submit">Create</button>
+			</form>
+		`)
+	)
 
-	return component
+	return root
 }

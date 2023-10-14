@@ -1,7 +1,8 @@
 import { db } from "@/db/api"
+import { commonStyle } from "@/importStyles"
 import { SearchManager } from "@/libs/searchManager"
-import { $ } from "master-ts/library/$"
-import { css, html } from "master-ts/library/template"
+import { derive, fragment, signal } from "master-ts/core"
+import { awaited, css, defer, defineCustomTag, each, flatten, html, match } from "master-ts/extra"
 import { ProductComponent } from "./product"
 import { ProductFormComponent } from "./productForm"
 
@@ -18,33 +19,39 @@ const searchManager = SearchManager.create(db.query.product, {
 	},
 })
 
-const Component = $.component("x-products")
+const productsTag = defineCustomTag("x-products")
 export function ProductsComponent() {
-	const component = new Component()
+	const root = productsTag()
+	const dom = root.attachShadow({ mode: "open" })
+	dom.adoptedStyleSheets.push(commonStyle, style)
 
-	const searchText = $.writable("")
-	const searchTextDeferred = $.defer(searchText)
+	const searchText = signal("")
+	const searchTextDeferred = defer(searchText)
 
-	const productsPromise = $.derive(() => searchManager.search(searchTextDeferred.ref, 1024), [searchTextDeferred])
+	const products = flatten(derive(() => awaited(searchManager.search(searchTextDeferred.ref, 1024)), [searchTextDeferred]))
 
-	component.$html = html`
-		<x ${ProductFormComponent()} class="form"></x>
+	dom.append(
+		fragment(html`
+			<x ${ProductFormComponent()} class="form"></x>
 
-		<input type="text" placeholder="Search" bind:value=${searchText} />
+			<input type="text" placeholder="Search" bind:value=${searchText} />
 
-		<div class="products">
-			${$.await(productsPromise).then((products) =>
-				$.each(products)
-					.key((product) => product.id)
-					.as((product) => html` <x ${ProductComponent(product.ref)}></x> `)
-			)}
-		</div>
-	`
+			<div class="products">
+				${match(products)
+					.case(null, () => null)
+					.default((products) =>
+						each(products)
+							.key((product) => product.id)
+							.as((product) => html` <x ${ProductComponent(product.ref)}></x> `)
+					)}
+			</div>
+		`)
+	)
 
-	return component
+	return root
 }
 
-Component.$css = css`
+const style = css`
 	:host {
 		display: grid;
 	}

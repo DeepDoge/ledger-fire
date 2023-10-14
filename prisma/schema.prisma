@@ -79,8 +79,8 @@ model Account {
 }
 
 model Supplier {
-    account   Account @relation(fields: [accountId], references: [id])
-    accountId Int     @id
+    account Account @relation(fields: [id], references: [id])
+    id      Int     @id
 
     SupplierBill    SupplierBill[]
     SupplierProduct SupplierProduct[]
@@ -88,7 +88,7 @@ model Supplier {
 
 model SupplierBill {
     id               String             @id
-    supplier         Supplier           @relation(fields: [supplierId], references: [accountId])
+    supplier         Supplier           @relation(fields: [supplierId], references: [id])
     supplierId       Int
     timestamp        BigInt
     SupplierBillItem SupplierBillItem[]
@@ -116,7 +116,7 @@ model SupplierBillItem {
 model SupplierProduct {
     id Int @id @default(autoincrement())
 
-    supplier   Supplier @relation(fields: [supplierId], references: [accountId])
+    supplier   Supplier @relation(fields: [supplierId], references: [id])
     supplierId Int
     code       String
     name       String

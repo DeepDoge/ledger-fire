@@ -1,18 +1,26 @@
 import { App } from "@/app"
 import { db } from "@/db/api"
+import { commonStyle } from "@/importStyles"
 import { toLocaleCapitalized } from "@/utils/casing"
 import type { Prisma } from "@prisma/client"
-import { $ } from "master-ts/library/$"
-import { css, html } from "master-ts/library/template"
+import { derive, fragment, signal } from "master-ts/core"
+import { awaited, css, defineCustomTag, flatten, html } from "master-ts/extra"
 
-const Component = $.component("x-product")
+const productTag = defineCustomTag("x-product")
 export function ProductComponent(product: Prisma.ProductGetPayload<{ include: { brand: true } }>) {
-	const component = new Component()
+	const root = productTag()
+	const dom = root.attachShadow({ mode: "open" })
+	dom.adoptedStyleSheets.push(commonStyle, style)
 
-	const destroyPromise = $.writable<Promise<unknown>>(Promise.resolve())
-	const destroying = $.await(destroyPromise)
-		.until(() => true)
-		.then(() => false)
+	const destroyPromise = signal<Promise<unknown>>(Promise.resolve())
+	const destroying = flatten(
+		derive(() =>
+			awaited(
+				destroyPromise.ref.then(() => true).catch(() => false),
+				false
+			)
+		)
+	)
 	async function destroy() {
 		await destroyPromise.ref
 		const confirm = await App.dialogManager.create({
@@ -24,16 +32,18 @@ export function ProductComponent(product: Prisma.ProductGetPayload<{ include: { 
 		destroyPromise.ref = db.mutate.deleteProduct({ id: product.id })
 	}
 
-	component.$html = html`
-		<div class="name">${() => toLocaleCapitalized(App.language.ref)(product.name)}</div>
-		<div class="brandName">${() => toLocaleCapitalized(App.language.ref)(product.brand.name)}</div>
-		<button on:click=${destroy} disabled=${() => (destroying.ref ? "" : null)}>${() => (destroying.ref ? "Deleting..." : "Delete")}</button>
-	`
+	dom.append(
+		fragment(html`
+			<div class="name">${() => toLocaleCapitalized(App.language.ref)(product.name)}</div>
+			<div class="brandName">${() => toLocaleCapitalized(App.language.ref)(product.brand.name)}</div>
+			<button on:click=${destroy} disabled=${() => (destroying.ref ? "" : null)}>${() => (destroying.ref ? "Deleting..." : "Delete")}</button>
+		`)
+	)
 
-	return component
+	return root
 }
 
-Component.$css = css`
+const style = css`
 	:host {
 		display: grid;
 		padding: calc(var(--span) * 2);

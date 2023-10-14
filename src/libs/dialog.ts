@@ -1,65 +1,67 @@
-import { $ } from "master-ts/library/$"
-import type { SignalReadable } from "master-ts/library/signal"
-import { css, html } from "master-ts/library/template"
-import { assert } from "master-ts/library/utils/assert"
+import { commonStyle } from "@/importStyles"
+import { derive, fragment } from "master-ts/core"
+import { TYPEOF, css, defineCustomTag, html, match } from "master-ts/extra"
 import type { DialogManager } from "./dialogManager"
 
-const Component = $.component("x-dialog")
+const dialogTag = defineCustomTag("x-dialog")
 
 export function DialogComponent({ dialogs }: DialogManager) {
-	const component = new Component()
+	const root = dialogTag()
+	const dom = root.attachShadow({ mode: "open" })
+	dom.adoptedStyleSheets.push(commonStyle, style)
 
-	const lastDialog = $.derive(() => (dialogs.ref.length > 0 ? dialogs.ref[dialogs.ref.length - 1]! : null))
+	const lastDialog = derive(() => (dialogs.ref.length > 0 ? dialogs.ref[dialogs.ref.length - 1]! : null))
 
-	component.$html = html`
-		${$.switch(lastDialog)
-			.match(null, () => null)
-			.default(
-				(lastDialog) => html`
-					<div class="overlay">
-						<div class="backdrop"></div>
-						<div class="dialog">
-							<div class="title">${() => lastDialog.ref.title}</div>
-							<div class="message">
-								${$.derive(() => {
-									switch (typeof lastDialog.ref.message) {
-										case "string":
-											assert<SignalReadable<{ message: string }>>(lastDialog)
-											return html`${() => lastDialog.ref.message}`
-										case "function":
-											assert<SignalReadable<{ message(...args: any[]): any }>>(lastDialog)
-											return html` ${$.derive(() => lastDialog.ref.message(lastDialog.ref.resolve), [lastDialog])} `
-									}
-								}, [$.derive(() => typeof lastDialog.ref.message)])}
-							</div>
-							<div class="actions">
-								${$.switch(lastDialog)
-									.match(
-										{ type: "alert" },
-										(lastDialog) => html`
-											<button on:click=${() => lastDialog.ref.resolve()}>${() => lastDialog.ref.confirm ?? "OK"}</button>
-										`
-									)
-									.match(
-										{ type: "confirm" },
-										(lastDialog) => html`
-											<button on:click=${() => lastDialog.ref.resolve(true)}>${() => lastDialog.ref.confirm ?? "OK"}</button>
-											<button on:click=${() => lastDialog.ref.resolve(false)}>${() => lastDialog.ref.cancel ?? "Cancel"}</button>
-										`
-									)
-									.match({ type: "custom" }, () => html``)
-									.default()}
+	dom.append(
+		fragment(html`
+			${match(lastDialog)
+				.case(null, () => null)
+				.default(
+					(lastDialog) => html`
+						<div class="overlay">
+							<div class="backdrop"></div>
+							<div class="dialog">
+								<div class="title">${() => lastDialog.ref.title}</div>
+								<div class="message">
+									${match(lastDialog)
+										.case({ message: { [TYPEOF]: "string" } }, (lastDialog) => html`${() => lastDialog.ref.message}`)
+										.case({ message: { [TYPEOF]: "function" } }, (lastDialog) =>
+											derive(() => lastDialog.ref.message(() => lastDialog.ref.resolve(false)), [lastDialog])
+										)}
+								</div>
+								<div class="actions">
+									${match(lastDialog)
+										.case(
+											{ type: "alert" },
+											(lastDialog) => html`
+												<button on:click=${() => lastDialog.ref.resolve()}>${() => lastDialog.ref.confirm ?? "OK"}</button>
+											`
+										)
+										.case(
+											{ type: "confirm" },
+											(lastDialog) => html`
+												<button on:click=${() => lastDialog.ref.resolve(true)}>
+													${() => lastDialog.ref.confirm ?? "OK"}
+												</button>
+												<button on:click=${() => lastDialog.ref.resolve(false)}>
+													${() => lastDialog.ref.cancel ?? "Cancel"}
+												</button>
+											`
+										)
+										.case({ type: "custom" }, () => html``)
+										.default()}
+								</div>
 							</div>
 						</div>
-					</div>
-				`
-			)}
-	`
+					`
+				)}
+		`)
+	)
 
-	return component
+	return root
 }
 
-Component.$css = css`
+const style = css`
 	:host {
 		display: contents;
 	}

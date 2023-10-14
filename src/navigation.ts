@@ -1,23 +1,28 @@
-import { $ } from "master-ts/library/$"
-import { css, html } from "master-ts/library/template"
+import { fragment } from "master-ts/core"
+import { css, defineCustomTag, html } from "master-ts/extra"
+import { commonStyle } from "./importStyles"
 import { routeHash } from "./router"
 
-const Component = $.component("x-navigation")
+const navigationTag = defineCustomTag("x-navigation")
 
 export function NavigationComponent() {
-	const component = new Component()
+	const root = navigationTag()
+	const dom = root.attachShadow({ mode: "open" })
+	dom.adoptedStyleSheets.push(commonStyle, style)
 
-	component.$html = html`
-		<nav>
-			<a href=${routeHash({ path: "warehouses" })}>Warehouses</a>
-			<a href=${routeHash({ path: "products" })}>Products</a>
-		</nav>
-	`
+	dom.append(
+		fragment(html`
+			<nav>
+				<a href=${routeHash({ path: "warehouses" })}>Warehouses</a>
+				<a href=${routeHash({ path: "products" })}>Products</a>
+			</nav>
+		`)
+	)
 
-	return component
+	return root
 }
 
-Component.$css = css`
+const style = css`
 	:host {
 		display: contents;
 	}

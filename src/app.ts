@@ -1,25 +1,28 @@
 import "@/importStyles"
 
-import { $ } from "master-ts/library/$"
-import type { TemplateValue } from "master-ts/library/template"
-import { css, html } from "master-ts/library/template"
+import { commonStyle } from "@/importStyles"
+import { TagsNS, fragment, signal } from "master-ts/core"
+import { awaited, css, defineCustomTag, html } from "master-ts/extra"
 import { DialogComponent } from "./libs/dialog"
 import { createDialogManager } from "./libs/dialogManager"
 import { NavigationComponent } from "./navigation"
 import { route } from "./router"
 
 export namespace App {
-	export const language = $.writable(navigator.language)
-	language.subscribe((lang) => (document.documentElement.lang = lang), { mode: "immediate" })
+	export const language = signal(navigator.language)
+	language.follow((lang) => (document.documentElement.lang = lang), { mode: "immediate" })
 	export const dialogManager = createDialogManager()
 
-	const Component = $.component("x-app")
+	const appTag = defineCustomTag("x-app")
 	function AppComponent() {
-		const component = new Component()
+		const root = appTag()
+		const dom = root.attachShadow({ mode: "open" })
+		dom.adoptedStyleSheets.push(commonStyle, style)
 
-		const routeView = $.readable<Promise<TemplateValue>>(
+		const routeView = signal<Promise<TagsNS.AcceptedChild>>(
+			null!,
 			(set) =>
-				route.pathArr.subscribe(
+				route.pathArr.follow(
 					(pathArr) => {
 						if (pathArr[0] === "#warehouses") {
 							set(
@@ -44,21 +47,23 @@ export namespace App {
 						}
 					},
 					{ mode: "immediate" }
-				).unsubscribe
+				).unfollow
 		)
 
-		component.$html = html`
-			<header style:grid-area=${"header"}>
-				<x ${NavigationComponent()}></x>
-			</header>
-			<main style:grid-area=${"main"}>${$.await(routeView)}</main>
-			<x ${DialogComponent(dialogManager)}></x>
-		`
+		dom.append(
+			fragment(html`
+				<header style:grid-area=${"header"}>
+					<x ${NavigationComponent()}></x>
+				</header>
+				<main style:grid-area=${"main"}>${() => awaited(routeView.ref)}</main>
+				<x ${DialogComponent(dialogManager)}></x>
+			`)
+		)
 
-		return component
+		return root
 	}
 
-	Component.$css = css`
+	const style = css`
 		:host {
 			display: grid;
 			grid-template-areas: "header main";

@@ -1,14 +1,13 @@
-import { $ } from "master-ts/library/$"
-import type { SignalReadable, SignalWritable } from "master-ts/library/signal"
+import { Signal, derive, signal } from "master-ts/core"
 
-const routePath = $.writable("")
-const routePathArr = $.derive(() => routePath.ref.split("/"))
+const routePath = signal("")
+const routePathArr = derive(() => routePath.ref.split("/"))
 const route = {
 	path: routePath,
 	pathArr: routePathArr,
 }
 const routeReadable = route as {
-	[K in keyof typeof route]: (typeof route)[K] extends SignalWritable<infer U> ? SignalReadable<U> : (typeof route)[K]
+	[K in keyof typeof route]: (typeof route)[K] extends Signal.Mut<infer U> ? Signal<U> : (typeof route)[K]
 }
 export { routeReadable as route }
 function updateRoute() {

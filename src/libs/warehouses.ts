@@ -1,9 +1,9 @@
 import { db } from "@/db/api"
+import { commonStyle } from "@/importStyles"
 import { SearchManager } from "@/libs/searchManager"
 import type { Warehouse } from "@prisma/client"
-import { $ } from "master-ts/library/$"
-import { onMount$ } from "master-ts/library/lifecycle"
-import { css, html } from "master-ts/library/template"
+import { fragment, onConnected$, signal } from "master-ts/core"
+import { css, defineCustomTag, each, html } from "master-ts/extra"
 import { SearchComponent } from "./search"
 import { WarehouseComponent } from "./warehouse"
 import { WarehouseFormComponent } from "./warehouseForm"
@@ -15,37 +15,41 @@ const searchManager = SearchManager.create(db.query.warehouse, {
 	},
 })
 
-const Component = $.component("x-warehouses-page")
+const warehousesTag = defineCustomTag("x-warehouses")
 
 export function WarehousesComponent() {
-	const component = new Component()
+	const root = warehousesTag()
+	const dom = root.attachShadow({ mode: "open" })
+	dom.adoptedStyleSheets.push(commonStyle, style)
 
-	const warehouses = $.writable<Warehouse[]>([])
+	const warehouses = signal<Warehouse[]>([])
 
 	async function update() {
 		warehouses.ref = await db.query.warehouse.findMany({})
 	}
 
-	onMount$(component, () => {
+	onConnected$(root, () => {
 		update()
 	})
 
-	component.$html = html`
-		<x ${WarehouseFormComponent()} class="form"></x>
+	dom.append(
+		fragment(html`
+			<x ${WarehouseFormComponent()} class="form"></x>
 
-		<x ${SearchComponent(searchManager, (item) => console.log(item))}></x>
+			<x ${SearchComponent(searchManager, (item) => console.log(item))}></x>
 
-		<div class="warehouses">
-			${$.each(warehouses)
-				.key((warehouse) => warehouse.id)
-				.as((warehouse) => html` <x ${WarehouseComponent(warehouse.ref)}></x> `)}
-		</div>
-	`
+			<div class="warehouses">
+				${each(warehouses)
+					.key((warehouse) => warehouse.id)
+					.as((warehouse) => html` <x ${WarehouseComponent(warehouse.ref)}></x> `)}
+			</div>
+		`)
+	)
 
-	return component
+	return root
 }
 
-Component.$css = css`
+const style = css`
 	:host {
 		display: grid;
 		gap: calc(var(--span) * 0.25);

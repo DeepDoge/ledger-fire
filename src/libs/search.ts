@@ -1,32 +1,33 @@
+import { commonStyle } from "@/importStyles"
 import type { SearchManager } from "@/libs/searchManager"
-import { $ } from "master-ts/library/$"
-import { css, html } from "master-ts/library/template"
+import { derive, fragment, signal } from "master-ts/core"
+import { awaited, css, defer, defineCustomTag, each, flatten, html, match } from "master-ts/extra"
 
-const Component = $.component("x-search")
+const searchTag = defineCustomTag("x-search")
 
 export function SearchComponent<TSearchManager extends SearchManager>(
 	searchManager: TSearchManager,
 	onSelect: (item: Awaited<ReturnType<TSearchManager["search"]>>[0] | null) => any
 ) {
-	const component = new Component()
+	const root = searchTag()
+	const dom = root.attachShadow({ mode: "open" })
+	dom.adoptedStyleSheets.push(commonStyle, style)
 
-	const searchText = $.writable("")
-	const searchTextDeferred = $.defer(searchText)
+	const searchText = signal("")
+	const searchTextDeferred = defer(searchText)
 
-	const results = $.await(
-		$.derive(async () => (searchTextDeferred.ref ? await searchManager.search(searchTextDeferred.ref) : []), [searchTextDeferred])
-	).then()
+	const results = flatten(derive(() => awaited(searchManager.search(searchTextDeferred.ref)), [searchTextDeferred]))
 
-	const active = $.writable(false)
-	results.subscribe$(component, updateActive)
+	const active = signal(false)
+	results.follow$(root, updateActive)
 	function updateActive() {
 		active.ref = (results.ref?.length ?? 0) > 0
 	}
 
-	const selectedIndex = $.writable(0)
-	const selected = $.derive(() => results.ref?.[selectedIndex.ref] ?? null)
-	selected.subscribe$(component, onSelect)
-	$.effect$(component, () => (selectedIndex.ref = 0), [results])
+	const selectedIndex = signal(0)
+	const selected = derive(() => results.ref?.[selectedIndex.ref] ?? null)
+	selected.follow$(root, onSelect)
+	results.follow$(root, () => (selectedIndex.ref = 0))
 
 	function selectByIndex(index: number) {
 		selectedIndex.ref = index
@@ -56,30 +57,39 @@ export function SearchComponent<TSearchManager extends SearchManager>(
 		searchElement.ref?.blur()
 	}
 
-	const searchElement = $.writable<HTMLInputElement | null>(null)
+	const searchElement = signal<HTMLInputElement | null>(null)
 
-	component.$html = html`
-		${() => JSON.stringify(selected.ref, null, "\t")}
-		<form on:submit=${(event) => (event.preventDefault(), close())} on:focusout=${close} on:focusin=${updateActive}>
-			<input ref:=${searchElement} type="text" placeholder="Search for products..." bind:value=${searchText} on:keydown=${onKeyDown} />
-		</form>
-		<div class="results" class:active=${active}>
-			${() =>
-				results.ref &&
-				$.each(results.ref).as(
-					(item, index) => html`
-						<button class="item" on:click=${() => selectByIndex(index)} class:selected=${$.derive(() => index === selectedIndex.ref)}>
-							${index} ${JSON.stringify(item, null, "\t")}
-						</button>
-					`
-				)}
-		</div>
-	`
+	dom.append(
+		fragment(html`
+			${() => JSON.stringify(selected.ref, null, "\t")}
+			<form on:submit=${(event) => (event.preventDefault(), close())} on:focusout=${close} on:focusin=${updateActive}>
+				<input ref:=${searchElement} type="text" placeholder="Search for products..." bind:value=${searchText} on:keydown=${onKeyDown} />
+			</form>
+			<div class="results" class:active=${active}>
+				${match(results)
+					.case(null, () => null)
+					.default((results) =>
+						each(results)
+							.key((_, index) => index)
+							.as(
+								(item, index) => html`
+									<button
+										class="item"
+										on:click=${() => selectByIndex(index.ref)}
+										class:selected=${derive(() => index.ref === selectedIndex.ref)}>
+										${index} ${JSON.stringify(item, null, "\t")}
+									</button>
+								`
+							)
+					)}
+			</div>
+		`)
+	)
 
-	return component
+	return root
 }
 
-Component.$css = css`
+const style = css`
 	:host {
 		display: grid;
 		position: relative;

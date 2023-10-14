@@ -1,13 +1,16 @@
 import { db } from "@/db/api"
-import { $ } from "master-ts/library/$"
-import { html } from "master-ts/library/template"
+import { commonStyle } from "@/importStyles"
+import { fragment, signal } from "master-ts/core"
+import { defineCustomTag, html } from "master-ts/extra"
 
-const Component = $.component("x-product-form")
+const productFormTag = defineCustomTag("x-product-form")
 export function ProductFormComponent() {
-	const component = new Component()
+	const root = productFormTag()
+	const dom = root.attachShadow({ mode: "open" })
+	dom.adoptedStyleSheets.push(commonStyle)
 
-	const name = $.writable("")
-	const brandName = $.writable("")
+	const name = signal("")
+	const brandName = signal("")
 
 	async function onSubmit() {
 		await db.mutate.createProduct2({
@@ -16,13 +19,15 @@ export function ProductFormComponent() {
 		})
 	}
 
-	component.$html = html`
-		<form on:submit=${(event) => (event.preventDefault(), onSubmit())}>
-			<input type="text" placeholder="Name" bind:value=${name} />
-			<input type="text" placeholder="Brand Name" bind:value=${brandName} />
-			<button type="submit">Create</button>
-		</form>
-	`
+	dom.append(
+		fragment(html`
+			<form on:submit=${(event) => (event.preventDefault(), onSubmit())}>
+				<input type="text" placeholder="Name" bind:value=${name} />
+				<input type="text" placeholder="Brand Name" bind:value=${brandName} />
+				<button type="submit">Create</button>
+			</form>
+		`)
+	)
 
-	return component
+	return root
 }
