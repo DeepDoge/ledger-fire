@@ -1,6 +1,7 @@
 import { ApiServer } from "@app/server/server"
-import "./build"
 import { ScriptsConfig } from "./config"
+
+import "./build"
 
 const buffer = await Bun.file(ScriptsConfig.out).arrayBuffer()
 const api = await ApiServer.start()
