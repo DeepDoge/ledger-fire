@@ -1,10 +1,10 @@
 {
-	"name": "client",
+	"name": "@app/client",
 	"type": "module",
 	"devDependencies": {
+		"@app/common": "workspace:app/common",
+		"@app/server": "workspace:app/server",
 		"@prisma/client": "5.4.2",
-		"common": "workspace:packages/common",
-		"server": "workspace:packages/server",
 		"@total-typescript/ts-reset": "^0.4.2",
 		"master-ts": "https://github.com/DeepDoge/master-ts/releases/download/0.0.109/package.tar.gz"
 	}

@@ -1,5 +1,5 @@
+import { Bytes } from "@app/common/utils/bytes"
 import type { PrismaClient } from "@prisma/client"
-import { Bytes } from "common/utils/bytes"
 import type { Database } from "../database"
 
 export type PrismaTxIndexer = Database.TxIndexer & {}

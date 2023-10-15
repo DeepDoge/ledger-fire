@@ -2,7 +2,7 @@
 	"type": "module",
 	"name": "ledger-fire",
 	"workspaces": [
-		"./packages/*"
+		"./app/*"
 	],
 	"scripts": {
 		"format": "prettier -w ./",
@@ -10,7 +10,8 @@
 		"build": "bun ./scripts/build.ts",
 		"start": "bun ./scripts/start.ts",
 		"db:reset": "rm -rf ./prisma/migrations && rm -f ./prisma/dev.db && rm -f ./prisma/dev.db-journal && bun db:push",
-		"db:push": "prisma db push"
+		"db:push": "prisma db push",
+		"postinstall": "bun db:reset"
 	},
 	"devDependencies": {
 		"prettier": "^2.8.8",

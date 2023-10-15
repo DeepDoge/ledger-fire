@@ -1,4 +1,4 @@
-import { ApiServer } from "server/server"
+import { ApiServer } from "@app/server/server"
 import "./build"
 import { ScriptsConfig } from "./config"
 

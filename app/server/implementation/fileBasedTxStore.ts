@@ -1,4 +1,4 @@
-import { Bytes } from "common/utils/bytes"
+import { Bytes } from "@app/common/utils/bytes"
 import fs from "fs/promises"
 import path from "path"
 import { Database } from "../database"

@@ -1,9 +1,9 @@
 import { App } from "@/app"
+import { Bytes } from "@app/common/utils/bytes"
+import { ApiConfig } from "@app/server/config"
+import { Database } from "@app/server/database"
+import type { mutations } from "@app/server/mutations"
 import type { Prisma } from "@prisma/client"
-import { Bytes } from "common/utils/bytes"
-import { ApiConfig } from "server/config"
-import { Database } from "server/database"
-import type { mutations } from "server/mutations"
 
 function createProxy(fn: (path: readonly string[], args: unknown[]) => Promise<unknown>) {
 	function getter(path: readonly string[]): object {

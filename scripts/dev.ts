@@ -1,8 +1,8 @@
 /* 
 	TODO: Make this hot-reload.
 */
+import { ApiServer } from "@app/server/server"
 import path from "path"
-import { ApiServer } from "server/server"
 import { ScriptsConfig } from "./config"
 
 const outDir = `/tmp/${Math.random().toString(36).slice(2)}_bun_dev`
