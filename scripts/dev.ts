@@ -1,7 +1,7 @@
 /* 
 	TODO: Make this hot-reload.
 */
-import { ApiServer } from "@app/server/server"
+import { ApiServer } from "@app/server"
 import path from "path"
 import { ScriptsConfig } from "./config"
 
@@ -12,8 +12,6 @@ Bun.spawn(["bun", "build", "--watch", ScriptsConfig.ts, "--target", "browser", "
 	stdout: "inherit",
 	stderr: "inherit",
 })
-
-const api = await ApiServer.start()
 
 Bun.serve({
 	development: true,
@@ -33,5 +31,7 @@ Bun.serve({
 		)
 	},
 })
+
+const api = await ApiServer.start()
 
 process.on("SIGINT", process.exit)

@@ -9,7 +9,7 @@
 		"dev": "bun --watch ./scripts/dev.ts",
 		"build": "bun ./scripts/build.ts",
 		"start": "bun ./scripts/start.ts",
-		"db:reset": "rm -rf ./prisma/migrations && rm -f ./prisma/dev.db && rm -f ./prisma/dev.db-journal && bun db:push",
+		"db:reset": "rm -rf ./prisma/migrations && rm -f ./prisma/sqlite.db && rm -f ./prisma/sqlite.db-journal && bun db:push",
 		"db:push": "prisma db push",
 		"postinstall": "bun db:reset"
 	},

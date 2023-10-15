@@ -1,11 +1,8 @@
-import { ApiServer } from "@app/server/server"
+import { ApiServer } from "@app/server"
 import { ScriptsConfig } from "./config"
 
 import "./build"
-
 const buffer = await Bun.file(ScriptsConfig.out).arrayBuffer()
-const api = await ApiServer.start()
-
 Bun.serve({
 	async fetch(request) {
 		const url = new URL(request.url)
@@ -14,5 +11,7 @@ Bun.serve({
 		return new Response(buffer, { headers: { "Content-Type": "text/html" } })
 	},
 })
+
+const api = await ApiServer.start()
 
 process.on("SIGINT", process.exit)
