@@ -2,12 +2,6 @@
 	"type": "module",
 	"name": "@app/server",
 	"devDependencies": {
-		"@app/common": "workspace:app/common",
-		"@total-typescript/ts-reset": "^0.4.2",
-		"bun-types": "^1.0.6",
-		"prisma": "^5.4.2",
-		"@prisma/client": "^5.4.2",
-		"colors": "^1.4.0",
-		"zod": "^3.21.4"
+		"colors": "^1.4.0"
 	}
 }

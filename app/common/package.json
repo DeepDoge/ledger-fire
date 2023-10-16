@@ -1,4 +1,4 @@
 {
-	"name": "@app/common",
-	"type": "module"
+	"type": "module",
+	"name": "@app/common"
 }

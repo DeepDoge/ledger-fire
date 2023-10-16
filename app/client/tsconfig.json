@@ -8,12 +8,11 @@
 		"noEmit": true,
 		"moduleDetection": "force",
 
-		"allowJs": true,
-		"esModuleInterop": true,
+		"allowJs": true, // allow importing `.js` from `.ts`
+		"esModuleInterop": true, // allow default imports for CommonJS modules
 
 		"skipLibCheck": true,
 		"strict": true,
-		"strictNullChecks": true,
 		"useUnknownInCatchVariables": true,
 		"noUncheckedIndexedAccess": true,
 		"noPropertyAccessFromIndexSignature": true,
