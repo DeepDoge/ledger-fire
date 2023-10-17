@@ -1,7 +1,7 @@
 import { derive, fragment, signal } from "master-ts/core"
 import { awaited, css, defer, defineCustomTag, each, html, match } from "master-ts/extra"
-import { commonStyle } from "~/importStyles"
 import type { SearchManager } from "~/libs/searchManager"
+import { commonStyle } from "~/styles"
 
 const searchTag = defineCustomTag("x-search")
 
@@ -9,39 +9,32 @@ export function SearchComponent<TSearchManager extends SearchManager>(
 	searchManager: TSearchManager,
 	onSelect: (item: Awaited<ReturnType<TSearchManager["search"]>>[0] | null) => any,
 ) {
-	const root = searchTag()
-	const dom = root.attachShadow({ mode: "open" })
+	const host = searchTag()
+	const dom = host.attachShadow({ mode: "open" })
 	dom.adoptedStyleSheets.push(commonStyle, style)
 
 	const searchText = signal("")
 	const searchTextDeferred = defer(searchText)
-
 	const results = awaited(derive(() => searchManager.search(searchTextDeferred.ref), [searchTextDeferred]))
 
-	const active = signal(false)
-	results.follow$(root, updateActive)
-	function updateActive() {
-		active.ref = (results.ref?.length ?? 0) > 0
-	}
-
 	const selectedIndex = signal(0)
-	const selected = derive(() => results.ref?.[selectedIndex.ref] ?? null)
-	selected.follow$(root, onSelect)
-	results.follow$(root, () => (selectedIndex.ref = 0))
-
+	const selectedItem = derive(() => results.ref?.[selectedIndex.ref] ?? null)
+	selectedItem.follow$(host, onSelect)
+	results.follow$(host, () => (selectedIndex.ref = 0))
 	function selectByIndex(index: number) {
 		selectedIndex.ref = index
 	}
-
 	function incrementSelectedIndex() {
 		selectedIndex.ref = (selectedIndex.ref + 1) % results.ref!.length
 	}
-
 	function decrementSelectedIndex() {
 		selectedIndex.ref = (selectedIndex.ref - 1 + results.ref!.length) % results.ref!.length
 	}
 
-	function onKeyDown(event: KeyboardEvent) {
+	const searchElement = html`
+		<input type="text" placeholder="Search for products..." bind:value=${searchText} on:keydown=${onSelectElementKeyDown} />
+	`[0] as HTMLInputElement
+	function onSelectElementKeyDown(event: KeyboardEvent) {
 		switch (event.key) {
 			case "ArrowUp":
 				decrementSelectedIndex()
@@ -52,20 +45,11 @@ export function SearchComponent<TSearchManager extends SearchManager>(
 		}
 	}
 
-	function close() {
-		active.ref = false
-		searchElement.ref?.blur()
-	}
-
-	const searchElement = signal<HTMLInputElement | null>(null)
-
 	dom.append(
 		fragment(html`
-			${() => JSON.stringify(selected.ref, null, "\t")}
-			<form on:submit=${(event) => (event.preventDefault(), close())} on:focusout=${close} on:focusin=${updateActive}>
-				<input ref:=${searchElement} type="text" placeholder="Search for products..." bind:value=${searchText} on:keydown=${onKeyDown} />
-			</form>
-			<div class="results" class:active=${active}>
+			${() => JSON.stringify(selectedItem.ref, null, "\t")}
+			<form on:submit=${(event) => (event.preventDefault(), searchElement.blur())}>${searchElement}</form>
+			<div class="results">
 				${match(results)
 					.case(null, () => null)
 					.default((results) =>
@@ -86,7 +70,7 @@ export function SearchComponent<TSearchManager extends SearchManager>(
 		`),
 	)
 
-	return root
+	return host
 }
 
 const style = css`
@@ -99,7 +83,7 @@ const style = css`
 		display: contents;
 	}
 
-	.results:not(.active) {
+	form:not(:focus-within) + .results {
 		display: none;
 	}
 	.results {

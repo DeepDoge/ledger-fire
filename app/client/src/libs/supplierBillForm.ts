@@ -1,7 +1,7 @@
 import { fragment, signal } from "master-ts/core"
 import { defineCustomTag, html } from "master-ts/extra"
 import { tx } from "~/api/client"
-import { commonStyle } from "~/importStyles"
+import { commonStyle } from "~/styles"
 
 const supplierBillFormTag = defineCustomTag("x-supplier-bill-form")
 export function SupplierBillFormComponent() {
@@ -29,8 +29,8 @@ export function SupplierBillFormComponent() {
 		it should be simple and shouldnt require any mouse use.
 	*/
 
-	const root = supplierBillFormTag()
-	const dom = root.attachShadow({ mode: "open" })
+	const host = supplierBillFormTag()
+	const dom = host.attachShadow({ mode: "open" })
 	dom.adoptedStyleSheets.push(commonStyle)
 
 	const name = signal("")
@@ -53,5 +53,5 @@ export function SupplierBillFormComponent() {
 		`),
 	)
 
-	return root
+	return host
 }

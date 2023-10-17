@@ -4,12 +4,12 @@ import { derive, fragment, signal } from "master-ts/core"
 import { awaited, css, defineCustomTag, html } from "master-ts/extra"
 import { tx } from "~/api/client"
 import { App } from "~/app"
-import { commonStyle } from "~/importStyles"
+import { commonStyle } from "~/styles"
 
 const productTag = defineCustomTag("x-product")
 export function ProductComponent(product: Prisma.ProductGetPayload<{ include: { brand: true } }>) {
-	const root = productTag()
-	const dom = root.attachShadow({ mode: "open" })
+	const host = productTag()
+	const dom = host.attachShadow({ mode: "open" })
 	dom.adoptedStyleSheets.push(commonStyle, style)
 
 	const destroyPromise = signal<Promise<unknown>>(Promise.reject())
@@ -36,7 +36,7 @@ export function ProductComponent(product: Prisma.ProductGetPayload<{ include: { 
 		`),
 	)
 
-	return root
+	return host
 }
 
 const style = css`

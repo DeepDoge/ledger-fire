@@ -4,13 +4,13 @@ import { derive, fragment, signal } from "master-ts/core"
 import { awaited, css, defineCustomTag, html } from "master-ts/extra"
 import { tx } from "~/api/client"
 import { App } from "~/app"
-import { commonStyle } from "~/importStyles"
+import { commonStyle } from "~/styles"
 
 const warehouseTag = defineCustomTag("x-warehouse")
 
 export function WarehouseComponent(warehouse: Warehouse) {
-	const root = warehouseTag()
-	const dom = root.attachShadow({ mode: "open" })
+	const host = warehouseTag()
+	const dom = host.attachShadow({ mode: "open" })
 	dom.adoptedStyleSheets.push(commonStyle, style)
 
 	const destroyPromise = signal<Promise<unknown>>(Promise.reject())
@@ -38,7 +38,7 @@ export function WarehouseComponent(warehouse: Warehouse) {
 		`),
 	)
 
-	return root
+	return host
 }
 
 const style = css`

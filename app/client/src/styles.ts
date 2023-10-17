@@ -1,7 +1,7 @@
-import { importCss } from "./styles" assert { type: "macro" }
+import { importAsset } from "@app/assets" assert { type: "macro" }
 
-const globalCss = await importCss("global.css")
-const rootCss = await importCss("root.css")
+const globalCss = await importAsset("styles/global.css")
+const rootCss = await importAsset("styles/root.css")
 
 export const commonStyle = new CSSStyleSheet()
 const rootStyle = new CSSStyleSheet()

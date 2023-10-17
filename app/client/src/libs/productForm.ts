@@ -1,12 +1,12 @@
 import { fragment, signal } from "master-ts/core"
 import { defineCustomTag, html } from "master-ts/extra"
 import { tx } from "~/api/client"
-import { commonStyle } from "~/importStyles"
+import { commonStyle } from "~/styles"
 
 const productFormTag = defineCustomTag("x-product-form")
 export function ProductFormComponent() {
-	const root = productFormTag()
-	const dom = root.attachShadow({ mode: "open" })
+	const host = productFormTag()
+	const dom = host.attachShadow({ mode: "open" })
 	dom.adoptedStyleSheets.push(commonStyle)
 
 	const name = signal("")
@@ -29,5 +29,5 @@ export function ProductFormComponent() {
 		`),
 	)
 
-	return root
+	return host
 }

@@ -1,13 +1,13 @@
 import { derive, fragment } from "master-ts/core"
 import { TYPEOF, css, defineCustomTag, html, match } from "master-ts/extra"
-import { commonStyle } from "~/importStyles"
+import { commonStyle } from "~/styles"
 import type { DialogManager } from "./dialogManager"
 
 const dialogTag = defineCustomTag("x-dialog")
 
 export function DialogComponent({ dialogs }: DialogManager) {
-	const root = dialogTag()
-	const dom = root.attachShadow({ mode: "open" })
+	const host = dialogTag()
+	const dom = host.attachShadow({ mode: "open" })
 	dom.adoptedStyleSheets.push(commonStyle, style)
 
 	const lastDialog = derive(() => (dialogs.ref.length > 0 ? dialogs.ref[dialogs.ref.length - 1]! : null))
@@ -58,7 +58,7 @@ export function DialogComponent({ dialogs }: DialogManager) {
 		`),
 	)
 
-	return root
+	return host
 }
 
 const style = css`

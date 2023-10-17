@@ -1,14 +1,14 @@
-import "~/importStyles"
+import "~/styles"
 
-import { TagsNS, fragment, signal } from "master-ts/core"
+import { Template, fragment, signal } from "master-ts/core"
 import { css, defineCustomTag, html } from "master-ts/extra"
-import { commonStyle } from "~/importStyles"
-import { DialogComponent } from "./libs/dialog"
-import { createDialogManager } from "./libs/dialogManager"
-import { ProductsComponent } from "./libs/products"
-import { WarehousesComponent } from "./libs/warehouses"
-import { NavigationComponent } from "./navigation"
-import { route } from "./router"
+import { DialogComponent } from "~/libs/dialog"
+import { createDialogManager } from "~/libs/dialogManager"
+import { ProductsComponent } from "~/libs/products"
+import { WarehousesComponent } from "~/libs/warehouses"
+import { NavigationComponent } from "~/navigation"
+import { route } from "~/router"
+import { commonStyle } from "~/styles"
 
 export namespace App {
 	export const language = signal(navigator.language)
@@ -17,11 +17,11 @@ export namespace App {
 
 	const appTag = defineCustomTag("x-app")
 	function AppComponent() {
-		const root = appTag()
-		const dom = root.attachShadow({ mode: "open" })
+		const host = appTag()
+		const dom = host.attachShadow({ mode: "open" })
 		dom.adoptedStyleSheets.push(commonStyle, style)
 
-		const routeView = signal<TagsNS.AcceptedChild>(
+		const routeView = signal<Template.Member>(
 			null!,
 			(set) =>
 				route.pathArr.follow(
@@ -54,7 +54,7 @@ export namespace App {
 			`),
 		)
 
-		return root
+		return host
 	}
 
 	const style = css`

@@ -1,4 +1,4 @@
-import { Signal, TagsNS, signal } from "master-ts/core"
+import { Signal, Template, signal } from "master-ts/core"
 
 export type DialogBase = {
 	title: string
@@ -21,7 +21,7 @@ export type DialogConfirm = DialogBase & {
 
 export type DialogCustom = DialogBase & {
 	type: "custom"
-	message(close: () => void): TagsNS.AcceptedChild
+	message(close: () => void): Template.Member
 	resolve(): void
 }
 

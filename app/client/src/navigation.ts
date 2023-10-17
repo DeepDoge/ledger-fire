@@ -1,13 +1,13 @@
 import { fragment } from "master-ts/core"
 import { css, defineCustomTag, html } from "master-ts/extra"
-import { commonStyle } from "./importStyles"
-import { routeHash } from "./router"
+import { routeHash } from "~/router"
+import { commonStyle } from "~/styles"
 
 const navigationTag = defineCustomTag("x-navigation")
 
 export function NavigationComponent() {
-	const root = navigationTag()
-	const dom = root.attachShadow({ mode: "open" })
+	const host = navigationTag()
+	const dom = host.attachShadow({ mode: "open" })
 	dom.adoptedStyleSheets.push(commonStyle, style)
 
 	dom.append(
@@ -19,7 +19,7 @@ export function NavigationComponent() {
 		`),
 	)
 
-	return root
+	return host
 }
 
 const style = css`

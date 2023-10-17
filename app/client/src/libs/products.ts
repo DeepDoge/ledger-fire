@@ -1,8 +1,8 @@
 import { derive, fragment, signal } from "master-ts/core"
 import { awaited, css, defer, defineCustomTag, each, html, match } from "master-ts/extra"
 import { query } from "~/api/client"
-import { commonStyle } from "~/importStyles"
 import { SearchManager } from "~/libs/searchManager"
+import { commonStyle } from "~/styles"
 import { ProductComponent } from "./product"
 import { ProductFormComponent } from "./productForm"
 
@@ -21,8 +21,8 @@ const searchManager = SearchManager.create(query.product, {
 
 const productsTag = defineCustomTag("x-products")
 export function ProductsComponent() {
-	const root = productsTag()
-	const dom = root.attachShadow({ mode: "open" })
+	const host = productsTag()
+	const dom = host.attachShadow({ mode: "open" })
 	dom.adoptedStyleSheets.push(commonStyle, style)
 
 	const searchText = signal("")
@@ -48,7 +48,7 @@ export function ProductsComponent() {
 		`),
 	)
 
-	return root
+	return host
 }
 
 const style = css`
