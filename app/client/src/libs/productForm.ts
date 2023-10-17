@@ -1,7 +1,7 @@
-import { tx } from "@/api/client"
-import { commonStyle } from "@/importStyles"
 import { fragment, signal } from "master-ts/core"
 import { defineCustomTag, html } from "master-ts/extra"
+import { tx } from "~/api/client"
+import { commonStyle } from "~/importStyles"
 
 const productFormTag = defineCustomTag("x-product-form")
 export function ProductFormComponent() {
@@ -26,7 +26,7 @@ export function ProductFormComponent() {
 				<input type="text" placeholder="Brand Name" bind:value=${brandName} />
 				<button type="submit">Create</button>
 			</form>
-		`)
+		`),
 	)
 
 	return root

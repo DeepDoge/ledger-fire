@@ -1,8 +1,8 @@
-import "@/importStyles"
+import "~/importStyles"
 
-import { commonStyle } from "@/importStyles"
 import { TagsNS, fragment, signal } from "master-ts/core"
 import { css, defineCustomTag, html } from "master-ts/extra"
+import { commonStyle } from "~/importStyles"
 import { DialogComponent } from "./libs/dialog"
 import { createDialogManager } from "./libs/dialogManager"
 import { ProductsComponent } from "./libs/products"
@@ -27,25 +27,21 @@ export namespace App {
 				route.pathArr.follow(
 					(pathArr) => {
 						if (pathArr[0] === "#warehouses") {
-							set(
-								html`
-									<h1>Warehouses</h1>
-									${WarehousesComponent()}
-								`
-							)
+							set(html`
+								<h1>Warehouses</h1>
+								${WarehousesComponent()}
+							`)
 						} else if (pathArr[0] === "#products") {
-							set(
-								html`
-									<h1>Products</h1>
-									${ProductsComponent()}
-								`
-							)
+							set(html`
+								<h1>Products</h1>
+								${ProductsComponent()}
+							`)
 						} else {
 							set(null)
 						}
 					},
-					{ mode: "immediate" }
-				).unfollow
+					{ mode: "immediate" },
+				).unfollow,
 		)
 
 		dom.append(
@@ -55,7 +51,7 @@ export namespace App {
 				</header>
 				<main style:grid-area=${"main"}>${routeView}</main>
 				<x ${DialogComponent(dialogManager)}></x>
-			`)
+			`),
 		)
 
 		return root

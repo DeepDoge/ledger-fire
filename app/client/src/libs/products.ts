@@ -1,8 +1,8 @@
-import { query } from "@/api/client"
-import { commonStyle } from "@/importStyles"
-import { SearchManager } from "@/libs/searchManager"
 import { derive, fragment, signal } from "master-ts/core"
 import { awaited, css, defer, defineCustomTag, each, flatten, html, match } from "master-ts/extra"
+import { query } from "~/api/client"
+import { commonStyle } from "~/importStyles"
+import { SearchManager } from "~/libs/searchManager"
 import { ProductComponent } from "./product"
 import { ProductFormComponent } from "./productForm"
 
@@ -42,10 +42,10 @@ export function ProductsComponent() {
 					.default((products) =>
 						each(products)
 							.key((product) => product.id)
-							.as((product) => html` <x ${ProductComponent(product.ref)}></x> `)
+							.as((product) => html` <x ${ProductComponent(product.ref)}></x> `),
 					)}
 			</div>
-		`)
+		`),
 	)
 
 	return root

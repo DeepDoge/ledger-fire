@@ -1,9 +1,9 @@
-import { App } from "@/app"
 import { Bytes } from "@app/common/utils/bytes"
 import { ApiConfig } from "@app/server/config"
 import { Database } from "@app/server/database"
 import type { mutations } from "@app/server/mutations"
 import type { Prisma } from "@prisma/client"
+import { App } from "~/app"
 
 function createProxy(fn: (path: readonly string[], args: unknown[]) => Promise<unknown>) {
 	function getter(path: readonly string[]): object {
@@ -29,7 +29,7 @@ export const query = createProxy(async ([table, ...path], args) => {
 				table,
 				path,
 				args,
-			} satisfies Database.QueryRequest)
+			} satisfies Database.QueryRequest),
 		),
 		headers: {
 			"Content-Type": "application/octet-stream",
@@ -55,7 +55,7 @@ export const tx = createProxy(async (path, [params]) => {
 					name,
 					params,
 				},
-			} satisfies Database.TxRequest)
+			} satisfies Database.TxRequest),
 		),
 		headers: {
 			"Content-Type": "application/octet-stream",
@@ -66,6 +66,6 @@ export const tx = createProxy(async (path, [params]) => {
 	return Bytes.decode(new Uint8Array(await response.arrayBuffer()))
 }) as {
 	[key in keyof typeof mutations]: (
-		args: Database.TxMutation.InferParameters<(typeof mutations)[key]>
+		args: Database.TxMutation.InferParameters<(typeof mutations)[key]>,
 	) => Promise<Database.TxMutation.InferReturnType<(typeof mutations)[key]>>
 }

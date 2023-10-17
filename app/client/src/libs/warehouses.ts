@@ -1,9 +1,9 @@
-import { query } from "@/api/client"
-import { commonStyle } from "@/importStyles"
-import { SearchManager } from "@/libs/searchManager"
 import type { Warehouse } from "@prisma/client"
 import { fragment, onConnected$, signal } from "master-ts/core"
 import { css, defineCustomTag, each, html } from "master-ts/extra"
+import { query } from "~/api/client"
+import { commonStyle } from "~/importStyles"
+import { SearchManager } from "~/libs/searchManager"
 import { SearchComponent } from "./search"
 import { WarehouseComponent } from "./warehouse"
 import { WarehouseFormComponent } from "./warehouseForm"
@@ -43,7 +43,7 @@ export function WarehousesComponent() {
 					.key((warehouse) => warehouse.id)
 					.as((warehouse) => html` <x ${WarehouseComponent(warehouse.ref)}></x> `)}
 			</div>
-		`)
+		`),
 	)
 
 	return root

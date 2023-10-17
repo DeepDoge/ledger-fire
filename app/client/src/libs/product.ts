@@ -1,10 +1,10 @@
-import { tx } from "@/api/client"
-import { App } from "@/app"
-import { commonStyle } from "@/importStyles"
 import { toLocaleCapitalized } from "@app/common/utils/casing"
 import type { Prisma } from "@prisma/client"
 import { derive, fragment, signal } from "master-ts/core"
 import { awaited, css, defineCustomTag, flatten, html } from "master-ts/extra"
+import { tx } from "~/api/client"
+import { App } from "~/app"
+import { commonStyle } from "~/importStyles"
 
 const productTag = defineCustomTag("x-product")
 export function ProductComponent(product: Prisma.ProductGetPayload<{ include: { brand: true } }>) {
@@ -17,9 +17,9 @@ export function ProductComponent(product: Prisma.ProductGetPayload<{ include: { 
 		derive(() =>
 			awaited(
 				destroyPromise.ref.then(() => true).catch(() => false),
-				false
-			)
-		)
+				false,
+			),
+		),
 	)
 	async function destroy() {
 		await destroyPromise.ref
@@ -37,7 +37,7 @@ export function ProductComponent(product: Prisma.ProductGetPayload<{ include: { 
 			<div class="name">${() => toLocaleCapitalized(App.language.ref)(product.name)}</div>
 			<div class="brandName">${() => toLocaleCapitalized(App.language.ref)(product.brand.name)}</div>
 			<button on:click=${destroy} disabled=${() => (destroying.ref ? "" : null)}>${() => (destroying.ref ? "Deleting..." : "Delete")}</button>
-		`)
+		`),
 	)
 
 	return root

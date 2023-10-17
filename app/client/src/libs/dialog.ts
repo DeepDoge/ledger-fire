@@ -1,6 +1,6 @@
-import { commonStyle } from "@/importStyles"
 import { derive, fragment } from "master-ts/core"
 import { TYPEOF, css, defineCustomTag, html, match } from "master-ts/extra"
+import { commonStyle } from "~/importStyles"
 import type { DialogManager } from "./dialogManager"
 
 const dialogTag = defineCustomTag("x-dialog")
@@ -26,7 +26,7 @@ export function DialogComponent({ dialogs }: DialogManager) {
 									${match(lastDialog)
 										.case({ message: { [TYPEOF]: "string" } }, (lastDialog) => html`${() => lastDialog.ref.message}`)
 										.case({ message: { [TYPEOF]: "function" } }, (lastDialog) =>
-											derive(() => lastDialog.ref.message(() => lastDialog.ref.resolve(false)), [lastDialog])
+											derive(() => lastDialog.ref.message(() => lastDialog.ref.resolve(false)), [lastDialog]),
 										)}
 								</div>
 								<div class="actions">
@@ -35,7 +35,7 @@ export function DialogComponent({ dialogs }: DialogManager) {
 											{ type: "alert" },
 											(lastDialog) => html`
 												<button on:click=${() => lastDialog.ref.resolve()}>${() => lastDialog.ref.confirm ?? "OK"}</button>
-											`
+											`,
 										)
 										.case(
 											{ type: "confirm" },
@@ -46,16 +46,16 @@ export function DialogComponent({ dialogs }: DialogManager) {
 												<button on:click=${() => lastDialog.ref.resolve(false)}>
 													${() => lastDialog.ref.cancel ?? "Cancel"}
 												</button>
-											`
+											`,
 										)
 										.case({ type: "custom" }, () => html``)
 										.default()}
 								</div>
 							</div>
 						</div>
-					`
+					`,
 				)}
-		`)
+		`),
 	)
 
 	return root

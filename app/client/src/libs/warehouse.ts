@@ -1,10 +1,10 @@
-import { tx } from "@/api/client"
-import { App } from "@/app"
-import { commonStyle } from "@/importStyles"
 import { toLocaleCapitalized } from "@app/common/utils/casing"
 import type { Warehouse } from "@prisma/client"
 import { derive, fragment, signal } from "master-ts/core"
 import { awaited, css, defineCustomTag, flatten, html } from "master-ts/extra"
+import { tx } from "~/api/client"
+import { App } from "~/app"
+import { commonStyle } from "~/importStyles"
 
 const warehouseTag = defineCustomTag("x-warehouse")
 
@@ -18,9 +18,9 @@ export function WarehouseComponent(warehouse: Warehouse) {
 		derive(() =>
 			awaited(
 				destroyPromise.ref.catch(() => false).then(() => true),
-				false
-			)
-		)
+				false,
+			),
+		),
 	)
 	async function destroy() {
 		await destroyPromise.ref
@@ -38,7 +38,7 @@ export function WarehouseComponent(warehouse: Warehouse) {
 			<div class="name">${() => toLocaleCapitalized(App.language.ref)(warehouse.name)}</div>
 			<div class="address">${() => toLocaleCapitalized(App.language.ref)(warehouse.address)}</div>
 			<button class="destroy" class:destroying=${destroying} on:click=${destroy}>Delete</button>
-		`)
+		`),
 	)
 
 	return root

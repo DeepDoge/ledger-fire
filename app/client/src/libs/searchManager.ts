@@ -1,10 +1,10 @@
-import { query } from "@/api/client"
-import { App } from "@/app"
 import type { Prisma } from "@prisma/client"
+import { query } from "~/api/client"
+import { App } from "~/app"
 
 export type SearchManager<
 	TQuery extends SearchManager.Query = SearchManager.Query,
-	TInclude extends SearchManager.Include<TQuery> = SearchManager.Include<TQuery>
+	TInclude extends SearchManager.Include<TQuery> = SearchManager.Include<TQuery>,
 > = {
 	search(text: string, take?: number): Promise<SearchManager.Item<TQuery, TInclude>[]>
 }
@@ -30,7 +30,7 @@ export namespace SearchManager {
 			itemIdKey: TItemIdKey
 			include?: TInclude
 			queries: (text: string) => Where<TQuery>[]
-		}
+		},
 	): SearchManager<TQuery, TInclude> {
 		return {
 			async search(text, take: number = 256) {

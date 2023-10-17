@@ -1,13 +1,13 @@
-import { commonStyle } from "@/importStyles"
-import type { SearchManager } from "@/libs/searchManager"
 import { derive, fragment, signal } from "master-ts/core"
 import { awaited, css, defer, defineCustomTag, each, flatten, html, match } from "master-ts/extra"
+import { commonStyle } from "~/importStyles"
+import type { SearchManager } from "~/libs/searchManager"
 
 const searchTag = defineCustomTag("x-search")
 
 export function SearchComponent<TSearchManager extends SearchManager>(
 	searchManager: TSearchManager,
-	onSelect: (item: Awaited<ReturnType<TSearchManager["search"]>>[0] | null) => any
+	onSelect: (item: Awaited<ReturnType<TSearchManager["search"]>>[0] | null) => any,
 ) {
 	const root = searchTag()
 	const dom = root.attachShadow({ mode: "open" })
@@ -79,11 +79,11 @@ export function SearchComponent<TSearchManager extends SearchManager>(
 										class:selected=${derive(() => index.ref === selectedIndex.ref)}>
 										${index} ${JSON.stringify(item, null, "\t")}
 									</button>
-								`
-							)
+								`,
+							),
 					)}
 			</div>
-		`)
+		`),
 	)
 
 	return root

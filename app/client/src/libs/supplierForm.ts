@@ -1,7 +1,7 @@
-import { tx } from "@/api/client"
-import { commonStyle } from "@/importStyles"
 import { fragment, signal } from "master-ts/core"
 import { defineCustomTag, html } from "master-ts/extra"
+import { tx } from "~/api/client"
+import { commonStyle } from "~/importStyles"
 
 const supplierFormTag = defineCustomTag("x-supplier-form")
 export function SupplierFormComponent() {
@@ -33,7 +33,7 @@ export function SupplierFormComponent() {
 
 				<button type="submit">Create</button>
 			</form>
-		`)
+		`),
 	)
 
 	return root
