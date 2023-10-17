@@ -29,9 +29,9 @@ export function SearchComponent<TSearchManager extends SearchManager>(
 	}
 
 	const searchElement = html`
-		<input type="text" placeholder="Search for products..." bind:value=${searchText} on:keydown=${onSelectElementKeyDown} />
+		<input type="text" id="search" placeholder="Search for products..." bind:value=${searchText} />
 	`[0] as HTMLInputElement
-	function onSelectElementKeyDown(event: KeyboardEvent) {
+	function onKeyDown(event: KeyboardEvent) {
 		switch (event.key) {
 			case "ArrowUp":
 				decrementSelectedIndex()
@@ -46,25 +46,27 @@ export function SearchComponent<TSearchManager extends SearchManager>(
 		dom,
 		html`
 			${() => JSON.stringify(selectedItem.ref, null, "\t")}
-			<form on:submit=${(event) => (event.preventDefault(), searchElement.blur())}>${searchElement}</form>
-			<div class="results">
-				${match(results)
-					.case(null, () => null)
-					.default((results) =>
-						each(results)
-							.key((_, index) => index)
-							.as(
-								(item, index) => html`
-									<button
-										class="item"
-										on:click=${() => (selectedIndex.ref = index.ref)}
-										class:selected=${derive(() => index.ref === selectedIndex.ref)}>
-										${index} ${JSON.stringify(item, null, "\t")}
-									</button>
-								`,
-							),
-					)}
-			</div>
+			<form on:submit=${(event) => (event.preventDefault(), searchElement.blur())} on:keydown=${onKeyDown}>
+				${searchElement}
+				<label for="search" id="results">
+					${match(results)
+						.case(null, () => null)
+						.default((results) =>
+							each(results)
+								.key((_, index) => index)
+								.as(
+									(item, index) => html`
+										<button
+											class="item"
+											on:click=${() => (selectedIndex.ref = index.ref)}
+											class:selected=${derive(() => index.ref === selectedIndex.ref)}>
+											${index} ${JSON.stringify(item, null, "\t")}
+										</button>
+									`,
+								),
+						)}
+				</div>
+			</form>
 		`,
 	)
 
@@ -73,18 +75,21 @@ export function SearchComponent<TSearchManager extends SearchManager>(
 
 const style = css`
 	:host {
+		display: contents;
+	}
+
+	form {
 		display: grid;
 		position: relative;
 	}
 
-	form {
-		display: contents;
-	}
-
-	form:not(:focus-within) + .results {
+	form:not(:focus-within) #results {
 		display: none;
 	}
-	.results {
+	#results {
+		display: grid;
+		justify-content: start;
+		grid-auto-flow: row;
 		position: absolute;
 		top: 100%;
 		max-height: 50vh;
@@ -99,6 +104,7 @@ const style = css`
 
 	.item {
 		display: grid;
+		text-align: left;
 		grid-template-columns: 1fr 1fr;
 		padding: calc(var(--span) * 0.5);
 	}
