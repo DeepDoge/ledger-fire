@@ -1,7 +1,4 @@
 {
 	"type": "module",
-	"name": "@app/server",
-	"devDependencies": {
-		"colors": "^1.4.0"
-	}
+	"name": "@app/server"
 }

@@ -10,7 +10,7 @@ export namespace Database {
 					if (typeof value !== "string") throw new Error("Invalid table name")
 					if (value[0] === "$") throw new Error("Invalid table name")
 					return value
-				})
+				}),
 			),
 			path: z.string().array(),
 			args: z.unknown().array(),
@@ -35,7 +35,7 @@ export namespace Database {
 			z.object({
 				id: z.bigint(),
 				timestamp: z.number(),
-			})
+			}),
 		) satisfies Parser
 	}
 

@@ -1,5 +1,5 @@
 import { derive, fragment, signal } from "master-ts/core"
-import { awaited, css, defer, defineCustomTag, each, flatten, html, match } from "master-ts/extra"
+import { awaited, css, defer, defineCustomTag, each, html, match } from "master-ts/extra"
 import { query } from "~/api/client"
 import { commonStyle } from "~/importStyles"
 import { SearchManager } from "~/libs/searchManager"
@@ -28,7 +28,7 @@ export function ProductsComponent() {
 	const searchText = signal("")
 	const searchTextDeferred = defer(searchText)
 
-	const products = flatten(derive(() => awaited(searchManager.search(searchTextDeferred.ref, 1024)), [searchTextDeferred]))
+	const products = awaited(derive(() => searchManager.search(searchTextDeferred.ref, 1024), [searchTextDeferred]))
 
 	dom.append(
 		fragment(html`

@@ -9,7 +9,7 @@ namespace Mutations {
 			z.object({
 				name: z.string().transform(toLocaleLowerCase(language)),
 				address: z.string().transform(toLocaleLowerCase(language)),
-			})
+			}),
 		)
 		.call(async ({ db, params }) => {
 			return await db.warehouse.create({
@@ -24,7 +24,7 @@ namespace Mutations {
 		.paramsParser(() =>
 			z.object({
 				id: z.number(),
-			})
+			}),
 		)
 		.call(async ({ db, params }) => {
 			return await db.warehouse.delete({
@@ -38,7 +38,7 @@ namespace Mutations {
 		.paramsParser(({ tx: { language } }) =>
 			z.object({
 				name: z.string().transform(toLocaleLowerCase(language)),
-			})
+			}),
 		)
 		.call(async ({ db, params }) => {
 			return await db.brand.create({
@@ -53,7 +53,7 @@ namespace Mutations {
 			z.object({
 				name: z.string().transform(toLocaleLowerCase(language)),
 				brandId: z.number(),
-			})
+			}),
 		)
 		.call(async ({ db, params }) => {
 			return await db.product.create({
@@ -69,7 +69,7 @@ namespace Mutations {
 			z.object({
 				name: z.string().transform(toLocaleLowerCase(language)),
 				brandName: z.string().transform(toLocaleLowerCase(language)),
-			})
+			}),
 		)
 		.call(async ({ db, params }) => {
 			return await db.product.create({
@@ -90,7 +90,7 @@ namespace Mutations {
 		.paramsParser(() =>
 			z.object({
 				id: z.number(),
-			})
+			}),
 		)
 		.call(async ({ db, params }) => {
 			return await db.product.delete({
@@ -112,7 +112,7 @@ namespace Mutations {
 				phone: z.string().optional(),
 				email: z.string().email().transform(toLocaleLowerCase(language)).optional(),
 				address: z.string().transform(toLocaleLowerCase(language)).optional(),
-			})
+			}),
 		)
 		.call(async ({ db, params }) => {
 			return await db.account.create({
@@ -134,7 +134,7 @@ namespace Mutations {
 				phone: z.string().optional(),
 				email: z.string().email().transform(toLocaleLowerCase(language)).optional(),
 				address: z.string().transform(toLocaleLowerCase(language)).optional(),
-			})
+			}),
 		)
 		.call(async ({ db, params }) => {
 			return await db.account.create({
@@ -160,10 +160,10 @@ namespace Mutations {
 						code: z.string(),
 						quantity: z.bigint(),
 						price: z.bigint(),
-					})
+					}),
 				),
 				timestamp: z.bigint(),
-			})
+			}),
 		)
 		.call(async ({ tx, db, params: { id, items, supplierId, timestamp } }) => {
 			await db.supplierBill.create({
@@ -198,7 +198,7 @@ namespace Mutations {
 				supplierId: z.number(),
 				supplierProductCode: z.string(),
 				localProductId: z.number(),
-			})
+			}),
 		)
 		.call(async ({ db, params: { supplierId, supplierProductCode, localProductId } }) => {
 			await db.supplierProduct.update({
@@ -212,7 +212,7 @@ namespace Mutations {
 			z.object({
 				id: z.string(),
 				warehouseId: z.number(),
-			})
+			}),
 		)
 		.call(async ({ db, params: { id, warehouseId } }) => {
 			const bill = await db.supplierBill.update({

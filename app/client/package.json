@@ -1,7 +1,4 @@
 {
 	"type": "module",
-	"name": "@app/client",
-	"devDependencies": {
-		"master-ts": "https://github.com/DeepDoge/master-ts/releases/download/0.0.109/package.tar.gz"
-	}
+	"name": "@app/client"
 }

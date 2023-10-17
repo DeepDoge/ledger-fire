@@ -16,7 +16,7 @@ export function NavigationComponent() {
 				<a href=${routeHash({ path: "warehouses" })}>Warehouses</a>
 				<a href=${routeHash({ path: "products" })}>Products</a>
 			</nav>
-		`)
+		`),
 	)
 
 	return root

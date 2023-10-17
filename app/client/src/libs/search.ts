@@ -1,5 +1,5 @@
 import { derive, fragment, signal } from "master-ts/core"
-import { awaited, css, defer, defineCustomTag, each, flatten, html, match } from "master-ts/extra"
+import { awaited, css, defer, defineCustomTag, each, html, match } from "master-ts/extra"
 import { commonStyle } from "~/importStyles"
 import type { SearchManager } from "~/libs/searchManager"
 
@@ -16,7 +16,7 @@ export function SearchComponent<TSearchManager extends SearchManager>(
 	const searchText = signal("")
 	const searchTextDeferred = defer(searchText)
 
-	const results = flatten(derive(() => awaited(searchManager.search(searchTextDeferred.ref)), [searchTextDeferred]))
+	const results = awaited(derive(() => searchManager.search(searchTextDeferred.ref), [searchTextDeferred]))
 
 	const active = signal(false)
 	results.follow$(root, updateActive)

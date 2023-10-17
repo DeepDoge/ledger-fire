@@ -1,7 +1,7 @@
 import { toLocaleCapitalized } from "@app/common/utils/casing"
 import type { Warehouse } from "@prisma/client"
 import { derive, fragment, signal } from "master-ts/core"
-import { awaited, css, defineCustomTag, flatten, html } from "master-ts/extra"
+import { awaited, css, defineCustomTag, html } from "master-ts/extra"
 import { tx } from "~/api/client"
 import { App } from "~/app"
 import { commonStyle } from "~/importStyles"
@@ -14,14 +14,11 @@ export function WarehouseComponent(warehouse: Warehouse) {
 	dom.adoptedStyleSheets.push(commonStyle, style)
 
 	const destroyPromise = signal<Promise<unknown>>(Promise.reject())
-	const destroying = flatten(
-		derive(() =>
-			awaited(
-				destroyPromise.ref.catch(() => false).then(() => true),
-				false,
-			),
-		),
+	const destroying = awaited(
+		derive(() => destroyPromise.ref.catch(() => false).then(() => true)),
+		false,
 	)
+
 	async function destroy() {
 		await destroyPromise.ref
 		const confirm = await App.dialogManager.create({

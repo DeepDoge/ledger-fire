@@ -27,7 +27,7 @@ Bun.serve({
 				.then((html) => html.replace("<!-- js -->", () => `<script type="module">${output}</script>`)),
 			{
 				headers: { "Content-Type": "text/html" },
-			}
+			},
 		)
 	},
 })
