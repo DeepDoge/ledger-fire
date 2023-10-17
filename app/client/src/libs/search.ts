@@ -1,4 +1,4 @@
-import { derive, fragment, signal } from "master-ts/core"
+import { derive, populate, signal } from "master-ts/core"
 import { awaited, css, defer, defineCustomTag, each, html, match } from "master-ts/extra"
 import type { SearchManager } from "~/libs/searchManager"
 import { commonStyle } from "~/styles"
@@ -18,12 +18,9 @@ export function SearchComponent<TSearchManager extends SearchManager>(
 	const results = awaited(derive(() => searchManager.search(searchTextDeferred.ref), [searchTextDeferred]))
 
 	const selectedIndex = signal(0)
-	const selectedItem = derive(() => results.ref?.[selectedIndex.ref] ?? null)
+	const selectedItem = derive(() => results.ref?.[selectedIndex.ref] ?? null, [results, selectedIndex])
 	selectedItem.follow$(host, onSelect)
 	results.follow$(host, () => (selectedIndex.ref = 0))
-	function selectByIndex(index: number) {
-		selectedIndex.ref = index
-	}
 	function incrementSelectedIndex() {
 		selectedIndex.ref = (selectedIndex.ref + 1) % results.ref!.length
 	}
@@ -45,8 +42,9 @@ export function SearchComponent<TSearchManager extends SearchManager>(
 		}
 	}
 
-	dom.append(
-		fragment(html`
+	populate(
+		dom,
+		html`
 			${() => JSON.stringify(selectedItem.ref, null, "\t")}
 			<form on:submit=${(event) => (event.preventDefault(), searchElement.blur())}>${searchElement}</form>
 			<div class="results">
@@ -59,7 +57,7 @@ export function SearchComponent<TSearchManager extends SearchManager>(
 								(item, index) => html`
 									<button
 										class="item"
-										on:click=${() => selectByIndex(index.ref)}
+										on:click=${() => (selectedIndex.ref = index.ref)}
 										class:selected=${derive(() => index.ref === selectedIndex.ref)}>
 										${index} ${JSON.stringify(item, null, "\t")}
 									</button>
@@ -67,7 +65,7 @@ export function SearchComponent<TSearchManager extends SearchManager>(
 							),
 					)}
 			</div>
-		`),
+		`,
 	)
 
 	return host
