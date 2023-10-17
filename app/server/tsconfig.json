@@ -22,5 +22,5 @@
 			"~/*": ["./src/*"]
 		}
 	},
-	"include": ["."]
+	"include": [".", "../common/prismaTxMutationFactory.ts", "../common/mutations.ts", "../common/database.ts"]
 }

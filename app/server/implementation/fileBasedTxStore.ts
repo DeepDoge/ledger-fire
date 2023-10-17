@@ -1,7 +1,7 @@
+import { Database } from "@app/common/database"
 import { Bytes } from "@app/common/utils/bytes"
 import fs from "fs/promises"
 import path from "path"
-import { Database } from "../database"
 
 export type FileBasedTxStore = Database.TxStore & {}
 export namespace FileBasedTxStore {

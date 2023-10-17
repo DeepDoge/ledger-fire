@@ -1,7 +1,4 @@
-import { Bytes } from "@app/common/utils/bytes"
-import { ApiConfig } from "@app/server/config"
-import { Database } from "@app/server/database"
-import type { mutations } from "@app/server/mutations"
+import { ApiConfig, Database, Utils, type mutations } from "@app/common"
 import type { Prisma } from "@prisma/client"
 import { App } from "~/app"
 
@@ -24,7 +21,7 @@ export const query = createProxy(async ([table, ...path], args) => {
 
 	const response = await fetch(ApiConfig.QUERY_PATH, {
 		method: "POST",
-		body: Bytes.encode(
+		body: Utils.Bytes.encode(
 			Database.QueryRequest.Parser.parse({
 				table,
 				path,
@@ -37,7 +34,7 @@ export const query = createProxy(async ([table, ...path], args) => {
 	})
 	if (!response.ok) throw new Error("Query failed")
 
-	return Bytes.decode(new Uint8Array(await response.arrayBuffer()))
+	return Utils.Bytes.decode(new Uint8Array(await response.arrayBuffer()))
 }) as Pick<Prisma.TransactionClient, Exclude<keyof Prisma.TransactionClient, `$${string}` | Exclude<PropertyKey, string>>>
 
 export const tx = createProxy(async (path, [params]) => {
@@ -47,7 +44,7 @@ export const tx = createProxy(async (path, [params]) => {
 
 	const response = await fetch(ApiConfig.TX_PATH, {
 		method: "POST",
-		body: Bytes.encode(
+		body: Utils.Bytes.encode(
 			Database.TxRequest.Parser.parse({
 				from: new Uint8Array([0]),
 				language: App.language.ref,
@@ -63,7 +60,7 @@ export const tx = createProxy(async (path, [params]) => {
 	})
 	if (!response.ok) throw new Error("Transaction failed")
 
-	return Bytes.decode(new Uint8Array(await response.arrayBuffer()))
+	return Utils.Bytes.decode(new Uint8Array(await response.arrayBuffer()))
 }) as {
 	[key in keyof typeof mutations]: (
 		args: Database.TxMutation.InferParameters<(typeof mutations)[key]>,

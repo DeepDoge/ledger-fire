@@ -1,27 +1,27 @@
 {
-  "type": "module",
-  "name": "ledger-fire",
-  "workspaces": [
-    "./app/*"
-  ],
-  "scripts": {
-    "format": "prettier -w ./",
-    "dev": "bun --watch ./scripts/dev.ts",
-    "build": "bun ./scripts/build.ts",
-    "start": "bun ./scripts/start.ts",
-    "db:reset": "rm -rf ./prisma/migrations && rm -f ./prisma/sqlite.db && rm -f ./prisma/sqlite.db-journal && bun db:push",
-    "db:push": "prisma db push",
-    "postinstall": "bun db:reset"
-  },
-  "devDependencies": {
-    "@prisma/client": "^5.4.2",
-    "@total-typescript/ts-reset": "^0.5.1",
-    "bun-types": "^1.0.6",
-    "colors": "^1.4.0",
-    "master-ts": "https://github.com/DeepDoge/master-ts/releases/download/0.0.117/package.tgz",
-    "prettier": "^3.0.3",
-    "prettier-plugin-organize-imports": "^3.2.3",
-    "prisma": "^5.4.2",
-    "zod": "^3.21.4"
-  }
+	"type": "module",
+	"name": "ledger-fire",
+	"workspaces": [
+		"./app/*"
+	],
+	"scripts": {
+		"format": "prettier -w ./",
+		"dev": "bun --watch ./scripts/dev.ts",
+		"build": "bun ./scripts/build.ts",
+		"start": "bun ./scripts/start.ts",
+		"db:reset": "rm -rf ./prisma/migrations && rm -f ./prisma/sqlite.db && rm -f ./prisma/sqlite.db-journal && bun db:push",
+		"db:push": "prisma db push",
+		"postinstall": "bun db:reset"
+	},
+	"devDependencies": {
+		"@prisma/client": "^5.4.2",
+		"@total-typescript/ts-reset": "^0.5.1",
+		"bun-types": "^1.0.6",
+		"colors": "^1.4.0",
+		"master-ts": "https://github.com/DeepDoge/master-ts/releases/download/0.0.117/package.tgz",
+		"prettier": "^3.0.3",
+		"prettier-plugin-organize-imports": "^3.2.3",
+		"prisma": "^5.4.2",
+		"zod": "^3.21.4"
+	}
 }

@@ -1,12 +1,11 @@
+import { ApiConfig } from "@app/common/config"
+import { Database } from "@app/common/database"
+import { mutations } from "@app/common/mutations"
 import { Bytes } from "@app/common/utils/bytes"
 import { Prisma, PrismaClient } from "@prisma/client"
 import colors from "colors/safe"
-import { ApiConfig } from "./config"
-import { Database } from "./database"
 import { FileBasedTxStore } from "./implementation/fileBasedTxStore"
-import { PrismaTxIndexer } from "./implementation/prismaTxIndexer"
-import { PrismaTxMutationFactory } from "./implementation/prismaTxMutationFactory"
-import { mutations } from "./mutations"
+import { PrismaTxIndexer } from "./implementation/txIndexer"
 
 export interface ApiServer {
 	handle(request: Request): Promise<Response>
@@ -20,7 +19,7 @@ export namespace ApiServer {
 		console.log(`${LOG_PREFIX} Starting API server...`)
 
 		const txStore = (await FileBasedTxStore.create({ dirname: "data" })) satisfies Database.TxStore
-		const mutationFactory = PrismaTxMutationFactory.create({ mutations: mutations }) satisfies Database.TxMutationFactory
+		const mutationFactory = Database.TxMutationFactory.create({ mutations: mutations }) satisfies Database.TxMutationFactory
 
 		const prisma = new PrismaClient()
 		const txIndexer = PrismaTxIndexer.create({

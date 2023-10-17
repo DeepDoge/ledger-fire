@@ -1,6 +1,6 @@
+import type { Database } from "@app/common/database"
 import { Bytes } from "@app/common/utils/bytes"
 import type { PrismaClient } from "@prisma/client"
-import type { Database } from "../database"
 
 export type PrismaTxIndexer = Database.TxIndexer & {}
 export namespace PrismaTxIndexer {
