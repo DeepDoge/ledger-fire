@@ -1,7 +1,7 @@
 import { toLocaleCapitalized } from "@app/common/utils/casing"
 import type { Warehouse } from "@prisma/client"
 import { derive, fragment, signal } from "master-ts/core"
-import { awaited, css, defineCustomTag, html } from "master-ts/extra"
+import { awaited, css, defineCustomTag, html, match } from "master-ts/extra"
 import { tx } from "~/api/client"
 import { App } from "~/app"
 import { commonStyle } from "~/styles"
@@ -13,11 +13,15 @@ export function WarehouseComponent(warehouse: Warehouse) {
 	const dom = host.attachShadow({ mode: "open" })
 	dom.adoptedStyleSheets.push(commonStyle, style)
 
-	const destroyPromise = signal<Promise<unknown>>(Promise.reject())
-	const destroying = awaited(
-		derive(() => destroyPromise.ref.catch(() => false).then(() => true)),
-		false,
-	)
+	const destroyPromise = signal<Promise<unknown> | null>(null)
+	const destroying = match(destroyPromise)
+		.case(null, () => false)
+		.default((destroyPromise) =>
+			awaited(
+				derive(() => destroyPromise.ref.then(() => true).catch(() => false)),
+				false,
+			),
+		)
 
 	async function destroy() {
 		await destroyPromise.ref

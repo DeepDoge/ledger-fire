@@ -27,7 +27,8 @@ export function DialogComponent({ dialogs }: DialogManager) {
 										.case({ message: { [TYPEOF]: "string" } }, (lastDialog) => html`${() => lastDialog.ref.message}`)
 										.case({ message: { [TYPEOF]: "function" } }, (lastDialog) =>
 											derive(() => lastDialog.ref.message(() => lastDialog.ref.resolve(false)), [lastDialog]),
-										)}
+										)
+										.default()}
 								</div>
 								<div class="actions">
 									${match(lastDialog)

@@ -18,7 +18,7 @@
     "@total-typescript/ts-reset": "^0.5.1",
     "bun-types": "^1.0.6",
     "colors": "^1.4.0",
-    "master-ts": "https://github.com/DeepDoge/master-ts/releases/download/0.0.119/package.tgz",
+    "master-ts": "https://github.com/DeepDoge/master-ts/releases/download/0.0.120/package.tgz",
     "prettier": "^3.0.3",
     "prettier-plugin-organize-imports": "^3.2.3",
     "prisma": "^5.4.2",
