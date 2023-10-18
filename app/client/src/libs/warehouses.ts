@@ -4,7 +4,6 @@ import { css, defineCustomTag, each, html } from "master-ts/extra"
 import { query } from "~/api/client"
 import { SearchManager } from "~/libs/searchManager"
 import { commonStyle } from "~/styles"
-import { SearchComponent } from "./search"
 import { WarehouseComponent } from "./warehouse"
 import { WarehouseFormComponent } from "./warehouseForm"
 
@@ -35,8 +34,6 @@ export function WarehousesComponent() {
 	dom.append(
 		fragment(html`
 			<x ${WarehouseFormComponent()} class="form"></x>
-
-			<x ${SearchComponent(searchManager, (item) => console.log(item))}></x>
 
 			<div class="warehouses">
 				${each(warehouses)
