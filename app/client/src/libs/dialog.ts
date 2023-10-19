@@ -1,4 +1,4 @@
-import { derive, fragment } from "master-ts/core"
+import { derive, populate } from "master-ts/core"
 import { TYPEOF, css, defineCustomTag, html, match } from "master-ts/extra"
 import { commonStyle } from "~/styles"
 import type { DialogManager } from "./dialogManager"
@@ -12,52 +12,48 @@ export function DialogComponent({ dialogs }: DialogManager) {
 
 	const lastDialog = derive(() => (dialogs.ref.length > 0 ? dialogs.ref[dialogs.ref.length - 1]! : null))
 
-	dom.append(
-		fragment(html`
-			${match(lastDialog)
-				.case(null, () => null)
-				.default(
-					(lastDialog) => html`
-						<div class="overlay">
-							<div class="backdrop"></div>
-							<div class="dialog">
-								<div class="title">${() => lastDialog.ref.title}</div>
-								<div class="message">
-									${match(lastDialog)
-										.case({ message: { [TYPEOF]: "string" } }, (lastDialog) => html`${() => lastDialog.ref.message}`)
-										.case({ message: { [TYPEOF]: "function" } }, (lastDialog) =>
-											derive(() => lastDialog.ref.message(() => lastDialog.ref.resolve(false)), [lastDialog]),
-										)
-										.default()}
-								</div>
-								<div class="actions">
-									${match(lastDialog)
-										.case(
-											{ type: "alert" },
-											(lastDialog) => html`
-												<button on:click=${() => lastDialog.ref.resolve()}>${() => lastDialog.ref.confirm ?? "OK"}</button>
-											`,
-										)
-										.case(
-											{ type: "confirm" },
-											(lastDialog) => html`
-												<button on:click=${() => lastDialog.ref.resolve(true)}>
-													${() => lastDialog.ref.confirm ?? "OK"}
-												</button>
-												<button on:click=${() => lastDialog.ref.resolve(false)}>
-													${() => lastDialog.ref.cancel ?? "Cancel"}
-												</button>
-											`,
-										)
-										.case({ type: "custom" }, () => html``)
-										.default()}
-								</div>
+	populate(dom, [
+		match(lastDialog)
+			.case(null, () => null)
+			.default(
+				(lastDialog) => html`
+					<div class="overlay">
+						<div class="backdrop"></div>
+						<div class="dialog">
+							<div class="title">${() => lastDialog.ref.title}</div>
+							<div class="message">
+								${match(lastDialog)
+									.case({ message: { [TYPEOF]: "string" } }, (lastDialog) => html`${() => lastDialog.ref.message}`)
+									.case({ message: { [TYPEOF]: "function" } }, (lastDialog) =>
+										derive(() => lastDialog.ref.message(() => lastDialog.ref.resolve(false)), [lastDialog]),
+									)
+									.default()}
+							</div>
+							<div class="actions">
+								${match(lastDialog)
+									.case(
+										{ type: "alert" },
+										(lastDialog) => html`
+											<button on:click=${() => lastDialog.ref.resolve()}>${() => lastDialog.ref.confirm ?? "OK"}</button>
+										`,
+									)
+									.case(
+										{ type: "confirm" },
+										(lastDialog) => html`
+											<button on:click=${() => lastDialog.ref.resolve(true)}>${() => lastDialog.ref.confirm ?? "OK"}</button>
+											<button on:click=${() => lastDialog.ref.resolve(false)}>
+												${() => lastDialog.ref.cancel ?? "Cancel"}
+											</button>
+										`,
+									)
+									.case({ type: "custom" }, () => html``)
+									.default()}
 							</div>
 						</div>
-					`,
-				)}
-		`),
-	)
+					</div>
+				`,
+			),
+	])
 
 	return host
 }
