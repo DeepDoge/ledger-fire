@@ -3,34 +3,27 @@ import { defineCustomTag, html } from "master-ts/extra"
 import { tx } from "~/api/client"
 import { commonSheet } from "~/styles"
 
-const supplierFormTag = defineCustomTag("x-supplier-form")
-export function SupplierFormComponent() {
-    const host = supplierFormTag()
+const warehouseTag = defineCustomTag("x-warehouse-form")
+export function WarehouseForm() {
+    const host = warehouseTag()
     const dom = host.attachShadow({ mode: "open" })
     dom.adoptedStyleSheets.push(commonSheet)
 
     const name = signal("")
     const address = signal("")
-    const phone = signal("")
-    const email = signal("")
-    const taxNumber = signal("")
 
     async function onSubmit() {
-        await tx.createSupplierAccount({
+        await tx.createWarehouse({
             name: name.ref,
             address: address.ref,
-            email: email.ref,
-            phone: phone.ref,
-            taxNumber: taxNumber.ref,
         })
     }
 
     dom.append(
         fragment(html`
             <form on:submit=${(event) => (event.preventDefault(), onSubmit())}>
-                <input type="text" placeholder="Full Name" bind:value=${name} />
+                <input type="text" placeholder="Name" bind:value=${name} />
                 <input type="text" placeholder="Address" bind:value=${address} />
-
                 <button type="submit">Create</button>
             </form>
         `),

@@ -1,13 +1,13 @@
 {
-	"name": "Node.js & TypeScript",
-	"image": "mcr.microsoft.com/devcontainers/typescript-node:0-20",
-	"features": {
-		"ghcr.io/shyim/devcontainers-features/bun:0": {}
-	},
-	"customizations": {
-		"vscode": {
-			"extensions": ["esbenp.prettier-vscode", "dbaeumer.vscode-eslint", "Prisma.prisma", "pushqrdx.inline-html", "EditorConfig.EditorConfig"]
-		}
-	},
-	"postCreateCommand": "bun install"
+    "name": "Node.js & TypeScript",
+    "image": "mcr.microsoft.com/devcontainers/typescript-node:0-20",
+    "features": {
+        "ghcr.io/shyim/devcontainers-features/bun:0": {}
+    },
+    "customizations": {
+        "vscode": {
+            "extensions": ["esbenp.prettier-vscode", "dbaeumer.vscode-eslint", "Prisma.prisma", "pushqrdx.inline-html", "EditorConfig.EditorConfig"]
+        }
+    },
+    "postCreateCommand": "bun install"
 }

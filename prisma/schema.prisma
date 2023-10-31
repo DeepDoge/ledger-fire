@@ -27,8 +27,19 @@ model Warehouse {
 
     name         String
     address      String
-    stocks       Stock[]
+    stocks       Warehouse_Stock[]
     SupplierBill SupplierBill[]
+}
+
+model Warehouse_Stock {
+    warehouse Warehouse @relation(fields: [warehouseId], references: [id])
+    product   Product   @relation(fields: [productId], references: [id])
+    quantity  BigInt
+
+    warehouseId Int
+    productId   Int
+
+    @@id([warehouseId, productId])
 }
 
 model Brand {
@@ -48,21 +59,10 @@ model Product {
 
     brandId Int
 
-    stocks          Stock[]
+    stocks          Warehouse_Stock[]
     SupplierProduct SupplierProduct[]
 
     @@unique([brandId, name])
-}
-
-model Stock {
-    warehouse Warehouse @relation(fields: [warehouseId], references: [id])
-    product   Product   @relation(fields: [productId], references: [id])
-    quantity  BigInt
-
-    warehouseId Int
-    productId   Int
-
-    @@id([warehouseId, productId])
 }
 
 model Account {

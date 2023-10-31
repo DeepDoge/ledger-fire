@@ -1,11 +1,11 @@
 import { fragment, signal } from "master-ts/core"
 import { defineCustomTag, html } from "master-ts/extra"
 import { tx } from "~/api/client"
-import { commonStyle } from "~/styles"
+import { commonSheet } from "~/styles"
 
 const supplierBillFormTag = defineCustomTag("x-supplier-bill-form")
 export function SupplierBillFormComponent() {
-	/* 
+    /* 
 		TODO:
 		You should first select a supplier, selecting a supplier screen should also let you create a new supplier.
 		Then fill product code, or name
@@ -29,29 +29,29 @@ export function SupplierBillFormComponent() {
 		it should be simple and shouldnt require any mouse use.
 	*/
 
-	const host = supplierBillFormTag()
-	const dom = host.attachShadow({ mode: "open" })
-	dom.adoptedStyleSheets.push(commonStyle)
+    const host = supplierBillFormTag()
+    const dom = host.attachShadow({ mode: "open" })
+    dom.adoptedStyleSheets.push(commonSheet)
 
-	const name = signal("")
-	const address = signal("")
+    const name = signal("")
+    const address = signal("")
 
-	async function onSubmit() {
-		await tx.createWarehouse({
-			name: name.ref,
-			address: address.ref,
-		})
-	}
+    async function onSubmit() {
+        await tx.createWarehouse({
+            name: name.ref,
+            address: address.ref,
+        })
+    }
 
-	dom.append(
-		fragment(html`
-			<form on:submit=${(event) => (event.preventDefault(), onSubmit())}>
-				<input type="text" placeholder="Name" bind:value=${name} />
-				<input type="text" placeholder="Address" bind:value=${address} />
-				<button type="submit">Create</button>
-			</form>
-		`),
-	)
+    dom.append(
+        fragment(html`
+            <form on:submit=${(event) => (event.preventDefault(), onSubmit())}>
+                <input type="text" placeholder="Name" bind:value=${name} />
+                <input type="text" placeholder="Address" bind:value=${address} />
+                <button type="submit">Create</button>
+            </form>
+        `),
+    )
 
-	return host
+    return host
 }
